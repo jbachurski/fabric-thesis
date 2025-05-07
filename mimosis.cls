@@ -114,14 +114,6 @@
 % package. It ensures that descriptions and entries are aligned.
 \newglossarystyle{long-mimosis}{%
   \setglossarystyle{long}
-
-    \renewcommand*{\glossaryheader}{}%
-    %
-    \renewcommand*{\glsgroupheading}[1]{%
-    \item[{\glsgetgrouptitle{##1}}]}
-    %
-    \renewcommand*{\glsgroupskip}{\indexspace}%
-    
   \renewcommand{\glossentry}[2]{%
     \glsentryitem{##1}\glstarget{##1}{\glossentryname{##1}} &
     \glossentrydesc{##1}\glspostdescription\space ##2\tabularnewline

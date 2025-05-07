@@ -1,89 +1,271 @@
-\newcommand{\newnotation}[4]{%
-\newglossaryentry{#1}{%
-  name        = {#2},
-  description = {#3},
-  sort        = {#4},
-}}
+\renewcommand\nomgroup[1]{%
+  \item[\bfseries
+  \ifstrequal{#1}{A}{Common symbols}{%
+  \ifstrequal{#1}{B}{Common syntax}{%
+  \ifstrequal{#1}{J}{Featherweight Java}{%
+  \ifstrequal{#1}{L}{Featherweight Lua}{%
+  \ifstrequal{#1}{S}{Subtyping and the type lattice}{%
+  \ifstrequal{#1}{T}{Constraint-based algebraic subtyping}{%
+  \ifstrequal{#1}{Z}{Star}{%
+  }}}}}}}%
+]}
+
+\newcommand{\newnotation}[4]{\nomenclature[#4]{#2}{#3}}
+
+\newcommand{\graintro}[1]{{#1} \,::=&\; }
+\newcommand{\graitem}{\\ \mid&\;}
+\newcommand{\irule}[3]{{\renewcommand\arraystretch{1.5} \begin{array}{ll} \textsc{#1} \\ \dfrac{\phantom| #2 \phantom|}{\phantom| #3 \phantom|}\end{array}}}
+\newcommand{\defeq}{\stackrel{\Delta}{=}}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-% Syntax
+% Symbols
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-\newnotation{expr}{$e$}{Expression}{Syntax}
-\newnotation{evalctx}{$C$}{Evaluation context}{Syntax}
-\newnotation{type}{$\tau, \pi$}{Type}{Syntax}
-\newnotation{constr}{$c$}{Constraint}{Syntax}
-\newnotation{constrctx}{$E$}{Constraint rewriting context}{Syntax}
+\newnotation{var}{$x, y, z$}{Variable}{A010}
+\newnotation{expr}{$e$}{Expression}{A020}
+\newnotation{type}{$\tau, \pi$}{Type}{A040}
+\newnotation{label}{$\ell$}{Record label}{A045}
+\newnotation{tag}{$T$}{Variant tag}{A046}
+\newnotation{env}{$\Gamma$}{Typing environment}{A050}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Common syntax
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\newnotation{def}{$\defeq$}{Definition}{B010}
+\newnotation{rep}{$\overline t$}{Repetition of $t$}{B020}
+
+\newcommand{\letbind}[2]{\mathrm{let}\,{#1}={#2}\,\mathrm{in}\,}
+\newcommand{\letbindx}[2]{\mathrm{let}\,{#1}={#2}}
+\newcommand{\fllet}[2]{\letbind{#1}{#2}}
+\newcommand{\flletx}[2]{\letbindx{#1}{#2}}
+\newnotation{fllet}{$\mathrm{let}$}{Let-binding}{B030}
+
+\newcommand{\lam}[1]{\lambda {#1} \ldotp}
+\newcommand{\fllam}[1]{\lam{#1}}
+\newnotation{fllam}{$\lambda$}{Function ($\lambda$ abstraction)}{B040}
+
+\newcommand{\rcd}[1]{\left\{ {#1} \right\}}
+\newnotation{flrec}{$\rcd{\cdots}$}{Record}{B050}
+
+\newcommand{\vrt}[1]{\left[ {#1} \right]}
+\newnotation{flvrt}{$\vrt{\cdots}$}{Variant}{B050}
+
+\newcommand{\denot}[1]{\left\llbracket{#1}\right\rrbracket}
+\newcommand{\denotl}[1]{\left\lceil\!\!\left\lceil{#1}\right\rceil\!\!\right\rceil}
+\newcommand{\denoty}[1]{\left(\!\left| #1
+\right|\!\right)}
+\newnotation{denot}{$\denot -$}{Expression translation: semantics- and type-preserving}{B064}
+\newnotation{denotl}{$\denotl -$}{Expression translation: semantics-preserving}{B066}
+\newnotation{denoty}{$\denoty -$}{Type translation}{B068}
+\newnotation{typing}{$\Gamma \vdash e : \tau$}{Typing judgement}{B070}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % Featherweight Lua
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
+\newcommand{\flrec}[1]{\rcd{#1}}
+
+\newcommand{\flext}[2]{\left\{ {#1} \,\middle|\, {#2} \right\}}
+\newnotation{flext}{$\flext{\overline{\ell = e}}{e}$}{Record extension}{L040}
+
+\newnotation{flrectyp}{$\flext{\overline{\ell : \phi}}{\phi}$}{Record type}{L045}
+
+\newcommand{\flproj}[2]{{#1}{.}{#2}}
+\newnotation{flproj}{$\flproj e \ell$}{Let-binding}{L050}
+
+\newcommand{\flcast}[2]{{#1} \vartriangleright {#2}}
+\newnotation{flcast}{$\flcast{e}{\tau}$}{Runtime type coercion}{L060}
+
+% FL types
+\newcommand{\flabsent}{\_}
+
+\newcommand{\centredalign}{\hspace{.45\textwidth}\phantom{{}={}}&\phantom{{}={}}\hspace{.45\textwidth}}
+
+\newcommand{\lua}[1]{\textsf{#1}}
+\newnotation{lua}{$\lua e$}{Lua expression \emph{(written in sans-serif font)}}{L070}
+
+
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % Featherweight Java
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\newcommand{\fj}[1]{\texttt{#1}}
+\newcommand{\fjoverline}[1]{$\overline{\mbox{#1}}$}
+
+\newcommand{\fjconsdef}{\fj{C(\fjoverline{C f}) \{ super($\overline{\fj{f}^*}$); \fjoverline{this.f' = f'';} \}}}
+\newcommand{\fjmethdefx}{\fj{C}^* \fj{ m(\fjoverline{C x})\{ ... \}}}
+\newcommand{\fjmethdef}{\fj{C}^* \fj{ m(\fjoverline{C x})\{ return e; \}}}
+\newcommand{\fjclassdef}{\fj{class C extends C' \{ \fjoverline{C f}; K; \fjoverline{M}; \}}}
+
+\newnotation{fj}{$\fj e$}{Expression \emph{(written in monospace font)}}{J010}
+\newnotation{fjtype}{$\fj C$}{Class}{J011}
+\newnotation{fj}{$K = \fjconsdef$}{Class constructor definition}{J020}
+\newnotation{fj}{$M = \fjmethdef$}{Method definition}{J030}
+\newnotation{fj}{$L = \fjclassdef$}{Class definition}{J040}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % Subtyping lattice
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 \newcommand{\sub}[0]{\leqslant}
-\newnotation{sub}{$\sub$}{Subtype}{Subtyping}
+\newnotation{sub}{$\sub$}{Subtype}{S010}
 
 \newcommand{\super}[0]{\geqslant}
-\newnotation{super}{$\super$}{Supertype}{Subtyping}
+\newnotation{super}{$\super$}{Supertype}{S015}
 
 \newcommand{\meet}[0]{\land}
-\newnotation{meet}{$\meet$}{Meet in the lattice of types}{Subtyping}
+\newnotation{meet}{$\meet$}{Meet in the lattice of types}{S030}
 
 \newcommand{\join}[0]{\lor}
-\newnotation{join}{$\super$}{Join in the lattice of types}{Subtyping}
+\newnotation{join}{$\super$}{Join in the lattice of types}{S035}
 
 \newcommand{\comp}[0]{\lnot}
-\newnotation{comp}{$\comp$}{Negation in the Boolean lattice of types}{Subtyping}
+\newnotation{comp}{$\comp$}{Negation in the Boolean lattice of types}{S040}
 
 \newcommand{\subsume}[0]{\sub^\forall}
-\newnotation{subsume}{$\subsume$}{Subsumption of type schemes}{Subtyping}
+\newnotation{subsume}{$\subsume$}{Subsumption of type schemes}{S050}
 
 \newcommand{\morph}{\zeta}
-\newnotation{morphism}{$\morph$}{Homomorphism in the type lattice}{Subtyping}
+\newnotation{morphism}{$\morph$}{Homomorphism in the type lattice}{S060}
 
 \newcommand{\ladj}[1]{\overleftarrow{#1}}
-\newnotation{ladj}{$\protect\ladj{\morph}$}{Left adjoint of a lattice homomorphism}{Subtyping}
+\newnotation{ladj}{$\protect\ladj{\morph}$}{Left adjoint of a lattice homomorphism}{S070}
 
 \newcommand{\radj}[1]{\overrightarrow{#1}}
-\newnotation{radj}{$\protect\radj{\morph}$}{Right adjoint of a lattice homomorphism}{Subtyping}
+\newnotation{radj}{$\protect\radj{\morph}$}{Right adjoint of a lattice homomorphism}{S075}
 
 \newcommand{\ladjrest}[1]{\underline{\overleftarrow{#1}}}
-\newnotation{ladjrest}{$\protect\ladjrest{\morph}$}{Remainder of a left adjoint of a lattice homomorphism}{Subtyping}
+\newnotation{ladjrest}{$\protect\ladjrest{\morph}$}{Remainder of a left adjoint of a lattice homomorphism}{S080}
 
 \newcommand{\radjrest}[1]{\underline{\overrightarrow{#1}}}
-\newnotation{radjrest}{$\protect\radjrest{\morph}$}{Remainder of a right adjoint of a lattice homomorphism}{Subtyping}
+\newnotation{radjrest}{$\protect\radjrest{\morph}$}{Remainder of a right adjoint of a lattice homomorphism}{S085}
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % Constraints - algebraic subtyping
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
+\newnotation{constr}{$c$}{Constraint}{T3}
+\newnotation{constrctx}{$E$}{Constraint rewriting context}{T6}
+
 \newcommand{\und}[0]{\mathop{\&}}
-\newnotation{und}{$\comp$}{Conjunction of constraints}{Constraints}
+\newnotation{und}{$\comp$}{Conjunction of constraints}{T10}
 
 \newcommand{\tru}[0]{\mathbf T}
-\newnotation{tru}{$\tru$}{Always-true constraint}{Constraints}
+\newnotation{tru}{$\tru$}{Always-true constraint}{T20}
 
 \newcommand{\fals}[0]{\mathbf F}
-\newnotation{fals}{$\fals$}{Always-false constraint}{Constraints}
+\newnotation{fals}{$\fals$}{Always-false constraint}{T25}
 
 \newcommand{\stepsto}[0]{\to}
-\newnotation{stepsto}{$\stepsto$}{Solver step}{Constraints}
+\newnotation{stepsto}{$\stepsto$}{Solver step}{T30}
 
-\newcommand{\progressesto}[0]{\leadsto}
-\newnotation{progressesto}{$\progressesto$}{Solver progress}{Constraints}
+\newcommand{\progressesto}[0]{\rightsquigarrow}
+\newnotation{progressesto}{$\progressesto$}{Solver progress}{T33}
 
 \newcommand{\goesto}[0]{\rightarrowtriangle}
-\newnotation{goesto}{$\goesto$}{Solver return}{Constraints}
+\newnotation{goesto}{$\goesto$}{Solver return}{T36}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % Fabric
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Star
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\newcommand{\exprcolor}[1]{#1}
+\newcommand{\shapeexprcolor}[1]{#1}
+\newcommand{\typecolor}[1]{#1}
+\newcommand{\shapetypecolor}[1]{#1}
+
+% \newcommand{\exprcolor}[1]{\mathcolor{RawSienna}{#1}}
+% \newcommand{\shapeexprcolor}[1]{\mathcolor{BurntOrange}{#1}}
+% \newcommand{\typecolor}[1]{\mathcolor{RoyalPurple}{#1}}
+% \newcommand{\shapetypecolor}[1]{\mathcolor{Violet}{#1}}
+
+Shape type $\sigma$
+\newnotation{ssexpr}{$e^S$}{Shape expression}{Z010}
+\newnotation{ssval}{$s$}{Shape value}{Z011}
+\newnotation{sstype}{$\sigma$}{Shape type}{Z012}
+
+% - types
+\newcommand{\sint}[0]{\typecolor{\mathrm{int}}}
+\newnotation{sint}{$\sint$}{Integer type}{Z021}
+
+\newcommand{\sfloat}[0]{\typecolor{\mathrm{float}}}
+\newnotation{sfloat}{$\sfloat$}{Floating point type}{Z022}
+
+\newcommand{\sfntype}{\typecolor{\to}}
+\newcommand{\fn}{\sfntype}
+\newcommand{\srecordtype}[1]{\typecolor{\left\{{#1}\right\}}}
+\newcommand{\svarianttype}[1]{\typecolor{\left[{#1}\right]}}
+
+\newcommand{\stwobounds}[2]{\typecolor{\left[ {#1}{.}{.}{#2} \right]}}
+\newcommand{\sonebound}[1]{\typecolor{\left[ {#1} \right]}}
+\newcommand{\sarraytype}[3]{\stwobounds{#1}{#2}{#3}}
+\newcommand{\suniarraytype}[2]{\sonebound{#1}{#2}}
+\newnotation{sfloat}{$\sarraytype{\sigma_1}{\sigma_2}{\tau}$}{Array type}{Z023}
+\newnotation{sfloat}{$\suniarraytype{\sigma}{\tau}$}{Abbreviated array type ($\sarraytype{\sigma}{\sigma}{\tau}$)}{Z024}
+
+% - expressions
+\newcommand{\slam}[2]{\exprcolor{\lambda\,{#1} \ldotp {#2}}}
+\newcommand{\slet}[3]{\exprcolor{\mathrm{let}\,#1=#2\,\mathrm{in}\,{#3}}}
+\newcommand{\srecordval}[1]{\exprcolor{\left\{{#1}\right\}}}
+\newcommand{\sarrayval}[2]{\exprcolor{\textsc{Arr}(#1,#2)}}
+\newcommand{\sproj}[2]{\exprcolor{{#1}{.}{#2}}}
+\newcommand{\stag}[2]{\exprcolor{{#1}\,{#2}}}
+\newcommand{\smatch}[2]{\exprcolor{\mathrm{match}\,{#1}\,\mathrm{with}\,{#2}}}
+\newcommand{\sbuild}[3]{\exprcolor{\Phi\, {#1}\left[{#2}\right] \ldotp {#3}}}
+\newcommand{\sbuildempty}[2]{\sbuild{#1}{}{#2}}
+\newcommand{\sindex}[2]{\exprcolor{{#1}\left[{#2}\right]}}
+\newcommand{\sshape}[1]{\exprcolor{\left|{#1}\right|}}
+\newcommand{\smult}{\times}
+
+\newnotation{sarrayelemse}{$J$}{Unevaluated array elements}{Z030}
+\newnotation{sarrayelemsv}{$I$}{Evaluated array elements}{Z031}
+\newnotation{sarrayval}{$\sarrayval{s}{J}$}{Array literal expression}{Z032}
+\newnotation{sarrayval}{$\sarrayval{s}{I}$}{Array literal value}{Z032}
+\newnotation{sbuild}{$\sbuild{x}{e}{e'}$}{Array comprehension -- array of shape $e$ with element $e'$ at index $x$}{Z040}
+\newnotation{sshape}{$\sshape{e}$}{Array shape access}{Z041}
+
+% - Star shape values [we now better distinguish shape values from shape types]
+% Shape values:
+\newcommand{\eess}{{e^\mathrm{S}}}  %% was e_s
+% \newcommand{\vess}{{v^\mathrm{S}}}  %% was v_s
+\newcommand{\vess}{s}
+\newcommand{\ssize}[1]{\shapeexprcolor{\#{#1}}}
+\newcommand{\sproductval}[1]{\shapeexprcolor{\left\{\!\left|{#1}\right|\!\right\}}}
+\newcommand{\sconcatval}[1]{\shapeexprcolor{\left\llbracket{#1}\right\rrbracket}}
+\newcommand{\sbroadcast}[2]{\shapeexprcolor{{#1} \broadcast {#2}}}
+\newcommand{\sproductproj}[2]{\shapeexprcolor{{{#1}\!\!\phantom{\mid}_{\circ}}#2}}
+\newcommand{\sconcatproj}[2]{\shapeexprcolor{{{#1}\!\!\phantom{\mid}_{\diamond}}#2}}
+
+\newnotation{ssize}{$\ssize{e}$}{Sized shape}{Z050}
+\newnotation{sproduct}{$\sproductval{\cdots}$}{Product shape}{Z051}
+\newnotation{sconcat}{$\sconcatval{\cdots}$}{Concatenation shape}{Z052}
+\newnotation{sproductproj}{$\sproductproj{e}{\ell}$}{Product dimension projection}{Z053}
+\newnotation{sconcatproj}{$\sconcatproj{e}{T}$}{Concatenation component projection}{Z054}
+
+\newcommand{\broadcast}{\sqcap}
+\newcommand{\broadcastsem}{\bowtie}
+\newcommand{\scast}[2]{{#1} \obslash {#2}}
+\newcommand{\inbs}{\vartriangleleft}
+\newcommand{\inbsp}{\trianglelefteq}
+\newcommand{\inbstr}{\blacktriangleleft}
+
+\newnotation{broadcast}{$e \broadcast e$}{Broadcasting (expression)}{Z060}
+\newnotation{broadcastsem}{$s \broadcastsem s$}{Broadcasting (semantics)}{Z061}
+\newnotation{scast}{$\scast{v}{s}$}{Index coercion into shape}{Z062}
+\newnotation{inbs}{$v \inbs s$}{Index in-bounds of shape}{Z063}
+\newnotation{inbsp}{$v \inbsp s$}{Index within-bounds of shape}{Z064}
+\newnotation{inbstr}{$v \inbstr s$}{Index structurally-in-bounds of shape}{Z065}
+
+% Shape types
+\newcommand{\ssized}{\shapetypecolor{\#}}
+\newcommand{\sproducttype}[1]{\shapetypecolor{\left\{\!\left|{#1}\right|\!\right\}}}
+\newcommand{\sconcattype}[1]{\shapetypecolor{\left\llbracket{#1}\right\rrbracket}}
+
+\newnotation{evalctx}{$C$}{Evaluation context}{Z010}

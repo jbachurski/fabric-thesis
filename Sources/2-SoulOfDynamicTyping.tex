@@ -1,6 +1,7 @@
 \chapter
     [Structural Subtyping: The Static Soul of Dynamic Languages]
     {Structural Subtyping: \newline The Static Soul of Dynamic Languages}
+\label{static-soul}
 
 We begin by exploring characteristics of dynamically typed programs that we wish to type statically. I~propose for \textbf{duck typing} to be the key characteristic we should focus our attention on, and argue -- via the introduction of \emph{translations} -- that \textbf{structural subtyping} is a good solid approach for statically modelling this pattern.
 
@@ -11,7 +12,8 @@ This chapter both builds the motivation of this thesis, and introduces various k
 
 We begin by considering what we mean by \emph{dynamic} and \emph{static} typing.
 
-\emph{Dynamic typing} generally means any form of runtime type checking, while \emph{static typing} is type checking at compile time. A dynamically typed language (or program) relies only on dynamic typing, and not static typing. 
+\emph{Dynamic typing} generally means any form of runtime type checking, while \emph{static typing} is type checking at compile time. A dynamically typed language (or program) relies only on dynamic typing, and not static typing. Since when we talk about \emph{typing} we generally mean static typing, we also call dynamically typed programs \emph{untyped}. 
+
 Many statically typed languages possess some facilities for dynamic type checking, blurring the line between static and dynamic languages: \begin{description}
     \item[Static can be dynamic] Java (along with many other object-oriented languages) features \textit{downcasts}, which coerce an object of some class into its subclass. This has to be checked at runtime to preserve safety. It would be entirely possible -- though impractical -- to program in Java using only the \texttt{Object} type and to rely on downcasts for any useful work, essentially circumventing static typing. More glaringly, Java also has reflection facilities, allowing introspection of types of values at runtime. 
     \item[Dynamic can be static] Most dynamically typed languages \emph{could} be given a trivial static type system -- for instance, determining whether a given piece of code is a statement (of type \textsf{stmt}), or expression (of type \textsf{value}). Checking such types would be entirely syntax-directed.
@@ -51,35 +53,13 @@ Having identified duck typing as a crucial well-behaved pattern in dynamically-t
 
 \subsubsection{Structural subtyping}
 
-Duck typing naturally admits a notion of \textbf{subtyping}: if a duck $a$ of type $A$ quacks, and another duck $b$ of type $B$ not only quacks but also walks -- then clearly $b$ can be used in place of $a$. A substitution principle holds: the type $B$ supports more operations than $A$, and thus $B$ is a subtype of $A$ -- we shall write denote this $A \sub B$. When speaking of subtyping, we usually refer to its \emph{implicit} variety -- the language does not require an \emph{explicit} annotation every time we treat a type as its supertype.
+Duck typing naturally admits a natural notion of \textbf{subtyping}: if a duck $a$ of type $A$ quacks, and another duck $b$ of type $B$ not only quacks but also walks -- then clearly $b$ can be used in any place $a$ can. A substitution principle holds: the type $B$ supports more operations than $A$, and thus $B$ is a subtype of $A$ -- we shall write denote this $A \sub B$. When speaking of subtyping, we usually refer to its \emph{implicit} variety -- the language does not require an \emph{explicit} annotation every time we treat a type as its supertype.
 
-This is a good time to introduce a distinction between \textbf{nominal} and \textbf{structural} typing. \begin{description}
+This is a good time to introduce a distinction between \textbf{nominal} and \textbf{structural} typing \cite{pierce-book}. \begin{description}
     \item[Nominal] Most static type systems in popular programming languages are nominal: types are introduced via a type definition, where they are \emph{named} -- the type is then identified with (e.g.\@ compared by) this name. For example, the type systems in Java, C/C++, and Haskell are predominantly nominal.
     \item[Structural] On the other hand, a structural type system does not pose the requirement for a type to have a name nor a definition. A popular example of a structurally typed language would be TypeScript -- the statically typed dialect of JavaScript. 
 \end{description}
-Similarly to static and dynamic, nominal and structural typing also lie on a spectrum: few languages feature solely nominal or structural types. A good example of a language with a mix of nominal and structural typing is OCaml (Figure \ref{fig:nominal-and-structural-ocaml}): while records and variants can only be introduced in a \emph{nominal} type definition, we can introduce \emph{structural} type abbreviations. In particular, we have structural versions of records (objects) and variants (polymorphic variants).
-
-\definecolor{deepblue}{rgb}{0,0,0.6}
-\definecolor{deepred}{rgb}{0.6,0,0}
-\definecolor{deepgreen}{rgb}{0,0.6,0}
-
-\def\backtick{\`{}}
-\newcommand\ocamlstyle{\lstset{
-    language=caml,
-    basicstyle=\small\ttfamily,
-    morekeywords={self},
-    keywordstyle=\color{deepblue},
-    stringstyle=\color{deepgreen},
-    showstringspaces=false,
-    literate={`}{\backtick}1,
-    escapechar=@
-}}
-\lstnewenvironment{ocaml}[1][]
-{
-\ocamlstyle
-\lstset{#1}
-}
-{}
+Similarly to static and dynamic, nominal and structural typing also lie on a spectrum: few languages feature solely nominal or structural types. A good example of a language with a mix of nominal and structural typing is OCaml (Figure \ref{fig:nominal-and-structural-ocaml}): while records and variants can only be introduced in a \emph{nominal} type definition, we can introduce \emph{structural} type abbreviations. In particular, we have structural versions of records (objects) and variants (polymorphic variants). OCaml modules are structurally typed, too.
 
 \begin{figure}
     \centering
@@ -106,22 +86,24 @@ type opt = [ `None | `Some of int ]
     \caption{Structurally typed objects and polymorphic variants.}
     \label{subfig:structural-ocaml}
     \end{subfigure}
-    \caption{Examples of nominal and structural type definitions in OCaml.}
+    \caption{Examples of nominal and structural type definitions in OCaml. Note that the same syntax is used for both nominal type definitions (Figure \ref{subfig:nominal-ocaml}) and structural type abbreviations (Figure \ref{subfig:structural-ocaml}), even though these two kinds of type declarations behave differently in OCaml's type system.}
     \label{fig:nominal-and-structural-ocaml}
 \end{figure}
 
 Intuitively, a nominally typed program can be transformed into a structurally typed one, and as such structurally typed programs are inherently more flexible. 
 This fundamental idea of \emph{anonymising types} by erasing their names is formally explored in the \textbf{translations} presented in Section \ref{sec:translations}.
 
-We also introduce a similar distinction between nominal and structural \textbf{subtyping}: while in a language like Java subtyping is defined through the inheritance hierarchy (\texttt{class C extends C' \{ ... \}}) -- subtyping is defined on types with specific names -- structural subtyping is instead defined in terms of the structure of the type (though more nuanced definitions exist). For example, structural subtyping on records (objects) is defined by the following two rules:\footnote{A traditional formal treatment is given by \textcite{pierce-book}. In this dissertation -- to bring it closer to the algebraic subtyping approach -- we use a slightly different approach.}
+We also introduce a similar distinction between nominal and structural \textbf{subtyping}: while in a language like Java subtyping is defined through the inheritance hierarchy (\texttt{class C extends C' \{ ... \}}) -- subtyping is defined on types with specific names -- structural subtyping is instead defined in terms of the structure of the type (though more nuanced definitions exist). For example, structural subtyping naturally arises on records (and, dually, variants) through the following two rules:\footnote{A traditional formal treatment is given by \textcite{pierce-book}. In this dissertation -- to bring us closer to algebraic subtyping, the subject of Chapter \ref{algebraic-subtyping} -- we use a slightly different approach.}
 \begin{description}
-    \item[Width subtyping] A record is the subtype of another if it has more fields and other fields are compatible. For example: $$ \{ \mathrm{foo} : \mathrm{int}, \mathrm{bar} : \mathrm{string} \} \sub \{ \mathrm{foo} : \mathrm{int} \} $$
-    \item[Depth subtyping] A record is the subtype of another if its respective fields are subtypes. For example, since $\mathrm{nat} \sub \mathrm{int}$:
+    \item[Width subtyping] A record is a subtype of another if it has more fields and the other are compatible, e.g.: $$ \{ \mathrm{foo} : \mathrm{int}, \mathrm{bar} : \mathrm{string} \} \sub \{ \mathrm{foo} : \mathrm{int} \} $$
+    \item[Depth subtyping] A record is a subtype of another if its respective fields are subtypes, e.g.:
     $$ \{ \mathrm{foo}: \mathrm{nat}, \mathrm{bar}: \mathrm{string} \} \sub \{ \mathrm{foo}: \mathrm{int}, \mathrm{bar}: \mathrm{string} \} $$
 \end{description}
-We formalise this in the type system for the extensible record calculus -- Featherweight Lua -- in Section~\ref{subsec:featherweight-lua}.
+We formalise this in the type system for the record calculus -- Featherweight Lua -- in Section~\ref{subsec:featherweight-lua}.
 
-Clearly, \textbf{structural subtyping} is most relevant for modelling duck typing: most dynamically typed programs will not feature type definitions.\footnote{A note-worthy exceptions would be OOP-style class definitions, present in e.g.\@ Python.} This is the direction I chose for my thesis -- and we briefly consider two possible alternatives in the following subsections.
+Clearly, \textbf{structural subtyping} is most relevant for modelling duck typing: most dynamically typed programs will not feature type definitions.\footnote{A note-worthy exceptions would be OOP-style class definitions, present in e.g.\@ Python.} I am motivated by modelling objects in dynamic languages, following the tradition of \textcite{cardelli-multiple-inheritance}.
+
+I chose structural subtyping as the direction for my thesis -- we briefly consider two possible alternatives in the following subsections.
 
 \subsubsection{Row polymorphism}
 
@@ -129,24 +111,30 @@ Clearly, \textbf{structural subtyping} is most relevant for modelling duck typin
     \centering
     \begin{tabular}{c}
     \begin{ocaml}
-(* TODO *)
+let f = function 
+    | `None -> `Unit 
+    | `Some x when x mod 2 = 0 -> `Pair (x / 2, x / 2) 
+    | `Some x -> `Single x
+(* 
+val f : [< `None | `Some of int ] 
+     -> [> `Pair of int * int | `Single of int | `Unit ]
+*)
     \end{ocaml}
     \end{tabular}
-    \caption{Row polymorphism in OCaml in an example with polymorphic variants and explicit type coercions.}
+    \caption{Example of row polymorphism in OCaml using polymorphic variants, annotated with its (inferred) most general type. \texttt{<} and \texttt{>} stand for row type variables in a closed and open variant, respectively.}
     \label{fig:ocaml-row-polymorphism}
 \end{figure}
 
-There is a common trick for replacing subtype polymorphism in a system with parametric polymorphism by an appropriate form of parametric polymorphism. For example, a function of type $\top \to \mathrm{int}$ -- featuring a top type $\top$, the supertype of any type -- could equivalently be given the type scheme $\forall \alpha \ldotp \alpha \to \mathrm{int}$, since $\alpha$ can be instantiated to any argument type.
-Row polymorphism can be seen as an application of this trick to structural record and variant types: we introduce \emph{row type variables} that stand for \enquote{the rest of the record} (for which the width subtyping rule applies in records with structural subtyping).
-
-\todo{explain?}
-\todo[color=cyan]{example vs $\sub$?}
+There is a common folklore trick for replacing subtype polymorphism in a system with parametric polymorphism by an appropriate form of parametric polymorphism \cite{structural-subtyping-as-parameric-polymorphism}. For example, a function of type $\top \to \mathrm{int}$ -- featuring a top type $\top$, the supertype of any type -- could equivalently be given the type scheme $\forall \alpha \ldotp \alpha \to \mathrm{int}$, since $\alpha$ can be instantiated to any argument type.
+Row polymorphism \cite{remy-records}, introduced by \textcite{wand-rows} -- and sometimes called structural polymorphism \cite{simple-structural-polymorphism} -- can be seen as an application of this trick to structural record and variant types: we introduce \emph{row type variables} that stand for \enquote{the rest of the record} (for which the width subtyping rule applies in records with structural subtyping).
 
 % https://ocaml.org/papers
-OCaml's structurally typed objects \cite{objective-ml} and polymorphic variants \cite{polymorphic-variants} -- as exemplified in Figure \ref{subfig:structural-ocaml} -- are typed using a form of row polymorphism, which features keeps row variables limited sufficiently to be kept implicit \cite{objective-ml}. It is also worth noting that OCaml also supports \textbf{explicit} (super)type coercions, adding a limited form of explicit structural subtyping -- managing the limitations of the row polymorphism design. 
+We do not consider a technical explanation of row polymorphism as it is outside the scope of this thesis. It is worth noting that OCaml's structurally typed objects \cite{objective-ml} and polymorphic variants \cite{polymorphic-variants} -- as exemplified in Figure \ref{subfig:structural-ocaml} -- are typed using a form of row polymorphism, which features keeps row variables limited sufficiently to be kept implicit \cite{objective-ml}. OCaml also supports \textbf{explicit} (super)type coercions, adding a limited form of explicit structural subtyping -- managing the limitations of the row polymorphism design. 
 An example application of row polymorphism in OCaml is given in Figure \ref{fig:ocaml-row-polymorphism}.\todo[color=cyan]{example}
 
-The relative power of structural subtyping (as part of bounded parametric polymorphism -- more powerful than just subtype polymorphism) and row polymorphism is unclear, and building systems based on row polymorphism is a viable alternative -- though possibly limited in the context of types for which rows are not clearly helpful in modelling notions of subtyping. There is some recent work exploring the relationship between the two techniques \cite{disjoint-polymorphism}.
+The relative power of structural subtyping and row polymorphism -- as extensions on parametric polymorphism -- is unclear.
+% , and building systems based on row polymorphism is a viable alternative -- though possibly limited in the context of types for which rows are not clearly helpful in modelling notions of subtyping. 
+There is some recent work exploring the relationship between the two \cite{disjoint-polymorphism, structural-subtyping-as-parameric-polymorphism}. However, systems with row polymorphism tend to grow more complex than ones with subtyping -- but they have historically been a more straightforward extension of ML-like type systems.
 
 \subsubsection{Set-theoretic types}
 
@@ -160,22 +148,7 @@ The relative power of structural subtyping (as part of bounded parametric polymo
 \subsection{Featherweight Lua}
 \label{subsec:featherweight-lua}
 
-\newcommand{\graintro}[1]{{#1} \,::=&\; }
-\newcommand{\graitem}{\\ \mid&\;}
-
-\newcommand{\defeq}{\stackrel{\Delta}{=}}
-
-% FL expressions
-\newcommand{\fllet}[2]{\mathrm{let}\,{#1}={#2}\,\mathrm{in}\,}
-\newcommand{\flletx}[2]{\mathrm{let}\,{#1}={#2}}
-\newcommand{\fllam}[1]{\lambda {#1} \ldotp}
-\newcommand{\flrec}[1]{\left\{ {#1} \right\}}
-\newcommand{\flext}[2]{\left\{ {#1} \,\middle|\, {#2} \right\}}
-\newcommand{\flproj}[2]{{#1}{.}{#2}}
-\newcommand{\flcast}[2]{{#1} \vartriangleright {#2}}
-
-% FL types
-\newcommand{\flabsent}{\_}
+\newcommand{\erased}[1]{\textcolor{red}{#1}}
 
 \begin{figure}
     \centering
@@ -183,10 +156,6 @@ The relative power of structural subtyping (as part of bounded parametric polymo
     \caption{Syntax of Featherweight Lua.}
     \label{fig:featherweight-lua-grammar}
 \end{figure}
-
-\newcommand{\irule}[3]{{\renewcommand\arraystretch{1.5} \begin{array}{ll} \textsc{#1} \\ \dfrac{\phantom| #2 \phantom|}{\phantom| #3 \phantom|}\end{array}}}
-
-\newcommand{\erased}[1]{\textcolor{red}{#1}}
 
 \begin{figure}
     \centering
@@ -200,14 +169,6 @@ The relative power of structural subtyping (as part of bounded parametric polymo
     \caption{Typing rules for the statically typed fragment of Featherweight Lua.}
     \label{fig:featherweight-lua-typing}
 \end{figure}
-
-\newcommand{\denot}[1]{\left\llbracket#1\right\rrbracket}
-\newcommand{\denotl}[1]{\left\lceil\!\!\left\lceil#1\right\rceil\!\!\right\rceil}
-\newcommand{\denoty}[1]{\left(\!\left| #1
-\right|\!\right)}
-\newcommand{\centredalign}{\hspace{.45\textwidth}\phantom{{}={}}&\phantom{{}={}}\hspace{.45\textwidth}}
-
-\newcommand{\lua}[1]{\textsf{#1}}
 
 \begin{figure}
     \centering
@@ -236,14 +197,6 @@ To show the compatibility of FL with its namesake, I sketch a compositional embe
 \label{sec:translations}
 
 \todo{write}
-
-\newcommand{\fj}[1]{\texttt{#1}}
-\newcommand{\fjoverline}[1]{$\overline{\mbox{#1}}$}
-
-\newcommand{\fjconsdef}{\fj{C(\fjoverline{C f}) \{ super($\overline{\fj{f}^*}$); \fjoverline{this.f' = f'';} \}}}
-\newcommand{\fjmethdefx}{\fj{C}^* \fj{ m(\fjoverline{C x})\{ ... \}}}
-\newcommand{\fjmethdef}{\fj{C}^* \fj{ m(\fjoverline{C x})\{ return e; \}}}
-\newcommand{\fjclassdef}{\fj{class C extends C' \{ \fjoverline{C f}; K; \fjoverline{M}; \}}}
 
 \begin{figure}
     \centering
