@@ -101,9 +101,9 @@ We also introduce a similar distinction between nominal and structural \textbf{s
 \end{description}
 We formalise this in the type system for the record calculus -- Featherweight Lua -- in Section~\ref{subsec:featherweight-lua}.
 
-Clearly, \textbf{structural subtyping} is most relevant for modelling duck typing: most dynamically typed programs will not feature type definitions.\footnote{A note-worthy exceptions would be OOP-style class definitions, present in e.g.\@ Python.} I am motivated by modelling objects in dynamic languages, following the tradition of \textcite{cardelli-multiple-inheritance}.
+Clearly, \textbf{structural subtyping} is most relevant for modelling duck typing: most dynamically typed programs will not feature type definitions.\footnote{A note-worthy exceptions would be OOP-style class definitions, present in e.g.\@ Python.} I am mainly motivated by modelling objects in dynamic languages, following the tradition of \textcite{cardelli-multiple-inheritance}.
 
-I chose structural subtyping as the direction for my thesis -- we briefly consider two possible alternatives in the following subsections.
+I chose structural subtyping as the direction for my thesis -- we briefly consider two possible alternatives in the following subsections. I motivate this mainly choice by the recency of the seminal work of \textcite{mlsub} on \emph{algebraic subtyping} -- the topic of Chapter \ref{algebraic-subtyping} -- as it is directly applicable to languages with certain forms of structural subtyping.
 
 \subsubsection{Row polymorphism}
 
@@ -129,16 +129,24 @@ There is a common folklore trick for replacing subtype polymorphism in a system 
 Row polymorphism \cite{remy-records}, introduced by \textcite{wand-rows} -- and sometimes called structural polymorphism \cite{simple-structural-polymorphism} -- can be seen as an application of this trick to structural record and variant types: we introduce \emph{row type variables} that stand for \enquote{the rest of the record} (for which the width subtyping rule applies in records with structural subtyping).
 
 % https://ocaml.org/papers
-We do not consider a technical explanation of row polymorphism as it is outside the scope of this thesis. It is worth noting that OCaml's structurally typed objects \cite{objective-ml} and polymorphic variants \cite{polymorphic-variants} -- as exemplified in Figure \ref{subfig:structural-ocaml} -- are typed using a form of row polymorphism, which features keeps row variables limited sufficiently to be kept implicit \cite{objective-ml}. OCaml also supports \textbf{explicit} (super)type coercions, adding a limited form of explicit structural subtyping -- managing the limitations of the row polymorphism design. 
-An example application of row polymorphism in OCaml is given in Figure \ref{fig:ocaml-row-polymorphism}.\todo[color=cyan]{example}
+We do not consider a technical explanation of row polymorphism as it is outside the scope of this thesis. It is worth noting that OCaml's structurally typed objects \cite{objective-ml} and polymorphic variants \cite{polymorphic-variants} -- as exemplified in Figure \ref{subfig:structural-ocaml} -- are typed using a form of row polymorphism, with implicit row variables \cite{objective-ml} causing sometimes awkward limitations \cite{castagna-polymorphic-variants}. OCaml also supports \textbf{explicit} (super)type coercions, adding a form of explicit structural subtyping -- managing the limitations of the row polymorphism design. 
+An example application of row polymorphism in OCaml is given in Figure \ref{fig:ocaml-row-polymorphism}.
 
 The relative power of structural subtyping and row polymorphism -- as extensions on parametric polymorphism -- is unclear.
 % , and building systems based on row polymorphism is a viable alternative -- though possibly limited in the context of types for which rows are not clearly helpful in modelling notions of subtyping. 
-There is some recent work exploring the relationship between the two \cite{disjoint-polymorphism, structural-subtyping-as-parameric-polymorphism}. However, systems with row polymorphism tend to grow more complex than ones with subtyping -- but they have historically been a more straightforward extension of ML-like type systems.
+There is some recent work exploring the relationship between the two \cite{disjoint-polymorphism, structural-subtyping-as-parameric-polymorphism}. However, systems with row polymorphism tend to grow more complex than ones with subtyping \cite{castagna-polymorphic-variants} -- but they have historically been a more feasible extension of ML-like type systems.
 
 \subsubsection{Set-theoretic types}
 
-\todo{write}
+We also briefly consider set-theoretic types, where the type language is extended with operators corresponding to set operations:
+$$ \tau ::= \cdots \mid \tau \cup \tau \mid \tau \cap \tau \mid \lnot \tau $$
+These operators admit a set-theoretic interpretation -- they are exactly compatible with the sets of expressions that have a given type $\tau$. 
+Under this interpretation, the set-inclusion relation naturally gives us a notion of subtyping, so that e.g.\@ $\tau \cap \tau' \sub \tau'$.
+While set-theoretic types are elegant, expressive, and have seen practical use \cite{erlang-set-theoretic-types}, it is difficult to efficiently infer and simplify them, and type inference approaches usually lack the principal types property enjoyed by ML-like systems \cite{mlstruct, castagna-dynamic}. 
+
+When we later explore algebraic subtyping, we will rely on a type lattice construction featuring meets $\meet$ (least upper bounds) and joins $\join$ (greatest lower bounds), similar to set operations here. Though similar at first sight, the two approaches are different in nature \cite{mlstruct}: while $(\mathrm{int} \to \mathrm{int}) \cap (\mathrm{nat} \to \mathrm{nat})$ is as valid a type as any other, in a type lattice we might have: $$(\mathrm{int} \to \mathrm{int}) \meet (\mathrm{nat} \to \mathrm{nat}) = (\mathrm{int} \join \mathrm{nat} \to \mathrm{int} \meet \mathrm{nat}) =\mathrm{int} \to \mathrm{nat} $$
+While $\cap$ gives us a type which preserves the type of its argument, $\meet$ only guarantees that the function accepts $\mathrm{int}$ and returns $\mathrm{nat}$ (cf.\@ subtyping of functions).
+This choice is made both by \textcite{mlsub} and \textcite{mlstruct}, and so types no longer have a set-theoretic interpretation.\footnote{Note that type lattices exist where the equation does not hold, and that Dolan's system admits some set-theoretic-esque types like $\{\} \meet (\top \to \top)$ (though they can only be used as $\top$) where necessary for \emph{extensibility}.}
 
 \section{Languages}
 \label{sec:languages}
@@ -179,6 +187,8 @@ There is some recent work exploring the relationship between the two \cite{disjo
 \end{figure}
 
 \todo{write}
+
+Types $\tau$ in FL are generated coinductively, so that we have (equi)recursive types (other constructs are generated inductively as usual). This allows us to statically type open recursion -- an object's method calling other methods and accessing its attributes.
 
 \subsubsection{Embedding in Lua}
 Featherweight Lua is, notionally, a subset of a widely known dynamically typed language: Lua \cite{lua54}.
