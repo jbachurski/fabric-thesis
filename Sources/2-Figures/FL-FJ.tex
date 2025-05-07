@@ -1,0 +1,29 @@
+\begin{align*}    
+    \Aboxed{\denoty{\fj M}_{\fj C} &= x : \tau} \\
+    \denoty{\fjmethdefx} &= \fj m : \denoty{\fj C} \to \overline{\denoty{\fj C} \to}\, \denoty{\fj{C}^*} \\
+    \\
+    \Aboxed{\denoty{\fj L} &= x : \tau} \\
+    \denoty{\fjclassdef} &= \fj C : \flrec{\overline{\fj{f}: \denoty{\fj{C}}}, \overline{\denoty{\fj M}}} \\
+    \\
+    \Aboxed{\denoty{\Gamma_{\fj C}} &= \Gamma_\tau} \\
+    \denoty{\overline{\fj x : \fj C}} &= \overline{\fj x : \denoty{\fj C}} \\
+    \\
+    \Aboxed{\denot{\fj K}_{\fj{C}}^{\fj{C}'} &= e} \\
+    \denot{\fjconsdef}_{\fj{C}}^{\fj{C}'} &= \flletx{\fj C}{\overline{\fllam{\fj f : \denoty{\fj C}}}\, \flext{\fj{\fjoverline{f' = f''}}}{\fj{C'}\,\overline{\fj{f}^*}}}
+    \\ \\
+    \Aboxed{\denot{\fj M}_{\fj C} &= e} \\
+    \denot{\fjmethdef}_{\fj C} &= \flletx{\fj m}{\fllam{\fj{this} : \denoty{\fj C}} \overline{\fllam{\fj x: \denoty{\fj C}}}\, \denot{\fj e}}
+    \\ \\
+    \Aboxed{\denot{\fj L} &= e} \\
+    \denot{\fjclassdef} &= \flletx{\fj C}{\denot{K}_{\fj C}^{\fj C'}} \\
+    &\phantom{{}={}} \flletx{\fj{C}_\mathrm{proto}}{\flext{\overline{\denot{M}_{\fj C}}}{\fj C'_\mathrm{proto}}} \\
+    \fj{Object}_\mathrm{proto} &= \flrec{}
+    \\ \\
+    \Aboxed{\denot{\fj e} &= e} \\
+    \denot{\fj x} &= \fj x \\
+    \denot{\fj {e.f}} &= \flproj{\denot{\fj e}}{\fj f} \\
+    \denot{\fj {e.m(\fjoverline e)}} &= \fllet{x}{\denot{\fj e}} \flproj{x}{\fj m}\,x\,\overline{\denot{\fj e}} \\
+    \denot{\fj {new C(\fjoverline e)}} &= \fj{C}_\mathrm{proto}\,\flrec{}\,\overline{\denot{\fj e}} \\
+    \denot{\fj {(C)e}} &= \flcast{\denot {\fj e}}{\denoty {\fj C}} \\ 
+    \centredalign
+\end{align*}

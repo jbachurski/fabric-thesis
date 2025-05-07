@@ -1,0 +1,31 @@
+$$ 
+\begin{array}{c}
+\boxed{\Gamma \vdash e : \tau} 
+\\[0.5em]
+\Gamma ::= \cdot \mid \Gamma, x : \tau
+\\[1em]
+\irule{FL-Typ-Var}{\Gamma(x) = \tau}{\Gamma \vdash v : \tau}
+\quad 
+\irule{FL-Typ-Sub}{\Gamma \vdash e : \tau \quad \tau \sub \tau'}{\Gamma \vdash e : \tau'}
+\quad
+\irule{FL-Typ-Cast}{\Gamma \vdash e : \tau}{\Gamma \vdash \flcast e \tau' : \tau'}
+\\[2em]
+\irule{FL-Typ-Let}{\Gamma \vdash e : \tau \quad \Gamma, x : \tau \vdash e' : \tau'}{\Gamma \vdash \fllet{x}{e}{e'} : \tau'}
+\quad 
+\irule{FL-Typ-Fun}{\Gamma, x : \tau \vdash e : \tau'}{\Gamma \vdash \fllam{x} e : \tau \to \tau'}    
+\quad 
+\irule{FL-Typ-App}{\Gamma \vdash e : \tau' \to \tau \quad \Gamma \vdash e' : \tau'}{\Gamma \vdash e\,e' : \tau}
+\\[2em]
+\irule{FL-Typ-Cons}
+    {\overline{\Gamma \vdash e_\ell : \tau_\ell}}
+    {\Gamma \vdash \flrec{\overline{\ell = e_\ell}} : \flrec{\overline{\ell : \tau_\ell} \mid \flabsent}}
+\quad
+\irule{FL-Typ-Ext}
+    {\Gamma \vdash e : \flext{\ell^\star : \flabsent, \overline{\ell : \phi_\ell}}{\phi_\ell'}}
+    {\Gamma \vdash \flext{\ell^\star = e^\star}{e} : \flext{\ell^\star : \tau^\star, \overline{\ell : \phi_\ell}}{\phi_\ell'}}
+\quad
+\irule{FL-Typ-Proj}
+    {\Gamma \vdash e : \flrec{ \ell : \tau }}
+    {\Gamma \vdash e : \tau}
+\end{array} 
+$$

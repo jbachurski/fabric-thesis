@@ -1,0 +1,18 @@
+$$ 
+\begin{array}{c}
+\flproj{\tau}{\ell} \defeq \begin{cases}
+    \phi_\ell, & \ell \text{ occurs in } \tau \\
+    \phi, & \ell \text{ does not occur in } \tau
+\end{cases} \qquad \text{where } \tau = \{ \ell : \phi_\ell \mid \phi \}
+\\[1.5em]
+\boxed{\tau \sub \tau}
+\\[0.5em]
+\irule{FL-Sub-Fun}{\tau_1 \super \tau_2 \quad \tau_1' \sub \tau_2'}{\tau_1 \to \tau_1' \sub \tau_2 \to \tau_2'}
+\qquad
+\irule{FL-Sub-Rec}{\forall \ell \in \mathcal L(\tau_1) \cup \mathcal L(\tau_2) \ldotp \flproj{\tau_1}{\ell} \sub \flproj{\tau_2}{\ell}}{\tau_1 \sub \tau_2}
+\\[2.5em]
+\boxed{\phi \sub \phi}
+\\[1em]
+\bot \sub \tau \sub \top \qquad \bot \sub \flabsent \sub \top
+\end{array} 
+$$

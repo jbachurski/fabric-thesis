@@ -1,0 +1,20 @@
+\begin{align*}
+\Aboxed{\denotl{e} &= \lua{e}} \\ 
+\denotl{x} &= x \\ 
+\denotl{\fllet{x}{e} e} &= x \lua{ = } \denotl{e} \lua{; } \denotl{e} \\
+\denotl{\fllam{x} e} &= \lua{function (} x\lua{) return }\denotl{e}\lua{ end} \\ %
+\denotl{e\,e} &= \denotl{e} \lua{(} e \lua{)} \\
+\denotl{\flrec{\overline{\ell = e}}} &= \lua\{ \overline{\ell = \denot e} \lua\} \\
+\denotl{\flext{\ell = e}{e'}} &= \lua{update(}\ell, e, e'\lua{)}  \\
+\denotl{\flproj{e}{\ell}} &= \denotl{e}\lua{.}\ell \\
+\denotl{\flcast{e}{\tau}} &= \denotl{e} \\
+\centredalign
+\end{align*}
+\begin{minipage}{7.5cm}\lua{%
+function update(l, e, t) \\
+\hspace*{0.6cm}local target = \{\} \\
+\hspace*{0.6cm}for k, v in pairs(t) do target[k] = v end \\
+\hspace*{0.6cm}target[l] = e \\ 
+end \\
+}
+\end{minipage}

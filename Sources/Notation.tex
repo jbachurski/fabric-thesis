@@ -1,0 +1,89 @@
+\newcommand{\newnotation}[4]{%
+\newglossaryentry{#1}{%
+  name        = {#2},
+  description = {#3},
+  sort        = {#4},
+}}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Syntax
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\newnotation{expr}{$e$}{Expression}{Syntax}
+\newnotation{evalctx}{$C$}{Evaluation context}{Syntax}
+\newnotation{type}{$\tau, \pi$}{Type}{Syntax}
+\newnotation{constr}{$c$}{Constraint}{Syntax}
+\newnotation{constrctx}{$E$}{Constraint rewriting context}{Syntax}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Featherweight Lua
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Featherweight Java
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Subtyping lattice
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\newcommand{\sub}[0]{\leqslant}
+\newnotation{sub}{$\sub$}{Subtype}{Subtyping}
+
+\newcommand{\super}[0]{\geqslant}
+\newnotation{super}{$\super$}{Supertype}{Subtyping}
+
+\newcommand{\meet}[0]{\land}
+\newnotation{meet}{$\meet$}{Meet in the lattice of types}{Subtyping}
+
+\newcommand{\join}[0]{\lor}
+\newnotation{join}{$\super$}{Join in the lattice of types}{Subtyping}
+
+\newcommand{\comp}[0]{\lnot}
+\newnotation{comp}{$\comp$}{Negation in the Boolean lattice of types}{Subtyping}
+
+\newcommand{\subsume}[0]{\sub^\forall}
+\newnotation{subsume}{$\subsume$}{Subsumption of type schemes}{Subtyping}
+
+\newcommand{\morph}{\zeta}
+\newnotation{morphism}{$\morph$}{Homomorphism in the type lattice}{Subtyping}
+
+\newcommand{\ladj}[1]{\overleftarrow{#1}}
+\newnotation{ladj}{$\protect\ladj{\morph}$}{Left adjoint of a lattice homomorphism}{Subtyping}
+
+\newcommand{\radj}[1]{\overrightarrow{#1}}
+\newnotation{radj}{$\protect\radj{\morph}$}{Right adjoint of a lattice homomorphism}{Subtyping}
+
+\newcommand{\ladjrest}[1]{\underline{\overleftarrow{#1}}}
+\newnotation{ladjrest}{$\protect\ladjrest{\morph}$}{Remainder of a left adjoint of a lattice homomorphism}{Subtyping}
+
+\newcommand{\radjrest}[1]{\underline{\overrightarrow{#1}}}
+\newnotation{radjrest}{$\protect\radjrest{\morph}$}{Remainder of a right adjoint of a lattice homomorphism}{Subtyping}
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Constraints - algebraic subtyping
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\newcommand{\und}[0]{\mathop{\&}}
+\newnotation{und}{$\comp$}{Conjunction of constraints}{Constraints}
+
+\newcommand{\tru}[0]{\mathbf T}
+\newnotation{tru}{$\tru$}{Always-true constraint}{Constraints}
+
+\newcommand{\fals}[0]{\mathbf F}
+\newnotation{fals}{$\fals$}{Always-false constraint}{Constraints}
+
+\newcommand{\stepsto}[0]{\to}
+\newnotation{stepsto}{$\stepsto$}{Solver step}{Constraints}
+
+\newcommand{\progressesto}[0]{\leadsto}
+\newnotation{progressesto}{$\progressesto$}{Solver progress}{Constraints}
+
+\newcommand{\goesto}[0]{\rightarrowtriangle}
+\newnotation{goesto}{$\goesto$}{Solver return}{Constraints}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Fabric
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+

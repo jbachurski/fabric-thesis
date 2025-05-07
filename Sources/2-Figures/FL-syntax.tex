@@ -1,0 +1,64 @@
+\begin{subfigure}{.49\textwidth}
+\begin{align*}
+    \graintro e
+    x 
+    & \text{(variable)}
+    \graitem
+    \fllet{x}{e}e
+    & \text{(let-binding)}
+    \graitem
+    \fllam{x} e
+    & \text{(function)}
+    \graitem
+    e\,e
+    & \text{(application)}        
+    \graitem
+    \flrec{\overline{\ell = e}}
+    & \text{(record construction)}
+    \graitem
+    \flext{\ell = e}{e}
+    & \text{(record extension)}
+    \graitem
+    \flproj{e}{\ell}
+    & \text{(record projection)}
+    \graitem
+    \flcast{e}{\tau}
+    & \text{(subtype coercion)}
+    \\ \\
+    \graintro v
+    \fllam{x} e
+    & \text{(function)}
+    \graitem
+    \flrec{\ell = v}
+    & \text{(record)}
+\end{align*}
+\caption{Expressions $e$ and values $v$ in Featherweight Lua.}
+\label{fig:featherweight-lua-expr}
+\end{subfigure}
+\hfill
+\begin{subfigure}{.49\textwidth}
+\begin{align*}
+    \graintro \tau
+    \tau \to \tau
+    & \text{(function)}
+    \graitem
+    \flext{\overline{\ell : \phi}}{\phi}
+    & \text{(record)}
+    \\ \\ 
+    \graintro \phi 
+    \top
+    & \text{(top)}
+    \graitem
+    \bot 
+    & \text{(bottom)}
+    \graitem
+    \tau
+    & \text{(present)}
+    \graitem
+    \flabsent 
+    & \text{(absent)}
+\end{align*}
+$$ \flrec{ \overline{\ell : \tau_\ell} } \defeq \flrec{ \overline{\ell : \tau_\ell} \mid \top } $$
+\caption{Types $\tau$ and field types $\phi$.}
+\label{fig:featherweight-lua-types}
+\end{subfigure}
