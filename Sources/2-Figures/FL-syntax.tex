@@ -39,6 +39,12 @@
 \begin{subfigure}{.49\textwidth}
 \begin{align*}
     \graintro \tau
+    \top
+    & \text{(top)}
+    \graitem
+    \bot
+    & \text{(bottom)}
+    \graitem
     \tau \to \tau
     & \text{(function)}
     \graitem
@@ -46,10 +52,10 @@
     & \text{(record)}
     \\ \\ 
     \graintro \phi 
-    \top
+    \flftop
     & \text{(top)}
     \graitem
-    \bot 
+    \flfbot 
     & \text{(bottom)}
     \graitem
     \tau
@@ -59,6 +65,6 @@
     & \text{(absent)}
 \end{align*}
 $$ \flrec{ \overline{\ell : \tau_\ell} } \defeq \flrec{ \overline{\ell : \tau_\ell} \mid \top } $$
-\caption{Types $\tau$ and field types $\phi$.}
+\caption{Types $\tau$ (def. coinductively \cite{castagna-polymorphic-variants}) and field types $\phi$.}
 \label{fig:featherweight-lua-types}
 \end{subfigure}

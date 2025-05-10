@@ -1,0 +1,66 @@
+\begin{align*}
+\graintro e
+n \mid f  
+& \text{(integer and float literal)} 
+\graitem
+\pi(\overline{e}) 
+& \text{(scalar operations)}
+\graitem
+x
+& \text{(variable)}
+\graitem
+\slet{x}{e}{e}
+& \text{(let-binding)}
+\graitem
+\slam{x}{e}
+& \text{(function)}
+\graitem
+e\,e 
+& \text{(application)}
+\graitem
+\srecordval{\overline{\ell = e}} 
+& \text{(record construction)}
+\graitem
+\sproj{e}{\ell} 
+& \text{(record projection)}
+\graitem
+\stag{T}{e} 
+& \text{(variant construction)}
+\graitem
+\smatch{e}{\overline{\mid T\,x\,\Rightarrow e}} 
+& \text{(pattern matching)}
+\graitem
+\sbuild{x}{e}{e} 
+& \text{(array comprehension)}
+\graitem
+\sarrayval{s}{J} 
+& \text{(unevaluated array)}
+\graitem
+\sindex{e}{e} 
+& \text{(array indexing)}
+\graitem
+\sshape{e} 
+& \text{(array shape)} 
+\graitem
+\eess
+& \text{(shape expression)} 
+\\ \\
+% shape expressions
+\graintro{\eess}
+\ssize{e} 
+& \text{(sized shape)}
+\graitem
+\sproductval{\overline{ \ell = e }} 
+& \text{(product shape)} 
+\graitem
+\sproductproj{e}{\ell} 
+& \text{(product dimension projection)}
+\graitem
+\sconcatval{\overline{ T = e }} & \text{(concatenation shape)}
+\graitem
+\sconcatproj{e}{T} 
+& \text{(concatenation component projection)}
+\graitem
+\sbroadcast{e}{e} 
+& \text{(shape broadcasting)}
+\end{align*}

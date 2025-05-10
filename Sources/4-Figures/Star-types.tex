@@ -1,0 +1,40 @@
+\begin{align*}
+\graintro \tau
+\top \mid \bot 
+& \text{(top, bottom)} 
+\graitem
+\mathrm{int} \mid \mathrm{float} 
+& \text{(integer, float)}
+\graitem
+\tau \sfntype \tau 
+& \text{(function)} 
+\graitem
+\srecordtype{\overline{\ell : \tau}} 
+& \text{(record)} 
+\graitem
+\svarianttype{\overline{T : \tau}} 
+& \text{(variant)}
+\graitem
+\sarraytype{\sigma_1}{\sigma_2}{\tau} \quad \text{for } \sigma_1 \sub \sigma_2 
+& \text{(array)}
+\graitem
+\sigma 
+& \text{(shape)} \\ 
+\\
+\graintro \sigma
+\ssized 
+& \text{(sized)}
+\graitem
+\sproducttype{\overline{ \ell : \sigma }} 
+& \text{(product)} 
+\graitem
+\sconcattype{\overline{ T : \sigma }} 
+& \text{(concatenation)} \\
+\\
+\graintro \eta
+\mathrm{int} 
+\mid
+\srecordtype{\overline{\ell : \eta}} 
+\mid
+\svarianttype{\overline{T : \eta}} & \text{(indices in } \tau)
+\end{align*}

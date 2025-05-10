@@ -1,0 +1,12 @@
+\begin{align*}
+\ssize{n} \broadcastsem \ssize{m} 
+&= \ssize{n} 
+& \text{if }n = m \\ 
+% 
+\sproductval{ \overline{\ell' = \vess_\ell'} } \broadcastsem \sproductval{ \overline{\ell'' = \vess_\ell''} } 
+&= \sproductval{\overline{\ell = \vess_\ell' \broadcastsem \vess_\ell''} } 
+& \text{for }\ell = \ell' \cup \ell'' \\
+% 
+\sconcatval{ \overline{T = s_T'} } \broadcastsem \sconcatval{ \overline{T = s_T''} } \ 
+&= \sconcatval{ \overline{T = s_T' \broadcastsem s_T''} }
+\end{align*}

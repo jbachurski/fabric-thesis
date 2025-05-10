@@ -41,6 +41,9 @@
 \newcommand{\flletx}[2]{\letbindx{#1}{#2}}
 \newnotation{fllet}{$\mathrm{let}$}{Let-binding}{B030}
 
+\newnotation{top}{$\top$}{Top type -- supertype of all types}{B048}
+\newnotation{bot}{$\bot$}{Bottom type -- subtype of all types}{B049}
+
 \newcommand{\lam}[1]{\lambda {#1} \ldotp}
 \newcommand{\fllam}[1]{\lam{#1}}
 \newnotation{fllam}{$\lambda$}{Function ($\lambda$ abstraction)}{B040}
@@ -64,12 +67,20 @@
 % Featherweight Lua
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
+\newnotation{flfieldtype}{$\phi$}{Field type}{L030}
+
 \newcommand{\flrec}[1]{\rcd{#1}}
 
 \newcommand{\flext}[2]{\left\{ {#1} \,\middle|\, {#2} \right\}}
 \newnotation{flext}{$\flext{\overline{\ell = e}}{e}$}{Record extension}{L040}
 
 \newnotation{flrectyp}{$\flext{\overline{\ell : \phi}}{\phi}$}{Record type}{L045}
+
+\newcommand{\flftop}{\boxed{\top}}
+\newcommand{\flfbot}{\boxed{\bot}}
+\newnotation{flftop}{$\flftop$}{Top field type}{L048}
+\newnotation{flfbot}{$\flfbot$}{Bottom field type}{L049}
+
 
 \newcommand{\flproj}[2]{{#1}{.}{#2}}
 \newnotation{flproj}{$\flproj e \ell$}{Let-binding}{L050}
@@ -78,7 +89,7 @@
 \newnotation{flcast}{$\flcast{e}{\tau}$}{Runtime type coercion}{L060}
 
 % FL types
-\newcommand{\flabsent}{\_}
+\newcommand{\flabsent}{\Box}
 
 \newcommand{\centredalign}{\hspace{.45\textwidth}\phantom{{}={}}&\phantom{{}={}}\hspace{.45\textwidth}}
 
@@ -100,9 +111,11 @@
 
 \newnotation{fj}{$\fj e$}{Expression \emph{(written in monospace font)}}{J010}
 \newnotation{fjtype}{$\fj C$}{Class}{J011}
-\newnotation{fj}{$K = \fjconsdef$}{Class constructor definition}{J020}
-\newnotation{fj}{$M = \fjmethdef$}{Method definition}{J030}
-\newnotation{fj}{$L = \fjclassdef$}{Class definition}{J040}
+\newnotation{fjtype}{$\fj m$}{Method name}{J012}
+\newnotation{fjtype}{$\fj f$}{Field, variable name}{J013}
+\newnotation{fjconsdef}{$K$}{Class constructor definition}{J020}
+\newnotation{fjmethdef}{$M$}{Method definition}{J030}
+\newnotation{fjclassdef}{$L$}{Class definition}{J040}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % Subtyping lattice
@@ -186,7 +199,6 @@
 % \newcommand{\typecolor}[1]{\mathcolor{RoyalPurple}{#1}}
 % \newcommand{\shapetypecolor}[1]{\mathcolor{Violet}{#1}}
 
-Shape type $\sigma$
 \newnotation{ssexpr}{$e^S$}{Shape expression}{Z010}
 \newnotation{ssval}{$s$}{Shape value}{Z011}
 \newnotation{sstype}{$\sigma$}{Shape type}{Z012}
@@ -196,12 +208,17 @@ Shape type $\sigma$
 \newnotation{sint}{$\sint$}{Integer type}{Z021}
 
 \newcommand{\sfloat}[0]{\typecolor{\mathrm{float}}}
-\newnotation{sfloat}{$\sfloat$}{Floating point type}{Z022}
+\newnotation{sfloat}{$\sfloat$}{Floating point type}{Z021}
+
+\newnotation{sintv}{$n, m$}{Integer}{Z022}
+\newnotation{sfloatv}{$f$}{Float}{Z022}
 
 \newcommand{\sfntype}{\typecolor{\to}}
 \newcommand{\fn}{\sfntype}
 \newcommand{\srecordtype}[1]{\typecolor{\left\{{#1}\right\}}}
 \newcommand{\svarianttype}[1]{\typecolor{\left[{#1}\right]}}
+
+\newnotation{iota}{$\iota$}{Index of shape: upper bound on index type given shape type}{Z023}
 
 \newcommand{\stwobounds}[2]{\typecolor{\left[ {#1}{.}{.}{#2} \right]}}
 \newcommand{\sonebound}[1]{\typecolor{\left[ {#1} \right]}}
@@ -260,7 +277,7 @@ Shape type $\sigma$
 \newnotation{broadcastsem}{$s \broadcastsem s$}{Broadcasting (semantics)}{Z061}
 \newnotation{scast}{$\scast{v}{s}$}{Index coercion into shape}{Z062}
 \newnotation{inbs}{$v \inbs s$}{Index in-bounds of shape}{Z063}
-\newnotation{inbsp}{$v \inbsp s$}{Index within-bounds of shape}{Z064}
+\newnotation{inbsp}{$v \inbsp s$}{Index structurally-exactly in-bounds of shape}{Z064}
 \newnotation{inbstr}{$v \inbstr s$}{Index structurally-in-bounds of shape}{Z065}
 
 % Shape types
@@ -268,4 +285,12 @@ Shape type $\sigma$
 \newcommand{\sproducttype}[1]{\shapetypecolor{\left\{\!\left|{#1}\right|\!\right\}}}
 \newcommand{\sconcattype}[1]{\shapetypecolor{\left\llbracket{#1}\right\rrbracket}}
 
-\newnotation{evalctx}{$C$}{Evaluation context}{Z010}
+\newcommand{\evalct}[2]{{#1}\left\langle{#2}\right\rangle}
+\newcommand{\evalctx}{C\langle\Box\rangle}
+\newnotation{evalctx}{$\evalctx$}{Evaluation context -- with hole $\Box$ for substitution}{Z070}
+
+\newcommand{\step}{\leadsto}
+\newcommand{\sterr}{\leadsto \lightning}
+\newnotation{step}{$e \step e$}{Small-step (operational semantics)}{Z071}
+\newnotation{sterr}{$e \sterr$}{Raises-error step (operational semantics)}{Z072}
+\newnotation{refltransclos}{$R^*$}{Reflexive-transitive closure of relation $R$ (e.g.\@ $\step^*$, $\sterr^*$)}{Z073}

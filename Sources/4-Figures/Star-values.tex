@@ -1,0 +1,28 @@
+\begin{align*}
+% \\ \\
+% values
+\graintro v
+n \mid f   
+& \text{(integer, float)}
+\graitem
+\slam{x}{e} 
+& \text{(function)}
+\graitem
+\srecordval{\overline{\ell = v}} 
+& \text{(record)} 
+\graitem
+\stag{T}{v} & \text{(variant)} \\ \mid&\,\,
+\sarrayval{\vess}{I} & \text{(array)} \\ \mid&\,\,
+\vess & \text{(shape value)} 
+\\ \\
+% shape values
+\graintro{\vess}
+\ssize{n} 
+& \text{(sized shape)}
+\graitem
+\sproductval{\overline{ \ell = \vess }} 
+& \text{(product shape)}
+\graitem
+\sconcatval{\overline{ T = \vess }} 
+& \text{(concat. shape)}
+\end{align*}

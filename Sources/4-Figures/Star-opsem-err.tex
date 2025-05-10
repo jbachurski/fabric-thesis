@@ -1,0 +1,15 @@
+\renewcommand\arraystretch{1.5}
+\begin{gather*}
+\boxed{e \sterr} \\[0.5em]
+\begin{array}{rlr}
+\sarrayval{\vess}{I}[v] 
+\leadsto \lightning 
+&\text{ if } (v \inbstr \vess) \land \lnot (v \inbs \vess) 
+& \textsc{StepIndexErr} \\
+\vess' \broadcast \vess'' 
+\leadsto \lightning 
+&\text{ if } \vess' \broadcastsem \vess'' \text{ is undefined} 
+&\quad \textsc{StepBroadcastErr}
+\end{array}
+\irule{CongErr}{e \leadsto \lightning}{\evalct{C}{e} \leadsto \lightning}
+\end{gather*}

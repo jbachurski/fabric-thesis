@@ -2,8 +2,11 @@
 
 \usepackage{metalogo}
 
+\usepackage{tikz}
+
 \usepackage{todonotes}
 
+\usepackage{needspace}
 \usepackage{etoolbox}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -17,8 +20,7 @@
 \definecolor{deepgreen}{rgb}{0,0.6,0}
 
 \def\backtick{\`{}}
-\newcommand\ocamlstyle{\lstset{
-    language=caml,
+\newcommand\basestyle{\lstset{
     basicstyle=\small\ttfamily,
     morekeywords={self},
     keywordstyle=\color{deepblue},
@@ -27,32 +29,15 @@
     literate={`}{\backtick}1,
     escapechar=@
 }}
-\lstnewenvironment{ocaml}[1][]
-{
-\ocamlstyle
-\lstset{#1}
-}
-{}
 
-\definecolor{deepblue}{rgb}{0,0,0.6}
-\definecolor{deepred}{rgb}{0.6,0,0}
-\definecolor{deepgreen}{rgb}{0,0.6,0}
+\newcommand\ocamlstyle{\basestyle{} \lstset{language=caml}}
+\lstnewenvironment{ocaml}[1][]{\ocamlstyle \lstset{#1}}{}
 
-\def\backtick{\`{}}
-\newcommand\pythonstyle{\lstset{
-    language=Python,
-    basicstyle=\small\ttfamily,
-    morekeywords={self},
-    keywordstyle=\color{deepblue},
-    stringstyle=\color{deepgreen},
-    showstringspaces=false,
-}}
-\lstnewenvironment{python}[1][]
-{
-\pythonstyle
-\lstset{#1}
-}
-{}
+\newcommand\pythonstyle{\basestyle{} \lstset{language=Python}}
+\lstnewenvironment{python}[1][]{\pythonstyle \lstset{#1}}{}
+
+\newcommand\javastyle{\basestyle{} \lstset{language=Java}}
+\lstnewenvironment{java}[1][]{\javastyle \lstset{#1}}{}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % Nomenclature
@@ -185,6 +170,7 @@
 \author{Jakub Krzysztof Bachurski}
 
 \begin{document}
+%TC:ignore 
   \input{Sources/Notation}
 
 \frontmatter
@@ -193,6 +179,7 @@
 
   \tableofcontents
 
+%TC:endignore 
 \mainmatter
 
   \include{Sources/1-Introduction}
@@ -202,24 +189,29 @@
   \include{Sources/5-Star}
   \include{Sources/6-Conclusions}
   
+%TC:ignore 
 
-% This ensures that the subsequent sections are being included as root
-% items in the bookmark structure of your PDF reader.
-\bookmarksetup{startatroot}
-\backmatter
+  % This ensures that the subsequent sections are being included as root
+  % items in the bookmark structure of your PDF reader.
+  \bookmarksetup{startatroot}
 
-  \begingroup
-    \let\clearpage\relax
-
-    \renewcommand{\nomname}{Notation}
-    % \renewcommand{\nompreamble}{This is the used notation:}
-    \printnomenclature
-    % \glsaddall
-    % \printglossary[title=Notation]
-    % \printglossary[type=\acronymtype]
-  \endgroup
-
+\begingroup
+  \backmatter
   \printindex
   \printbibliography
+\endgroup
 
+\addtocontents{toc}{\protect\setcounter{tocdepth}{1}}
+\setcounter{chapter}{1}
+\appendix 
+
+\begingroup
+  \let\clearpage\relax
+  \renewcommand{\nomname}{Notation}
+  \printnomenclature
+\endgroup
+
+  \include{Sources/Appendix-Proof_of_Type_Safety_for_Star}
+
+%TC:endignore 
 \end{document}

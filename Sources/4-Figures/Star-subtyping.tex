@@ -1,0 +1,29 @@
+\renewcommand\arraystretch{1.3}
+$$\boxed{\tau \sub \tau}$$
+\vspace{-1.5em}
+\small
+$$ \begin{array}{c}
+\irule{SubRefl}{}{\tau \sub \tau} \quad 
+\irule{SubTrans}{\tau \sub \tau' \quad \tau' \sub \tau''}{\tau \sub \tau''} \quad
+\irule{SubTop}{}{\tau \sub \top} \quad 
+\irule{SubBot}{}{\bot \sub \tau} \quad 
+\\
+\irule{SubFun}{\tau_1' \sub \tau_1 \quad \tau_2 \sub \tau_2'}{(\tau_1 \sfntype \tau_2) \sub (\tau_1' \sfntype \tau_2')} \quad 
+{
+\irule{SubArray}{\sigma_1' \sub \sigma_1 \quad \sigma_2 \sub \sigma_2' \quad \tau \sub \tau'}{\sarraytype{\sigma_1}{\sigma_2}{\tau} \sub \sarraytype{\sigma_1'}{\sigma_2'}{\tau'}} } \\
+\irule{SubRecWidth}{}{\srecordtype{\ell: \tau, \rho} \sub \srecordtype{\rho}} \;
+\irule{SubRecDepth}{\tau \sub \tau'}{\srecordtype{\ell: \tau, \rho} \sub \srecordtype{\ell : \tau', \rho}} \quad 
+\irule{SubProdWidth}{}{\sproducttype{\ell: \tau, \rho} \sub \sproducttype{\rho}} \;
+\irule{SubProdDepth}{\tau \sub \tau'}{\sproducttype{\ell: \tau, \rho} \sub \sproducttype{\ell : \tau', \rho}} \\
+\irule{SubVarWidth}{}{\svarianttype{\rho} \sub \svarianttype{T: \tau, \rho}} \;
+\irule{SubVarDepth}{\tau \sub \tau'}{\svarianttype{T: \tau, \rho} \sub \svarianttype{T : \tau', \rho}} \quad 
+\irule{SubConcatWidth}{}{\sconcattype{T: \tau, \rho} \sub \sconcattype{\rho}} \;
+\irule{SubConcatDepth}{\tau \sub \tau'}{\sconcattype{T: \tau, \rho} \sub \sconcattype{T : \tau', \rho}} 
+% \\
+% \irule{SubShapeSize}{}{\ssized \sub \sigma} \,
+% \irule{SubShapeProd}{\tau \sub \sigma \quad \sproducttype{\rho} \sub \sigma}{\sproducttype{\ell: \tau, \rho} \sub \sigma} \,
+% \irule{SubShapeConcat}{\tau \sub \sigma \quad \sconcattype{\rho} \sub \sigma}{\sconcattype{T : \tau, \rho} \sub \sigma} \quad
+% \irule{SubIndexInt}{}{\mathrm{int} \sub \eta} \,
+% \irule{SubIndexRecord}{\tau \sub \eta \quad \sproducttype{\rho} \sub \eta}{\sproducttype{\ell : \tau, \rho} \sub \eta} \,
+% \irule{SubIndexVariant}{\tau \sub \eta \quad \sconcattype{\rho} \sub \eta}{\sconcattype{T: \tau, \rho} \sub \eta}
+\end{array} $$

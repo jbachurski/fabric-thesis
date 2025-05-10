@@ -1,0 +1,45 @@
+\renewcommand\arraystretch{1.3}
+$$\boxed{\Gamma \vdash e : \tau}$$
+\vspace{-1em}
+\small
+$$ \begin{array}{c}
+\Gamma ::= \cdot \mid \Gamma, x : \tau \\
+% fundamentals
+\irule{Sub}{\Gamma \vdash e : \tau \quad \tau \sub \tau'}{\Gamma \vdash e : \tau'} \quad
+\irule{Var}{\Gamma(x) = \tau}{\Gamma \vdash x : \tau} \quad
+\irule{Int}{}{\Gamma \vdash n:\mathrm{int}} \quad
+\irule{Float}{}{\Gamma \vdash f:\mathrm{float}} \\
+\irule{Let}
+     {\Gamma \vdash e:\tau \quad \Gamma,x:\tau \vdash e':\tau'}
+     {\Gamma \vdash \slet{x}{e}{e'} : \tau'} \quad
+\irule{Lambda}{\Gamma,x:\tau \vdash e':\tau'}{\Gamma \vdash \slam{x}{e}: \tau\sfntype\tau'} \quad
+\irule{Apply}{\Gamma \vdash e:\tau'\sfntype\tau \quad \Gamma \vdash e':\tau'}{\Gamma \vdash e \, e' : \tau} \\
+% records
+\irule{Record}
+     {\forall \ell \ldotp \Gamma \vdash e_\ell:\tau_\ell}
+     {\Gamma \vdash \srecordval{ \overline{\ell = e_\ell} } : \srecordtype{ \overline{ \ell : \tau_\ell } }} \!
+\irule{RecordProj}{\Gamma \vdash e : \srecordtype{\ell : \tau} }{\Gamma \vdash \sproj{e}{\ell} : \tau} 
+% variants
+\irule{Tag}{\Gamma \vdash e : \tau}{\Gamma \vdash \stag{T}{e} : \svarianttype{T : \tau }} \!
+\irule{Match}{\Gamma \vdash e : \svarianttype{\overline{T : \tau_T}} \; \Gamma, x_T {:} \tau_T \vdash e_T : \tau}{\Gamma \vdash \smatch{e}{\overline{\stag{T}{x_T} \Rightarrow e_T}} : \tau} \\
+% arrays
+\irule{Array}
+     {\Gamma \vdash e:\sigma \quad \Gamma,x:\iota(\sigma) \vdash e':\tau}
+     {\Gamma \vdash \sbuild{x}{e}{e'} : \suniarraytype{\sigma}\tau} \quad
+ \irule{ArrayLit}{\Gamma \vdash \vess : \sigma \quad \forall (v \mapsto e) \in J \ldotp \Gamma \vdash v : \iota(\sigma) \text{ and } \Gamma \vdash e : \tau}{\Gamma \vdash \sarrayval{\vess}{J} : \suniarraytype{\sigma}{\tau}} \\
+\irule{Index}
+     {\Gamma \vdash e:\sarraytype{\sigma_1}{\sigma_2}{\tau} \quad \Gamma \vdash e':\iota \left( \sigma_1 \right)}
+     {\Gamma \vdash e[e'] : \tau} \;
+\irule{Shape}{\Gamma \vdash e:\sarraytype{\sigma_1}{\sigma_2}{\tau}}{\Gamma \vdash \sshape{e}: \sigma_2} \quad
+\irule{Broadcast}{\Gamma \vdash e : \sigma \quad \Gamma \vdash e' : \sigma'}{\Gamma \vdash \sbroadcast{e}{e'} : \sigma \meet \sigma'} \quad
+% shapes
+\irule{Sized}{\Gamma \vdash e:\sint}{\Gamma \vdash \ssize{e} : \ssized} \\
+\irule{Product}
+     {\forall \ell \ldotp \Gamma \vdash e_\ell:\sigma_\ell}
+     {\Gamma \vdash \sproductval{\overline{ \ell = e_\ell }} : \sproducttype{\overline{ \ell : \sigma_\ell }}} \;
+\irule{ProductProj}{\Gamma \vdash e : \sproducttype{\ell : \sigma}}{\Gamma \vdash \sproductproj{e}{\ell} : \sigma} \quad
+\irule{Concat}
+     {\forall T \ldotp \Gamma \vdash e_T:\sigma_T}
+     {\Gamma \vdash \sconcatval{\overline{ T = e_T }} : \sconcattype{\overline{ T : \sigma_T }}} \;
+\irule{ConcatProj}{\Gamma \vdash e : \sconcattype{T : \sigma}}{\Gamma \vdash \sconcatproj{e}{T} : \sigma}
+\end{array} $$
