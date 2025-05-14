@@ -60,10 +60,16 @@ We consider the external side of the framework -- the \emph{signature}, i.e.\@ t
 \subsection{Expressions}
 \label{subsec:expressions}
 
+As expected, \inference{} does not place any particular requirements on the expression language. However, we must have a way to take an expression in the source language and express it as a type inference problem -- a \textbf{constraint} in the framework. 
+We relate expressions to constraints via \textbf{constraint generation} $\denot{e : \tau} = c$, requiring that generation agrees with the typing judgement, in that we always have: 
+$$\denot{e : \tau}; \Gamma \vdash e : \tau $$
+
 \section{Constraints}
 \label{sec:constraints}
 
 We now describe the constraint system used in \inference{}. In particular, we consider a simple constraint language (Section \ref{subsec:cstr-language}) and formulate a \mlstruct{}-inspired solver (Section \ref{subsec:cstr-solver}). 
+
+In particular, the description of \inference{} in this chapter can be seen as sufficient to instantiate an existing constraint-based type inference framework like $\mathrm{HM}(X)$ of \textcite{constraint-based-hm}. Thus, we do not consider let-polymorphism here -- typical of Hindley-Milner systems modelled by $\mathrm{HM}(X)$ -- and focus on the presentation of constraint solving. 
 
 \subsection{Language}
 \label{subsec:cstr-language}
