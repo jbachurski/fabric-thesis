@@ -12,22 +12,21 @@ We begin by exploring characteristics of dynamically typed programs that we migh
 
 We first consider the meaning of \emph{dynamic} and \emph{static} typing.
 
-\emph{Dynamic typing} generally means any form of runtime type checking, while \emph{static typing} is type checking at compile time. A dynamically typed language (or program) relies only on dynamic typing, and not static typing. Since when we talk about \emph{typing} we generally mean static typing, we also call dynamically typed programs \emph{untyped}.\todo[color=red]{really untyped?} 
+\emph{Dynamic typing} generally means any form of runtime type checking, while \emph{static typing} is type checking at compile time. A dynamically typed language (or program) relies only on dynamic typing, and not static typing. Since when we talk about \emph{typing} we generally mean static typing, we also call dynamically typed programs \emph{untyped}.
+% \todo[color=red]{really untyped?} 
 
 Many statically typed languages possess some facilities for dynamic type checking, blurring the line between static and dynamic languages: \begin{description}
     \item[Static can be dynamic] Java (along with many other object-oriented languages) features \textit{downcasts}, which coerce an object of some class into its subclass. This has to be checked at runtime to preserve safety. 
     % It would be entirely possible -- though impractical -- to program in Java using only the \texttt{Object} type and to rely on downcasts for any useful work, essentially circumventing static typing. 
     More glaringly, Java also has reflection facilities, allowing introspection of types of values at runtime. 
-    \item[Dynamic can be static] Most dynamically typed languages \emph{could} be given a trivial static type system (c.f.\@ the wildcard/any type). 
-    % for instance, determining whether a given piece of code is a statement (of type \textsf{stmt}), or expression (of type \textsf{value})
-    Checking such types would be entirely syntax-directed.
+    \item[Dynamic can be static] Most dynamically typed languages \emph{could} be given a trivial static type system -- for example, where all well-formed expressions are just given some type $\star$. 
 \end{description} 
 
 Furthermore, the line between type checking and other kinds of checks is itself subjective.
 Verifying that an index into an array is an integer is obviously known to be type checking.
 On the other hand, determining whether the index is out-of-bounds is generally thought not to be a type check -- even though it is handled as such in a dependent type system. 
 
-Hence, it is difficult say what dynamic language patterns we should attempt to type statically, and what type safety properties we should ensure. It is necessary to make some assumptions in order to proceed further.
+Hence, it is difficult say what dynamic language patterns we should attempt to type statically, and what type safety properties we should ensure. It is necessary to make some assumptions in order to proceed further.\todo{revise}
 After all, the space of dynamically typed programs is extremely large -- but there are only so many interesting patterns hiding within.
 
 \needspace{6em}
@@ -35,7 +34,7 @@ After all, the space of dynamically typed programs is extremely large -- but the
 \label{subsec:runtime-type-checking}
 
 Let us distinguish two kinds of runtime type checking -- with the goal of identifying a well-behaving subset: \begin{description}
-    \item[Types as data] A value's type can be read and itself operated on as a value. For example, both Python and Lua feature a \texttt{type} built-in function. Since the type becomes a runtime value, it can arbitrarily affect the data and control flow. 
+    \item[Types as data] A value's type can be read and itself operated on as a value unique to the type. For example, both Python and Lua feature a \texttt{type} built-in function. Since the type becomes a runtime value, it can arbitrarily affect the data and control flow. 
     Branching on the type (e.g.\@ Python's \texttt{isinstance}) -- a common pattern in literature on \emph{set-theoretic types} -- also treats the type as data. 
     
     I exclude the principle of types as data, as it has the following conseqeuences: \begin{description}
@@ -52,7 +51,7 @@ Let us distinguish two kinds of runtime type checking -- with the goal of identi
     % -- programs assume that all operations are legal.
     Note that -- provided we do not handle errors raised due to illegal operations -- duck typing does not suffer from the same loss of parametricity.
 \end{description}
-I thus chose to design an approach to static typing which admits programs utilising \textbf{duck typing} -- motivated by the fact that it preserves parametricity. 
+I chose to design an approach to static typing which admits \textbf{duck-typed} programs -- motivated by preservation of parametricity. 
 We now have to find a way to statically model duck typing.
 
 \subsection{Modelling duck typing}
@@ -62,9 +61,10 @@ Having identified duck typing as a crucial well-behaved pattern in dynamically-t
 
 \subsubsection{Structural subtyping}
 
-Duck typing naturally admits a natural notion of \textbf{subtyping}: if a duck $a$ of type $A$ quacks, and another duck $b$ of type $B$ not only quacks but also walks -- then clearly $b$ can be used in any place $a$ can. A substitution principle holds: the type $B$ supports more operations than $A$, and thus $B$ is a subtype of $A$ -- we shall denote this $A \sub B$. When speaking of subtyping, we usually refer to its \emph{implicit} variety -- the language does not require an \emph{explicit} annotation every time we treat a type as its supertype.
+Duck typing leads us to a natural notion of \textbf{subtyping}: if a duck $a$ of type $A$ quacks, and another duck $b$ of type $B$ not only quacks but also walks -- then clearly $b$ can be used in any place $a$ can. A substitution principle holds: the type $B$ supports more operations than $A$, and thus $B$ is a subtype of $A$ -- we denote this $A \sub B$. When speaking of subtyping, we usually refer to its \emph{implicit} variety -- the language does not require an \emph{explicit} annotation every time we treat a type as its supertype.
 
-This is a good time to introduce a distinction between \textbf{nominal} and \textbf{structural} (static) typing \cite{pierce-book}. \begin{description}
+\needspace{1em}
+This is a good time to introduce a distinction between \textbf{nominal} and \textbf{structural} (static) typing \cite{pierce-book}: \begin{description}
     \item[Nominal] Most static type systems in popular programming languages are nominal: types are introduced via a type definition, where they are \emph{named} -- the type is then identified with (e.g.\@ compared by) this name. For example, the type systems in Java, C/C++, and Haskell are predominantly nominal.
     \item[Structural] On the other hand, a structural type system does not pose the requirement for a type to have a name nor a definition. A popular example of a structurally typed language would be TypeScript -- the statically typed dialect of JavaScript. 
 \end{description}
@@ -102,7 +102,7 @@ type opt = [ `None | `Some of int ]
 Intuitively, a nominally typed program can be transformed into a structurally typed one, and as such structurally typed programs are inherently more flexible -- we explore this in Section \ref{sec:translations}. 
 % This fundamental idea of \emph{anonymising types} by erasing their names is formally explored in the \textbf{translations} presented in Section \ref{sec:translations} on the languages we introduce in Section \ref{sec:languages}.
 
-We also introduce a similar distinction between nominal and structural \textbf{subtyping}: while in a language like Java subtyping is defined through the inheritance hierarchy (\texttt{class C extends C' \{ ... \}}) -- subtyping is defined on types with specific names -- structural subtyping is instead defined in terms of the structure of the type. Structural subtyping naturally arises on records (and, dually, variants) through the following two rules:\footnote{A traditional formal treatment is given by \textcite{pierce-book}. In this dissertation -- to express it more conveniently for algebraic subtyping in Chapter \ref{algebraic-subtyping} -- we use a slightly different approach with \emph{field types}.}
+We also introduce a similar distinction between nominal and structural \textbf{subtyping}: while in a language like Java subtyping is defined through the inheritance hierarchy (\fj{class C extends C}'\fj{ \{...\}}) -- on types with specific \emph{names} -- structural subtyping is instead defined in terms of the structure of the type. Structural subtyping naturally arises on records (and, similarly, variants) through the following two rules:\footnote{A traditional formal treatment is given by \textcite{pierce-book}. In this dissertation -- to express it more conveniently for algebraic subtyping in Chapter \ref{algebraic-subtyping} -- we use a slightly different approach with \emph{field types}.}
 \begin{description}
     \item[Width subtyping] A record is a subtype of another if it has more fields and the other are compatible, e.g.: $$ \{ \mathrm{foo} : \mathrm{int}, \mathrm{bar} : \mathrm{string} \} \sub \{ \mathrm{foo} : \mathrm{int} \} $$
     \item[Depth subtyping] A record is a subtype of another if its respective fields are subtypes, e.g.:
@@ -111,11 +111,11 @@ We also introduce a similar distinction between nominal and structural \textbf{s
 
 We formalise this in the type system for the record calculus -- Featherweight Lua -- in Section~\ref{subsec:featherweight-lua}.
 
-Clearly, \textbf{structural subtyping} is most relevant for modelling duck typing: most dynamically typed programs will not feature type definitions.\footnote{A note-worthy exceptions would be OOP-style class definitions, present in e.g.\@ Python.} I am mainly motivated by modelling objects in dynamic languages, following the tradition of \textcite{cardelli-multiple-inheritance}.
+Clearly, \textbf{structural subtyping} is most relevant for modelling duck typing: most dynamically typed programs do not feature type definitions.\footnote{A note-worthy exceptions would be OOP-style class definitions, present in e.g.\@ Python.} I am mainly motivated by modelling objects in dynamic languages, following the tradition of \textcite{cardelli-multiple-inheritance}.
 
-I chose structural subtyping as the direction for my thesis -- we briefly consider two possible alternatives in the following subsections. I motivate this mainly choice by the recency of the seminal work of \textcite{mlsub} on \emph{algebraic subtyping} -- the topic of Chapter \ref{algebraic-subtyping} -- as it is directly applicable to languages with certain forms of structural subtyping.
+I chose structural subtyping as the direction for my thesis -- we briefly consider two possible alternatives in the following subsections. I motivate this choice mainly by the recency -- relative to the plethora of work on structural subtyping from the 90s -- of the seminal work of \textcite{mlsub} on \emph{algebraic subtyping}, as it is directly applicable to languages with structural subtyping. It is thus the topic of Chapter \ref{algebraic-subtyping}.
 
-\subsubsection{Row polymorphism}
+\subsubsection{Alternative 1: Row polymorphism}
 
 \begin{figure}
     \centering
@@ -131,11 +131,11 @@ val f : [< `None | `Some of int ]
 *)
     \end{ocaml}
     \end{tabular}
-    \caption{Example of row polymorphism in OCaml using polymorphic variants, annotated with its (inferred) most general type. \texttt{<} and \texttt{>} stand for row type variables in a closed and open variant, respectively. The argument type can be unified against any variant with at most the listed cases, while the result with at least those.}
+    \caption{Example of row polymorphism in OCaml using polymorphic variants, annotated with its (inferred) most general type. \texttt{<} and \texttt{>} stand for row type variables in closed and open variants, respectively. The argument type can be unified against any variant with at most the listed cases, while the result with at least those.}
     \label{fig:ocaml-row-polymorphism}
 \end{figure}
 
-There is a common folklore trick for replacing subtype polymorphism -- as seen for objects/records above -- by an appropriate form of parametric polymorphism \cite{structural-subtyping-as-parameric-polymorphism}. For example, a function of type $\top \to \mathrm{int}$ -- featuring a top type $\top$, the supertype of any type -- could equivalently be given the type scheme $\forall \alpha \ldotp \alpha \to \mathrm{int}$, since $\alpha$ can be instantiated to any argument type.
+There is a common folklore trick for replacing subtype polymorphism -- as seen for objects/records above -- by an appropriate form of parametric polymorphism \cite{structural-subtyping-as-parameric-polymorphism}. For example, a function of type $\top \to \mathrm{int}$ -- where $\top$ is top, the supertype of any type -- could equivalently be given the type scheme $\forall \alpha \ldotp \alpha \to \mathrm{int}$, since $\alpha$ can be instantiated to any argument type.
 \textbf{Row polymorphism} \cite{remy-records}, introduced by \textcite{wand-rows} (more generally \emph{structural polymorphism} \cite{simple-structural-polymorphism}) -- can be seen as an application of this trick to structural record and variant types: we introduce \emph{row type variables} that stand for \enquote{the rest of the record}.
 % Width subtyping correspond to instantiation of row variables, while depth subtyping corresponds to nested instantations.
 
@@ -146,26 +146,26 @@ An example application of row polymorphism in OCaml is given in Figure \ref{fig:
 
 The relative power of structural subtyping and row polymorphism -- as extensions on parametric polymorphism -- is unclear.
 % , and building systems based on row polymorphism is a viable alternative -- though possibly limited in the context of types for which rows are not clearly helpful in modelling notions of subtyping. 
-There is some recent work exploring the relationship between the two \cite{disjoint-polymorphism, structural-subtyping-as-parameric-polymorphism}. However, systems with row polymorphism tend to grow more complex than ones with subtyping \cite{castagna-polymorphic-variants}. Nonetheless, they have historically been a feasible extension of ML-like type systems.
+There is some recent work exploring the relationship between the two \cite{disjoint-polymorphism, structural-subtyping-as-parameric-polymorphism}. However, systems with row polymorphism tend to grow more complex than ones with subtyping \cite{castagna-polymorphic-variants}. Nonetheless, they have historically been used as a common extension of ML-like type systems.
 
-\subsubsection{Set-theoretic types}
+\subsubsection{Alternative 2: Set-theoretic types}
 
 With \textbf{set-theoretic types}, we extend the type language with operators corresponding to set operations:
 $$ \tau ::= \cdots \mid \tau \cup \tau \mid \tau \cap \tau \mid \lnot \tau $$
 These operators admit a set-theoretic interpretation -- they are exactly compatible with the sets of expressions (values) that have a given type $\tau$. 
 Under this interpretation, the set-inclusion relation naturally gives us a notion of subtyping, so that e.g.\@ $\tau \cap \tau' \sub \tau'$.
-Set-theoretic types are elegant, expressive, and have seen practical use \cite{set-theoretic-types-for-elixir, set-theoretic-types-for-erlang}. However, it is difficult to efficiently infer and simplify them, and type inference usually lacks \emph{principal types}, enjoyed by ML-style type inference -- like algebraic subtyping \cite{mlstruct, castagna-dynamic}. 
+Set-theoretic types are elegant, expressive, and have seen practical use \cite{set-theoretic-types-for-elixir, set-theoretic-types-for-erlang}. However, it is difficult to efficiently infer and simplify them, and type inference usually lacks \emph{principal types}, enjoyed by ML-style type inference (algebraic subtyping included \cite{mlstruct, castagna-dynamic}). 
 
 Later, in algebraic subtyping\todo[color=green]{move?} -- a technique that builds on structural subtyping -- we rely on a type lattice construction featuring meets $\meet$ (least upper bounds) and joins $\join$ (greatest lower bounds). Though similar at first sight, the two approaches are subtly different \cite{mlstruct}: while $(\mathrm{int} \to \mathrm{int}) \cup (\mathrm{nat} \to \mathrm{nat})$ is as valid a type as any other, in the type lattice of MLsub \cite{mlsub} and MLstruct \cite{mlstruct} we have: $$(\mathrm{int} \to \mathrm{int}) \join (\mathrm{nat} \to \mathrm{nat}) = (\mathrm{int} \meet \mathrm{nat} \to \mathrm{int} \join \mathrm{nat}) = \mathrm{nat} \to \mathrm{int} $$
 While $\cup$ gives us a function type which preserves its argument's type, $\join$ only grants that the function must accept $\mathrm{nat}$ and only returns $\mathrm{int}$ (cf.\@ subtyping of functions).
-Hence, types no longer have a direct set-theoretic interpretation.\footnote{Note that type lattices exist where the equation does not hold, and that Dolan's system admits some set-theoretic-esque types like $\{\} \meet (\top \to \top)$ (though they can only be used as $\top$) where necessary for \emph{extensibility}.} It thus seems that set-theoretic types are no less expressive than approaches based on algebraic subtyping, where types are constrained to just the ones in the defined lattice. To the author's knowledge, no formal relationship between the two has been established.
+Hence, types no longer have a direct set-theoretic interpretation.\footnote{Note that type lattices exist where the equation does not hold, and that Dolan's system admits some set-theoretic-esque types like $\{\} \meet (\top \to \top)$ (though they can only be used as $\top$) where necessary for \emph{extensibility}.} It thus seems that set-theoretic types are at least as expressive as approaches based on algebraic subtyping, where types are constrained to just the ones in the defined lattice. To the author's knowledge, no formal relationship between the two has been established.
 
 \section{Languages}
 \label{sec:languages}
 
 As I have now determined the main approach to static typing in this thesis -- \textbf{structural subtyping} -- we are in need of some initial model languages to ground any further conclusions.
 
-Firstly, I construct a simple calculus, which I dub \textbf{Featherweight Lua} (FL), that we will use to model a dynamically typed language with a statically typed fragment featuring structural subtyping. As the name implies, FL admits a simple embedding into its namesake, the popular dynamically typed language Lua. Secondly, I recall the established \textbf{Featherweight Java} (FJ) calculus, and use it as a model for a nominally typed OOP language.  
+Firstly, I construct a simple calculus, which I dub \textbf{Featherweight Lua} (FL), that we will use to model a dynamically typed language with a statically typed fragment featuring structural subtyping. As the name implies, FL admits a simple embedding into its namesake, the popular dynamically typed language Lua. Secondly, I recall the established \textbf{Featherweight Java} (FJ) calculus \cite{featherweight-java}, and use it as a model for a nominally typed OOP language.  
 
 \subsection{Featherweight Lua}
 \label{subsec:featherweight-lua}
@@ -183,7 +183,7 @@ I construct FL as the simply-typed lambda calculus extended with extensible reco
 
 Since FL's functions and bindings are entirely standard, we consider its records and coercions:\todo{opsem?}
 \begin{description}
-    \item[Records] Records can be constructed from a list of individual assignments, and individual fields can be projected. Since FL's records are extensible, we have a record extension operator, which, given an existing record without an assignment to a field, returns a new record with that field set.
+    \item[Records] Records can be constructed from a list of individual assignments, and individual fields can be projected. Since FL's records are extensible, we have a record extension operator, which, for an existing record lacking a given field, returns a new record with that field set.
     \item[Coercion] FL features a type coercion operator, which is a no-op at runtime. It is included as it plays a role in the FJ-FL translation later.
 \end{description}
 
@@ -207,7 +207,7 @@ FL has only two type constructors -- usual functions and slightly-unusual record
 
 \begin{description}
     \item[Recursive types] Types $\tau$ in FL are generated coinductively, so that we have regular (equi)recursive types (everything else generated inductively as usual). This later allows us to statically type (object-oriented) open recursion -- a method calling other methods of the same class and accessing its attributes.
-    \item[Record field types] Instead of the usual width and depth subtyping rules for record subtyping, we instead consider records $\flrec{\overline{\ell : \phi} \mid \phi}$ to be a functions from labels $\ell$ into \emph{field types} $\phi$, which are unequal to $\phi'$ at finitely many points (given by the list $\overline{\ell : \phi}$). This is particularly convenient as we also wish to keep track of the absent fields (which can filled by extension). This presentation is trivially compatible with the usual definition, like that of \textcite{pierce-book}, at just present and top field types.
+    \item[Record field types] Instead of the usual width and depth subtyping rules for record subtyping, we instead consider record types $\flrec{\overline{\ell : \phi} \mid \phi'}$ as functions from labels $\ell$ into \emph{field types} $\phi$, which are unequal to the \emph{default} $\phi'$ at finitely many points, which are given by the list $\overline{\ell : \phi}$. This approach is convenient, as it generalises well to keeping track of absent fields (fillable by extension). It is also trivially compatible with the usual definition, like that of \textcite{pierce-book}, taking just present and top field types.
     \item[Record operations] A freshly constructed record has all its other fields absent by default, and projection does not constrain the rest of the record (it allows $\flftop$ fields). Note no record value has a $\flfbot$ field.
 \end{description}
 
@@ -217,7 +217,7 @@ FL has only two type constructors -- usual functions and slightly-unusual record
     \centering
     \input{Sources/2-Figures/FL-Lua}
     \caption{Embedding of Featherweight Lua expressions $e$ into Lua programs $\lua e$. The embedding makes use the use of the functional \textsf{update} for tables, defined in Lua code as part of a preamble. \\
-    This is only a sketch of the translation -- for instance, any let-bindings should be extracted as separate statements, as Lua does not have binding expressions.}
+    This is only a sketch of the translation -- for instance, any assignments resulting from let-bindings should be extracted as separate statements and sequenced with \enquote{;}, as Lua does not have binding expressions.}
     \label{fig:featherweight-lua-embedding}
 \end{figure}
 
@@ -239,7 +239,7 @@ Reasoning about correctness is more difficult than in the well-typed case: it is
 \subsection{Featherweight Java}
 \label{subsec:featherweight-java}
 
-\textcite{featherweight-java} introduced Featherweight Java -- the \emph{core calculus} of Java, meaning it contains only the key features of the languages -- \textbf{classes} and \textbf{objects} with \textbf{fields} and \textbf{methods}. To us, FJ is a nominally (statically) typed calculus with object-oriented features and subtype polymorphism. The cited paper offers the formal details. An example of an FJ program is in Figure \ref{fig:featherweight-java}.
+\textcite{featherweight-java} introduced Featherweight Java: the \emph{core functional calculus} of Java. It contains only the key features of the languages -- \textbf{classes} and \textbf{objects} with \textbf{fields} and \textbf{methods} -- without mutation. To us, FJ is a nominally (statically) typed calculus with object-oriented features and subtype polymorphism. The cited paper offers the formal details. An example FJ program is in Figure \ref{fig:featherweight-java}.
 
 \begin{figure}
     \centering
@@ -248,13 +248,13 @@ Reasoning about correctness is more difficult than in the well-typed case: it is
     \label{fig:featherweight-java}
 \end{figure}
 
-Considering structural subtyping, we use FJ in the following thought experiment: what if we \emph{erased} all the type names (FJ classes) in a nominally typed program, inlining their definitions? This process of \textbf{anonymising types} intuitively works -- and shows that nominally typed programs have within them a structurally typed heart. We focus on the case of languages with subtype polymorphism (FJ and FL) -- more complex cases (e.g.\@ like Haskell's higher-kinded polymorphism) can be difficult to combine with structural typing (c.f.\@ \textcite{modular-implicits}).
+Considering structural subtyping, we use FJ in the following thought experiment: what if we \emph{erased} all the type names (FJ classes) in a nominally typed program, inlining their definitions? This process of \textbf{anonymising types} intuitively works -- and shows that nominally typed programs have within them a structurally typed heart. We focus on the case of languages with subtype polymorphism (FJ and FL) -- more complex cases (e.g.\@ like Haskell's higher-kinded polymorphism) can be difficult to combine with structural typing (cf.\@ structural subtyping of ML modules in \textcite{modular-implicits}).
 Via the FL-FJ translation in Section \ref{sec:translations} we will see that, despite its rich classes and objects, FJ is no more expressive than FL.
 
-\section{Translation for Anonymising Types}
+\section{Anonymising types: FL-FJ translation}
 \label{sec:translations}
 
-To serve as groundwork for this thesis, I now build a formal understanding of the relationship between the nominal, structural, and dynamic typing disciplines. To this end, we consider a translation between the introduced languages -- from the nominally typed Featherweight Java into the structurally (statically) typed fragment of Featherweight Lua.
+To serve as groundwork for this thesis, I now build a formal understanding of the relationship between the nominal, structural, and dynamic typing disciplines. To this end, we consider a translation between the languages above -- from the nominally typed Featherweight Java into the structurally (statically) typed fragment of Featherweight Lua.
 
 \begin{figure}
     \centering
@@ -270,35 +270,28 @@ The translation is described formally in Figure \ref{fig:translation}, with some
 The translation follows directly by considering a \textbf{prototype-based} object-oriented programming style: we translate each class into a constructor $\fj C$ and the \emph{prototype} $\fj C_\mathrm{proto}$, holding all of the class's methods. Constructing a new class first calls the subclass constructor, and then extends the object with methods from the prototype and the class's fields.
 
 A tricky aspect is that each method must take the object itself -- under the name $\fj{this}$ -- as an argument. Thankfully, method applications $\fj{e.m(\fjoverline e)}$ in FJ are syntactically separate, so we can pass the caller object as an argument to its translated method. 
-We note that for this to be well-typed in FL, we require regular equirecursive types, as the method types of a $\fj C$ use it as arguments in FL.
+We note that for this to be well-typed in FL, we require equirecursive types, so that we write down method types (which both occur in and contain the class type $\denoty{\fj C}$).
+
+Lastly, note that while FL's type system only allows absent record fields to be extended, this condition is always satisfied -- FJ does not allow field shadowing nor method overriding.
 
 \subsection{Correctness}
 
 We now state some theorems about the correctness of the translation.
 
 \begin{theorem}[Preservation of typing]
-    If $\Gamma \vdash \fj e : \fj C$, then $\denoty{\Gamma} \vdash \denot{\fj e} : \denoty{\fj C}$. 
+    Typing of FJ expressions is preserved, so that if we have $\Gamma \vdash \fj e : \fj C$, then $\denoty{\Gamma} \vdash \denot{\fj e} : \denoty{\fj C}$. Furthermore, translations of FJ definitions yield FL terms with expected types:
+    $$ \Gamma \vdash \denot{K}_{\fj C}^{\fj C'} : \denoty{K} \qquad \Gamma \vdash \denot{M}_{\fj C} : \denoty{M}_{\fj C} \qquad \Gamma \vdash \denot{L} : \denoty{L} $$
 \end{theorem}
 
 \begin{theorem}[Preservation of semantics]
-    If $\cdot \vdash \fj e : \fj C$ and $\fj e \rightarrow^* \fj v$, then $\denot{\fj e} \rightarrow^* \denot{\fj v}$.
+    If we have $\cdot \vdash \fj e : \fj C$ and $\fj e \step^* \fj v$, then $\denot{\fj e} \rightarrow^* \denot{\fj v}$.
 \end{theorem}
 
 In the statement of these theorems, we implicitly assume a well-typed class table $\mathrm{CT}$ (as defined by \textcite{featherweight-java}) -- it is necessary both for types and semantics.
 
 Note that, as pointed out by \textcite{inheritance-subtyping}, inheritance is \emph{not} subtyping -- it does not follow that $\denoty{\fj C} \sub \denoty {\fj C'}$ for any class $\fj C$ that $\fj{extends C}'$.
 
-\subsection{Consequences}
-
-Existence of the FL-FJ translations shows that very simple structural subtyping is sufficient to capture the essence of classic object-oriented programming, as in (Featherweight) Java -- and its nominal approach to static typing.
-More generally, we conclude that structural types are a more flexible typing discipline, as nominal types can be straightforwardly erased from simply-typed programs.
-A certain limitation is that certain type system features possible with nominal typing become infeasible under structural typing (e.g.\@ higher-kinded polymorphism).
-
-We contextualise this with the fact the structurally typed FL remains useful when we consider its untyped variety. Its statically typed fragment captures some -- but not all -- programs that do not go wrong.
-
-We conclude that \textbf{structural subtyping brings us closer to dynamic languages}. In conjunction, we have placed nominal, structural, and dynamic typing on a scale -- a relationship depicted in Figure \ref{fig:nominal-structural-dynamic}.
-
-\begin{figure}
+\begin{figure}[t]
     \centering
     \begin{tikzpicture}
         \node[align=center] at (-4,  0) (fj) {Featherweight \\ Java};
@@ -316,14 +309,25 @@ We conclude that \textbf{structural subtyping brings us closer to dynamic langua
         \draw[dashed] (-2, -2.5) -- (-2, 2);
         \draw[dashed] (2, -2.5) -- (2, 2);
     \end{tikzpicture}
-    \caption{Diagram depicting a scale of nominal, structural, and dynamic typing, with languages connected by translations between them. Its core is the translation of Featherweight Java (nominal) into Featherweight Lua (structural) from Section \ref{sec:translations}. Double arrows $\Rightarrow$ are translations that preserve both types and semantics, single arrows $\to$ only preserve semantics.}
+    \caption{Diagram depicting a scale of nominal, structural, and dynamic typing, with languages connected by translations between them. Its core is the translation of Featherweight Java (nominal) into Featherweight Lua (structural) from Section \ref{sec:translations}. Double arrows $\Rightarrow$ are translations that preserve both semantics and (non-trivial) types, while single arrows $\to$ only preserve semantics.}
     \label{fig:nominal-structural-dynamic}
 \end{figure}
+
+\subsection{Consequences}
+
+Existence of the FL-FJ translations shows that very simple structural subtyping is sufficient to capture the essence of classic object-oriented programming, as in (Featherweight) Java -- and its nominal approach to static typing.
+More generally, we conclude that structural types are a more flexible typing discipline, as nominal types can be straightforwardly erased from simply-typed programs.
+
+We contextualise this with the fact the structurally typed FL remains useful when we consider its untyped variety. Its statically typed fragment captures some -- but not all -- programs that do not go wrong.
+
+We conclude that \textbf{structural subtyping brings us closer to dynamic languages}. In conjunction, we have placed nominal, structural, and dynamic typing on a scale -- a relationship depicted in Figure \ref{fig:nominal-structural-dynamic}.
+
+It would be interesting to generalise the translation to Generic FJ (GFJ; FJ with Java-style generics), also considered by \textcite{featherweight-java} following \textcite{generic-java}. While generic classes seem straightforward, generic methods lead to types with higher-order polymorphism, which would hamper type inference. This displays the limitation of \emph{anonymising types}: nominal typing makes certain type system features easier than in the structurally typed case.
 
 \section{Summary}
 
 I have identified \textbf{duck typing} as a well-behaved pattern in dynamically typed programs, and \textbf{structural subtyping} as its appropriate model suitable for constructing expressive static type systems. I motivate this choice by presenting translations and embeddings for a pair of calculi: the nominally typed Featherweight Java, and the structurally typed Featherweight Lua. These formally reinforce intuitive beliefs about the static-dynamic and nominal-structural axes of type systems, and serve as groundwork for the thesis.
 
-Though this dissertation does not explore the application of structural subtyping to statically typing \emph{specific} dynamic languages (e.g.\@ as part of a \emph{gradual} type system \cite{gradual-typing-for-objects}), it contributes elements of a framework for doing so and motivates the application of structural subtyping for this purpose. In the next chapter, we develop a general type inference framework for languages featuring structural subtyping -- including Featherweight Lua.
+Though this dissertation does not explore the application of structural subtyping to statically typing specific dynamic languages (e.g.\@ as part of a gradual type system \cite{gradual-typing-for-objects}), it makes contributions towards it, and motivates the application of structural subtyping for this purpose. In the next chapter, I develop a type inference framework for languages featuring structural subtyping -- including Featherweight Lua.
 
 % It has by now become evident that the aim of this thesis is not to implement a new system for typing dynamic languages directly. Instead, I identify and develop general approaches that show potential to be used for this purpose. Furthermore, they can inform the design of (possibly domain-specific) languages that can admit more flexible type systems.

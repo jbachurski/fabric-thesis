@@ -14,8 +14,8 @@ The key idea of Star is in line with the topic of this thesis -- to design array
 
 In this chapter, I describe the following contributions: \begin{itemize}
     \item A novel design for an array calculus – Star – which features subtyping and structural types for array shapes. I motivate it in Section \ref{sec:design} and elaborate in Section \ref{sec:calculus}.
-    \item A formalisation of with an operational semantics (Section \ref{subsec:semantics}), type system (Section \ref{sec:typing};  \emph{without parametric polymorphism}), and type safety (Section \ref{subsec:type-safety}).
-    \item Finally, in Section \ref{subsec:type-inference} I describe how to bestow Star (extended with parametric polymorphism) with ML-style type inference in terms of the framework from Chapter \ref{algebraic-subtyping}.
+    \item A formalisation of with an operational semantics (Section \ref{subsec:semantics}), type system (Section \ref{sec:typing};  \emph{without parametric polymorphism}), and proven type safety (Section \ref{subsec:type-safety}).
+    \item Finally, in Section \ref{subsec:type-inference} I describe how to bestow Star (extended with parametric polymorphism) with ML-style type inference in terms of the \inference{} framework from Chapter \ref{algebraic-subtyping}.
 \end{itemize}
 
 \section{Design}
@@ -30,7 +30,7 @@ A \emph{batch} refers to a sequence of something, and we speak of a batch dimens
 
 \subsection{Record indices label axes}
 
-Consider an array representing a batch of images. We would model this as a 4-dimensional array, with a batch dimension, two coordinate dimensions, and a channel dimension. For instance, a size 100 batch of $32 \times 32$ RGB images might have shape $(100, 32, 32, 3)$.
+Consider an array representing a batch of images. We would model this as a 4-dimensional array, with a batch dimension, two coordinate dimensions, and a channel dimension. For instance, a size-100 batch of $32 \times 32$ RGB images might have shape $(100, 32, 32, 3)$.
 
 We could instead consider a different interpretation for this array. Notice that a value of the record type:
 $$ \srecordtype{ \mathrm{batch}: \sint, \mathrm{row}: \sint, \mathrm{col}: \sint, \mathrm{channel}: \sint } $$
@@ -117,7 +117,7 @@ We start with some informal explanations:
 \subsection{Array shapes}
 \label{subsec:array-shapes}
 
-The array shape values (and types in Section~\ref{sec:typing}) in Star are a novel contribution.
+The design of array shapes in Star -- both shape values here and shape types in Section~\ref{sec:typing} -- is a novel contribution.
 In Star, array comprehensions require providing a shape.
 We informally summarise them now and elaborate later. 
 We have three constructors for shape values:
@@ -144,7 +144,7 @@ Projections on shapes extract dimensions/components of products/concatenations. 
     \input{Sources/4-Figures/Star-broadcasting}
     \caption{
         Semantics $\broadcastsem$ of shape broadcasting $\broadcast$. 
-        We take the union of sets of dimensions $\ell$ (defaulting $s_\ell' = s_\ell''$ is either is absent), but equate components $T$. 
+        We take the union of sets of dimensions $\ell$ (defaulting $s_\ell' = s_\ell''$ if either is absent), but equate sets of components $T$. 
         If $\vess' \broadcastsem \vess''$ is undefined, we say $\vess'$ and $\vess''$ are \emph{incompatible}, and $\sbroadcast{\vess'}{\vess''}$ is a stuck state in the operational semantics.
     }
     \label{fig:broadcasting}
@@ -153,6 +153,7 @@ Projections on shapes extract dimensions/components of products/concatenations. 
 Lastly, Star's \textit{shape broadcasting}
 operation $e \broadcast e'$ (see Figure \ref{fig:broadcasting}) is used to \textit{align} compatible shapes $e$ and $e'$ by finding their common \emph{sub-shape} (cf.\@ broadcasting in NumPy \cite{numpy}), so that, for example:
 $$ \sproductval{\mathrm{row}: \ssized 5} \broadcast \sproductval{\mathrm{col}: \ssized 4} \text{ evaluates to } \sproductval{\mathrm{row}: \ssized 5, \mathrm{col}: \ssized 4}$$
+The name sub-shape refers to the result having possibly more dimensions, paralleling subtyping.
 % We define broadcasting precisely and elaborate on its uses in Section~\ref{subsec:shape-broadcasting}.
 
 \subsection{Shape bounds}
@@ -212,6 +213,13 @@ Successful executions eventually reduce to a value $v$ (Figure~\ref{fig:star-val
 
 \begin{figure}
     \centering
+    \input{Sources/4-Figures/Star-opsem-err}
+    \caption{Raises-error step relation $e \sterr$, used for specifying errors which \emph{can} occur in well-typed Star programs.}
+    \label{fig:opsem-err}
+\end{figure}
+
+\begin{figure}
+    \centering
     \input{Sources/4-Figures/Star-opsem}
     \caption{
         Small-step operational semantics for Star. We write $e \step e'$ when $e$ reduces to $e'$.
@@ -221,15 +229,7 @@ Successful executions eventually reduce to a value $v$ (Figure~\ref{fig:star-val
     \label{fig:opsem}
 \end{figure}
 
-\begin{figure}
-    \centering
-    \input{Sources/4-Figures/Star-opsem-err}
-    \caption{Raises-error step relation $e \sterr$, used for specifying errors which \emph{can} occur in well-typed Star programs.}
-    \label{fig:opsem-err}
-\end{figure}
-
-\clearpage
-\section{Typing}\todo{pagebreak}
+\section{Typing}
 \label{sec:typing}
 
 \begin{figure}[t]
@@ -253,7 +253,10 @@ Successful executions eventually reduce to a value $v$ (Figure~\ref{fig:star-val
 We now move on to Star's type system, which features novel aspects, matching the design of structural shape and index types. 
 I give a complete description of the type language in Figure~\ref{fig:types}, subtyping in Figure~\ref{fig:subtyping}, and the typing judgement in Figure~\ref{fig:typing}. 
 
-I focus on the approach to typing array shapes and indices, and finish with a statement of type safety for Star in Section \ref{subsec:type-safety} and application of the type inference framework (Chapter \ref{algebraic-subtyping}) to Star in Section~\ref{subsec:type-inference}.
+I first focus on the typing of array shapes and indices.\todo[color=red]{records?}
+Afterwards, I state type safety for Star in Section \ref{subsec:type-safety}, and show how to apply the type inference framework from Chapter \ref{algebraic-subtyping} to Star in Section~\ref{subsec:type-inference}.
+
+% I use a standard presentation of record (and similar) types \cite{pierce-book} for Star, unlike FL (Chapter \ref{static-soul}).
 
 \begin{figure}[p]
     \centering
@@ -273,16 +276,18 @@ I focus on the approach to typing array shapes and indices, and finish with a st
     % \AMcomment{$\tau?$}
     % \AMcomment{CONCAT rule has been `corrected'}
     Note $\iota$ in \textsc{Array} and \textsc{Index} maps shape types $\sigma$ into corresponding index types $\eta$. 
-    Quantifiers $\forall t \ldotp \cdots$ stand for an expanded list of assumptions instantiated for all appropriate $t$.
+    Quantifiers $\forall \ell$/$\forall T$ stand for an expanded list of assumptions instantiated for all appropriate $\ell$/$T$.
     }
     \label{fig:typing}
 \end{figure}
 
-\paragraph{Shape and index types} Recall that in Section \ref{subsec:shape-bounds} we determined that integers index into sized shapes, records into product shapes, and variants into concatenation shapes. This happens both at the value- and type-level, with examples in Table \ref{tab:shape-index-examples}.
+\paragraph{Shapes and indices}
 
-While in basic array type systems it is sufficient to presume that the type of a shape and a matching index are the same, in Star this is clearly not the case. For this purpose, we introduce a $\iota$ metafunction on types (defined in Figure \ref{fig:iota}): given a shape type $\sigma$, $\eta = \iota(\sigma)$ is the supertype of all matching index types for $\sigma$.
+Recall that in Section \ref{subsec:shape-bounds} we determined that integers index into sized shapes, records into product shapes, and variants into concatenation shapes. This happens both at the value- and type-level, with examples in Table \ref{tab:shape-index-examples}.
 
-Constructing $\iota$ is not so surprising -- similar concepts often arise when generalising array-like structures, e.g.\@ \textit{containers} \cite{containers} or Naperian (representable) functors, which \textcite{naperian-apl} has found useful for statically modelling certain patterns of array programming. To the author's knowledge, neither of these have yet lead to the key ideas present in Star.
+While in basic array type systems it is sufficient to presume that the type of a shape $\sigma$ and a matching index $\eta$ are the same, in Star this is clearly not the case. We thus use a $\iota$ metafunction on types (defined in Figure \ref{fig:iota}): given a shape type $\sigma$, $\eta = \iota(\sigma)$ is the supertype of all matching index types for $\sigma$.
+
+Constructing $\iota$ is unsurprising -- similar concepts often arise when generalising array-like structures, e.g.\@ \textit{containers} \cite{containers} or Naperian (representable) functors, which \textcite{naperian-apl} has found useful for statically modelling certain patterns of array programming. To the author's knowledge, neither of these have yet led to the key ideas present in Star.
 
 \begin{figure}
     \centering
@@ -291,14 +296,14 @@ Constructing $\iota$ is not so surprising -- similar concepts often arise when g
     \label{fig:iota}
 \end{figure}
 
-\paragraph{Splitting $\sigma$} Let us direct our attention to Star's array types, which have the syntax $\sarraytype{\sigma_1}{\sigma_2}{\tau}$ for $\sigma_1 \sub \sigma_2$. They are carefully constructed to provide \emph{useful} subtyping for array types, and follow a technique used by both \textcite{dolan-thesis} and \textcite{pottier-thesis} for typing mutable reference types. The crux is to split the shape $\sigma$ in $\sonebound{\sigma}\tau$ into a contravariant part $\sigma_1$ and covariant part $\sigma_2$, so that indexing uses $\sigma_1$, while accessing the shape returns a $\sigma_2$. With a simpler array type like $\sonebound{\sigma}\tau$ (which we write to abbreviate $\sarraytype{\sigma}{\sigma}{\tau}$) array types would have to be invariant.\todo[color=purple]{cite paper} Notice that by requiring $\sigma_1 \sub \sigma_2$ there is a $\sigma$ such that $\sigma_1 \sub \sigma \sub \sigma_2$: we have an \emph{actual} shape $\sigma$ into which we index with $\iota(\sigma_1) \sub \iota(\sigma)$, and when accessing the shape we only obtain one of type $\sigma_2 \super \sigma$.
+\paragraph{Splitting $\sigma$} Let us direct our attention to Star's array types, which have the syntax $\sarraytype{\sigma_1}{\sigma_2}{\tau}$ for $\sigma_1 \sub \sigma_2$. They are carefully constructed to provide \emph{useful} subtyping for array types, and follow a technique used by both \textcite{dolan-thesis} and \textcite{pottier-thesis} (which they use for typing mutable reference types). The crux is to split the shape $\sigma$ in $\sonebound{\sigma}\tau$ into a contravariant part $\sigma_1$ and covariant part $\sigma_2$, so that indexing uses $\sigma_1$, while accessing the shape returns a $\sigma_2$. With a simpler array type like $\sonebound{\sigma}\tau$ (which we write to abbreviate $\sarraytype{\sigma}{\sigma}{\tau}$) array types would have to be invariant.\todo[color=purple]{cite paper} Notice that by requiring $\sigma_1 \sub \sigma_2$ there is a $\sigma$ such that $\sigma_1 \sub \sigma \sub \sigma_2$: we have an \emph{actual} shape $\sigma$ into which we index with $\iota(\sigma_1) \sub \iota(\sigma)$, and when accessing the shape we only obtain one of type $\sigma_2 \super \sigma$.
 
 \paragraph{Broadcasting}
 Our presented subtyping order forms a distributive lattice, in line with algebraic subtyping. 
 This allows us to view as a meet in the lattices of both shape bounds and their types. 
-Indeed, $\vess' \broadcastsem \vess''$ (for shape values $\vess': \sigma'$, $\vess'' : \sigma''$) is a partial operator that finds the shape $\vess : \sigma$ for which $\sigma = \sigma' \meet \sigma''$ (where $\meet$ is the meet on types agreeing with $\sub$), so that for any index $v$: 
+Indeed, $\vess' \broadcastsem \vess''$ (for shape values $\vess': \sigma'$, $\vess'' : \sigma''$ of types $\sigma', \sigma''$) is a partial operator that finds the shape $\vess : \sigma$ for which $\sigma = \sigma' \meet \sigma''$ (where $\meet$ is the meet on types agreeing with $\sub$), so that for any index $v$: 
 $$ v \inbs \vess \iff v \inbs \vess' \text{ and } v \inbs \vess'' $$
-Hence, $\broadcast$ is the meet in a lattice spanned by the predicate $\inbs s$, and its result type takes the meet of shape types: clarifying how broadcasting finds `sub-shapes', as said in Section~\ref{subsec:array-shapes}.
+Hence, $\broadcast$ is the meet in a lattice spanned by the unary predicate $\_ \inbs s$, and its result type takes the meet of shape types: clarifying how broadcasting finds sub-shapes, as defined in Section~\ref{subsec:array-shapes}.
 
 \subsection{Type safety}
 \label{subsec:type-safety}
@@ -306,25 +311,25 @@ Hence, $\broadcast$ is the meet in a lattice spanned by the predicate $\inbs s$,
 To show my design of Star is well-behaved, I state and prove type safety for it in the form of theorems of Preservation and Progress (in the simply-typed case, as presented so far). In the statement of Progress we refer to $e \sterr$, which captures errors that can occur even for well-typed programs -- out-of-bounds \emph{integer} indexing and invalid broadcasting.
 
 \begin{theorem}[Preservation]
-    If $\Gamma \vdash e : \tau$ and $e \leadsto e'$, then $\Gamma \vdash e' : \tau$.
+    If \ $\Gamma \vdash e : \tau$ and $e \leadsto e'$, then $\Gamma \vdash e' : \tau$.
 \end{theorem}
 \begin{theorem}[Progress]
-    If $\cdot \vdash e : \tau$, then either $e$ is a value, $e \leadsto e'$ for some $e'$, or $e \leadsto \lightning$.
+    If \ $\cdot \vdash e : \tau$, then either $e$ is a value, $e \leadsto e'$ for some $e'$, or $e \leadsto \lightning$.
 \end{theorem}
 
-I prove these theorems in Appendix \ref{star-type-safety-proof}, but they follow straightforwardly by structural induction -- the key lemma is that we can show a notion of agreement between the subtyping relation $\sub$ and the structurally-in-bounds relation $\inbstr$.
+I prove these theorems in Appendix \ref{star-type-safety-proof}, but they follow straightforwardly by structural induction. The key lemma shows agreement between the subtyping relation $\sub$ and the structurally-in-bounds relation $\inbstr$.
 
 
 \subsection{Type inference \& polymorphism}
 \label{subsec:type-inference}
 
-It turns out that Star's subtyping relation both forms a distributive lattice, and $\iota$ forms a type lattice homomorphism.
+It turns out that Star's subtyping relation both forms a distributive lattice\todo{closure!}, and $\iota$ forms a type lattice isomorphism.
 Thus, we can apply the type inference framework developed in Chapter \ref{algebraic-subtyping}. 
 
 Though I do not give a complete description of a polymorphic Star calculus, I show a sketch of constraint generation for Star in Figure \ref{fig:star-type-constraints}.
 
 Extending Star with polymorphism enables a \emph{shape-polymorphic} programming style -- a generalisation of rank polymorphism in existing literature \cite{automap, sac-tensor-comprehensions}. 
-It is worth noting that shape polymorphism (when we exclude sized shapes) gives us index safety for free, akin to \textcite{theorems-for-free}.
+It is worth noting that shape polymorphism gives us index safety for free akin to \textcite{theorems-for-free} (modulo integer indices).
 
 Let us consider an example of type inference in action. Given the expression:
 $$ \color{red} \text{TODO: something with broadcasting?} $$

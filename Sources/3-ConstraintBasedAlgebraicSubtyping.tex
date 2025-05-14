@@ -1,12 +1,88 @@
+\newcommand{\mlsub}{\textsc{MLsub}}
+\newcommand{\simplesub}{\textsc{Simple-sub}}
+\newcommand{\mlstruct}{\textsc{MLstruct}}
+\newenvironment{example}{ %
+    \begin{tcolorbox}[ %
+        colback=blue!5!white, % 
+        colframe=blue!60!black, %
+        title=\textsc{Example} %
+    ] %
+}{ %
+    \end{tcolorbox} %
+}
+
 \chapter{Constraint-Based Algebraic Subtyping}
 \label{algebraic-subtyping}
 
+Part of the convenience of programming with dynamic typing is the absence of type annotations. 
+This comfort comes at a price -- we cannot ensure any safety guarantees at compile-time. 
+The aim of this thesis is to statically type languages with similar flexibility in mind. As such, we need to recover static types in the absence of annotations -- the mission statement of \textbf{type inference}.
+
+In this chapter, I explore the problem of type inference for languages with structural subtyping. In doing so, I follow Dolan's seminal thesis on \textbf{algebraic subtyping} -- a type inference technique in the presence of subtyping and (bounded) parametric polymorphism. Specifically, I contribute the following:
+\begin{itemize}
+    \item A \textbf{constraint-based type inference framework} -- \inference{} -- based on the current state-of-the-art in algebraic subtyping. The framework does not fix specific type or expression languages -- it sets out some requirements for them (the \textit{signature}) and operates on a \emph{constraint language}. The constraint-based description is simple and direct, though formal and close to the implementation. 
+    \item An extension of algebraic subtyping that supplements the type language with applications of \textbf{type lattice homomorphisms}, described for the framework. Using this extension, I give a method to statically type extensible records using algebraic subtyping -- a novel alternative to row polymorphism. 
+\end{itemize}
+
+We begin with background on type inference, including a review of the developments in algebraic subtyping (Section \ref{sec:background}). The rest of the chapter's contents are the description of the framework. Firstly, in Section \ref{sec:signature} I give a description of the \textbf{signature} of the source language -- the requirements on the type language. Afterwards, in Section \ref{sec:constraints} I give the language of \textbf{constraints} and show how to solve them and extract solutions. Finally, I state and conjecture the correctness theorems of the framework in Section \ref{sec:correctness}. 
+
+\begin{tcolorbox}[colback=blue!10!white,colframe=blue!60!black]
+To ease understanding, the technical text of this chapter will be interleaved with boxes like this one, containing examples of applying the framework to Featherweight Lua.
+\end{tcolorbox}
+
 \section{Background}
+\label{sec:background}
 
-\subsection{Related work}
+\subsection{Type inference}
 
-\section{Languages}
+\subsubsection{Polymorphism}
+
+\subsubsection{Constraint-based type inference}
+
+\subsection{Algebraic subtyping}
+
+\section{Signature}
+\label{sec:signature}
+
+We consider the external side of the framework -- the \emph{signature}, i.e.\@ the requirements it entails on the source language. All constructs described here are available as \textbf{data} upholding certain \textbf{laws} when we later describe constraints and how we solve them in Section~\ref{sec:constraints}.
+
+\subsection{Types}
+\label{subsec:types}
+
+\subsubsection{Type language}
+
+\subsubsection{Typing judgement}
+
+\subsubsection{Type schemes}
+
+\paragraph{Subsumption}
+
+\subsection{Expressions}
+\label{subsec:expressions}
 
 \section{Constraints}
+\label{sec:constraints}
+
+We now describe the constraint system used in \inference{}. In particular, we consider a simple constraint language (Section \ref{subsec:cstr-language}) and formulate a \mlstruct{}-inspired solver (Section \ref{subsec:cstr-solver}). 
+
+\subsection{Language}
+\label{subsec:cstr-language}
+
+\subsection{Solver}
+\label{subsec:cstr-solver}
+
+\subsubsection{Rewrites}
+
+\subsubsection{Normal forms}
+
+\subsubsection{Solutions}
+
+\section{Breaking records: Homomorphism extension}
+
+\section{Correctness}
+\label{sec:correctness}
 
 \section{Conclusions}
+\label{sec:conclusions}
+
+
