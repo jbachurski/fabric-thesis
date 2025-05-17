@@ -1,9 +1,10 @@
 \chapter{Structuring Arrays with Algebraic Shapes}
 \label{star}
 
-\textbf{Array programming} is a programming paradigm focusing on arrays as a fundamental data structure, stemming from Iverson's \emph{array programming model} \cite{apl}. It plays a key role in now widespread domains like machine learning and data science. In this paradigm, we operate on often multi-dimensional arrays of data, particularly taking advantage of data parallelism hiding within data processing tasks. 
+\textbf{Array programming} is a programming paradigm focusing on arrays as a fundamental data structure, stemming from Iverson's \emph{array programming model} \cite{apl}. It plays a key role in now widespread domains like machine learning and data science. In this paradigm, we operate on often multi-dimensional arrays of data, taking particular advantage of data parallelism hiding within many data processing tasks. 
 
 Array programming appears in multiple styles nowadays -- be it point-free (like MatLab, NumPy \cite{numpy}), pointful (like Dex \cite{dex}, Ein \cite{ein}), or combinator-based (like Futhark \cite{futhark}). Despite this variety, array programming lacks a satisfactory typing discipline that balances safety and usability. In fact, array type systems seem to come in one of two extremes: \begin{description}
+\color{red}
     \item[Nearly-untyped] ...
     \item[Dependently typed] ...
 \end{description}
@@ -339,7 +340,7 @@ $$ \text{TODO} $$
 \begin{figure}
     \centering
     \begin{align*}
-        \Huge \color{red} \texttt{T O D O}
+        \color{red} \texttt{\Huge T O D O}
     \end{align*}
     \caption{Constraint generation for the key constructs in Star in the developed type inference framework.}
     \label{fig:star-type-constraints}

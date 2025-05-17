@@ -113,7 +113,7 @@ We formalise this in the type system for the record calculus -- Featherweight Lu
 
 Clearly, \textbf{structural subtyping} is most relevant for modelling duck typing: most dynamically typed programs do not feature type definitions.\footnote{A note-worthy exception would be OOP-style class definitions, present in e.g.\@ Python.} I am mainly motivated by modelling objects in dynamic languages, following the tradition of \textcite{cardelli-multiple-inheritance}.
 
-Note that we use the name structural subtyping in the sense of subtyping in a structurally typed setting, like \textcite{} -- 
+Note that we use the name structural subtyping in the sense of subtyping in a structurally typed setting, like \textcite{dolan-thesis} or \textcite{cardelli-power-type} -- and not in the sense of the non-structural and structural split explored by e.g.\@ \textcite{subtyping-decidability}.
 
 I chose structural subtyping as the direction for my thesis -- we briefly consider two possible alternatives in the following subsections. I motivate this choice mainly by the recency -- relative to the plethora of work on structural subtyping from the 90s -- of the seminal work of \textcite{mlsub} on \emph{algebraic subtyping}, as it is directly applicable to languages with structural subtyping. It is thus the topic of Chapter \ref{algebraic-subtyping}.
 
@@ -194,7 +194,7 @@ Since FL's functions and bindings are entirely standard, we consider its records
 \begin{figure}
     \centering
     \input{Sources/2-Figures/FL-subtyping}
-    \caption{Declarative definition of the subtyping relation $\sub$ in Featherweight Lua, including on field types $\phi$. $\mathcal L(\tau)$~stands for the set of labels $\ell$ in the record type $\tau$. We define projection on record types,~$\flproj{\tau}{\ell} = \phi.$}
+    \caption{Declarative definition of the subtyping relation $\sub$ in Featherweight Lua, including on field types $\phi$. We define projection on record types,~$\flproj{\tau}{\ell} = \phi.$. Note that when deciding record subtyping we only need to check the defaults and occurring labels.}
     \label{fig:featherweight-lua-subtyping}
 \end{figure}
 
