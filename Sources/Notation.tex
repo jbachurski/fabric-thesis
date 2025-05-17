@@ -4,10 +4,11 @@
   \ifstrequal{#1}{B}{Common syntax}{%
   \ifstrequal{#1}{J}{Featherweight Java}{%
   \ifstrequal{#1}{L}{Featherweight Lua}{%
+  \ifstrequal{#1}{P}{Type inference}{%
   \ifstrequal{#1}{S}{Subtyping and the type lattice}{%
   \ifstrequal{#1}{T}{Constraint-based algebraic subtyping}{%
   \ifstrequal{#1}{Z}{Star}{%
-  }}}}}}}%
+  }}}}}}}}%
 ]}
 
 \newcommand{\newnotation}[4]{\nomenclature[#4]{#2}{#3}}
@@ -22,11 +23,18 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 \newnotation{var}{$x, y, z$}{Variable}{A010}
+\newnotation{tvar}{$\alpha, \beta, \gamma$}{Type variable}{A011}
 \newnotation{expr}{$e$}{Expression}{A020}
 \newnotation{type}{$\tau, \pi$}{Type}{A040}
 \newnotation{label}{$\ell$}{Record label}{A045}
 \newnotation{tag}{$T$}{Variant tag}{A046}
 \newnotation{env}{$\Gamma$}{Typing environment}{A050}
+
+\newcommand{\substx}[1]{\left[ #1 \right]}
+\newcommand{\subst}[2]{\left[ #1/#2 \right]}
+\newnotation{subst}{$\subst{e}{x}e$}{Substitution}{A060}
+\newcommand{\tsubst}[3]{\subst{#1}{#2}{#3}}
+\newnotation{tsubst}{$\subst{\tau}{\alpha}{\tau}$}{Type substitution}{A061}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % Common syntax
@@ -39,14 +47,14 @@
 \newcommand{\letbindx}[2]{\mathrm{let}\,{#1}={#2}}
 \newcommand{\fllet}[2]{\letbind{#1}{#2}}
 \newcommand{\flletx}[2]{\letbindx{#1}{#2}}
-\newnotation{fllet}{$\mathrm{let}$}{Let-binding}{B030}
+% \newnotation{fllet}{$\mathrm{let}$}{Let-binding}{B030}
 
 \newnotation{top}{$\top$}{Top type -- supertype of all types}{B048}
 \newnotation{bot}{$\bot$}{Bottom type -- subtype of all types}{B049}
 
 \newcommand{\lam}[1]{\lambda {#1} \ldotp}
 \newcommand{\fllam}[1]{\lam{#1}}
-\newnotation{fllam}{$\lambda$}{Function ($\lambda$ abstraction)}{B040}
+% \newnotation{fllam}{$\lambda$}{Function ($\lambda$ abstraction)}{B040}
 
 \newcommand{\rcd}[1]{\left\{ {#1} \right\}}
 \newnotation{flrec}{$\rcd{\cdots}$}{Record}{B050}
@@ -76,8 +84,8 @@
 
 \newnotation{flrectyp}{$\flext{\overline{\ell : \phi}}{\phi}$}{Record type}{L045}
 
-\newcommand{\flftop}{\boxed{\top}}
-\newcommand{\flfbot}{\boxed{\bot}}
+\newcommand{\flftop}{\top \!\!\!\! \top}
+\newcommand{\flfbot}{\bot \!\!\!\! \bot}
 \newnotation{flftop}{$\flftop$}{Top field type}{L048}
 \newnotation{flfbot}{$\flfbot$}{Bottom field type}{L049}
 
@@ -118,6 +126,20 @@
 \newnotation{fjclassdef}{$L$}{Class definition}{J040}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Type inference
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\newcommand{\asubst}{\psi}
+\newnotation{asubst}{$\asubst$}{Substitution, e.g.\@ in $\substx{\asubst} e = e$}{T010}
+
+\newcommand{\sch}{\sigma}
+\newnotation{sch}{$\sch$}{Type scheme}{T010}
+\newnotation{inst}{$\sigma \models \tau$}{Type scheme instantiation}{T011}
+
+\newcommand{\rec}[1]{\mu\,{#1}\ldotp}
+\newnotation{rec}{$\mu \alpha \ldotp \tau$}{Recursive type}{T020}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % Subtyping lattice
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
@@ -127,32 +149,44 @@
 \newcommand{\super}[0]{\geqslant}
 \newnotation{super}{$\super$}{Supertype}{S015}
 
+\newcommand{\constr}[0]{K}
+\newnotation{constr}{$\constr[\overline \tau]$}{Type constructor $\constr$ with type subterms $\overline \tau$}{S030}
+
+\newcommand{\cmeet}[0]{\sqcap}
+\newnotation{cmeet}{$\cmeet$}{Meet in the lattice of type constructors}{S031}
+
+\newcommand{\cjoin}[0]{\sqcup}
+\newnotation{cjoin}{$\cjoin$}{Join in the lattice of types constructors}{S032}
+
+\newcommand{\cdecomp}[0]{\lhd}
+\newnotation{cdecomp}{$\cdecomp$}{Decomposition of type constructor subtyping constraint}{S031}
+
 \newcommand{\meet}[0]{\land}
-\newnotation{meet}{$\meet$}{Meet in the lattice of types}{S030}
+\newnotation{meet}{$\meet$}{Meet in the lattice of types}{S035}
 
 \newcommand{\join}[0]{\lor}
-\newnotation{join}{$\super$}{Join in the lattice of types}{S035}
+\newnotation{join}{$\lor$}{Join in the lattice of types}{S036}
 
 \newcommand{\comp}[0]{\lnot}
-\newnotation{comp}{$\comp$}{Negation in the Boolean lattice of types}{S040}
+\newnotation{comp}{$\comp$}{Complement in the Boolean algebra of types}{S040}
 
 \newcommand{\subsume}[0]{\sub^\forall}
 \newnotation{subsume}{$\subsume$}{Subsumption of type schemes}{S050}
 
 \newcommand{\morph}{\zeta}
-\newnotation{morphism}{$\morph$}{Homomorphism in the type lattice}{S060}
+\newnotation{morphism}{$\morph$}{Homomorphism in the type algebra}{S060}
 
 \newcommand{\ladj}[1]{\overleftarrow{#1}}
-\newnotation{ladj}{$\protect\ladj{\morph}$}{Left adjoint of a lattice homomorphism}{S070}
+\newnotation{ladj}{$\protect\ladj{\morph}$}{Left adjoint of a type homomorphism}{S070}
 
 \newcommand{\radj}[1]{\overrightarrow{#1}}
-\newnotation{radj}{$\protect\radj{\morph}$}{Right adjoint of a lattice homomorphism}{S075}
+\newnotation{radj}{$\protect\radj{\morph}$}{Right adjoint of a type homomorphism}{S075}
 
 \newcommand{\ladjrest}[1]{\underline{\overleftarrow{#1}}}
-\newnotation{ladjrest}{$\protect\ladjrest{\morph}$}{Remainder of a left adjoint of a lattice homomorphism}{S080}
+\newnotation{ladjrest}{$\protect\ladjrest{\morph}$}{Remainder of a left adjoint of a type homomorphism}{S080}
 
 \newcommand{\radjrest}[1]{\underline{\overrightarrow{#1}}}
-\newnotation{radjrest}{$\protect\radjrest{\morph}$}{Remainder of a right adjoint of a lattice homomorphism}{S085}
+\newnotation{radjrest}{$\protect\radjrest{\morph}$}{Remainder of a right adjoint of a type homomorphism}{S085}
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -162,7 +196,7 @@
 \newnotation{constr}{$c$}{Constraint}{T3}
 \newnotation{constrctx}{$E$}{Constraint rewriting context}{T6}
 
-\newcommand{\und}[0]{\mathop{\&}}
+\newcommand{\und}[0]{\;\&\;}
 \newnotation{und}{$\comp$}{Conjunction of constraints}{T10}
 
 \newcommand{\tru}[0]{\mathbf T}

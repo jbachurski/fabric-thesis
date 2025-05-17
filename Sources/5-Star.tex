@@ -223,7 +223,7 @@ Successful executions eventually reduce to a value $v$ (Figure~\ref{fig:star-val
     \input{Sources/4-Figures/Star-opsem}
     \caption{
         Small-step operational semantics for Star. We write $e \step e'$ when $e$ reduces to $e'$.
-        Evaluation contexts $\evalctx$ are defined in Appendix \ref{star-type-safety-proof} -- I remark that we never evaluate under $\lambda$ or $\Phi$; but we evaluate expressions in $\sarrayval{s}{J}$.
+        Evaluation contexts $\evalctx$ are defined in Appendix \ref{extra:star-proofs} -- I remark that we never evaluate under $\lambda$ or $\Phi$; but we evaluate expressions in $\sarrayval{s}{J}$.
         Note that indexing and broadcasting may result in a \emph{stuck state}, and that if $v \inbs s$ holds, then $\scast v s$ is well-defined.
     }
     \label{fig:opsem}
@@ -256,7 +256,7 @@ I give a complete description of the type language in Figure~\ref{fig:types}, su
 I first focus on the typing of array shapes and indices.\todo[color=red]{records?}
 Afterwards, I state type safety for Star in Section \ref{subsec:type-safety}, and show how to apply the type inference framework from Chapter \ref{algebraic-subtyping} to Star in Section~\ref{subsec:type-inference}.
 
-% I use a standard presentation of record (and similar) types \cite{pierce-book} for Star, unlike FL (Chapter \ref{static-soul}).
+% I use a standard presentation of record (and similar) types \cite{tapl} for Star, unlike FL (Chapter \ref{static-soul}).
 
 \begin{figure}[p]
     \centering
@@ -317,7 +317,7 @@ To show my design of Star is well-behaved, I state and prove type safety for it 
     If \ $\cdot \vdash e : \tau$, then either $e$ is a value, $e \leadsto e'$ for some $e'$, or $e \leadsto \lightning$.
 \end{theorem}
 
-I prove these theorems in Appendix \ref{star-type-safety-proof}, but they follow straightforwardly by structural induction. The key lemma shows agreement between the subtyping relation $\sub$ and the structurally-in-bounds relation $\inbstr$.
+I prove these theorems in Appendix \ref{extra:star-proofs}, but they follow straightforwardly by structural induction. The key lemma shows agreement between the subtyping relation $\sub$ and the structurally-in-bounds relation $\inbstr$.
 
 
 \subsection{Type inference \& polymorphism}

@@ -95,7 +95,7 @@
   address   = "https://www.lua.org/manual/5.4/manual.html"
 }
 
-@book{pierce-book,
+@book{tapl,
   author       = {Benjamin C. Pierce},
   title        = {Types and Programming Languages},
   publisher    = {{MIT} Press},
@@ -104,6 +104,14 @@
   timestamp    = {Thu, 03 Feb 2011 10:51:35 +0100},
   biburl       = {https://dblp.org/rec/books/daglib/0005958.bib},
   bibsource    = {dblp computer science bibliography, https://dblp.org}
+}
+
+@book{adv-tapl, 
+  author = {Pierce, Benjamin C.}, 
+  title = {Advanced Topics in Types and Programming Languages}, 
+  year = {2004}, 
+  isbn = {0262162288}, 
+  publisher = {The MIT Press} 
 }
 
 @article{featherweight-java,
@@ -950,23 +958,6 @@
   bibsource    = {dblp computer science bibliography, https://dblp.org}
 }
 
-@inproceedings{theorems-for-free,
-  author       = {Philip Wadler},
-  editor       = {Joseph E. Stoy},
-  title        = {Theorems for Free!},
-  booktitle    = {Proceedings of the fourth international conference on Functional programming
-                  languages and computer architecture, {FPCA} 1989, London, UK, September
-                  11-13, 1989},
-  pages        = {347--359},
-  publisher    = {{ACM}},
-  year         = {1989},
-  url          = {https://doi.org/10.1145/99370.99404},
-  doi          = {10.1145/99370.99404},
-  timestamp    = {Wed, 14 Nov 2018 10:57:36 +0100},
-  biburl       = {https://dblp.org/rec/conf/fpca/Wadler89.bib},
-  bibsource    = {dblp computer science bibliography, https://dblp.org}
-}
-
 @article{constraint-based-hm,
   author       = {Martin Odersky and
                   Martin Sulzmann and
@@ -979,6 +970,166 @@
   year         = {1999},
   timestamp    = {Thu, 10 Sep 2020 14:37:52 +0200},
   biburl       = {https://dblp.org/rec/journals/tapos/OderskySW99.bib},
+  bibsource    = {dblp computer science bibliography, https://dblp.org}
+}
+
+@incollection{forsythe,
+  title         = {Design of the programming language Forsythe},
+  author        = {Reynolds, John C.},
+  booktitle     = {ALGOL-like languages},
+  pages         = {173--233},
+  year          = {1997},
+  publisher     = {Springer}
+}
+
+@article{intrinsic-extrinsic, 
+  title     = {The Meaning of Types From Intrinsic to Extrinsic Semantics}, 
+  volume    = {7}, 
+  url       = {https://tidsskrift.dk/brics/article/view/20167}, 
+  DOI       = {10.7146/brics.v7i32.20167}, 
+  number    = {32}, 
+  journal   = {BRICS Report Series}, 
+  author    = {Reynolds, John C.}, 
+  year      = {2000}, 
+  month     = {6} 
+}
+
+@inproceedings{integrating-nominal-and-structural,
+  author       = {Donna Malayeri and
+                  Jonathan Aldrich},
+  editor       = {Jan Vitek},
+  title        = {Integrating Nominal and Structural Subtyping},
+  booktitle    = {{ECOOP} 2008 - Object-Oriented Programming, 22nd European Conference,
+                  Paphos, Cyprus, July 7-11, 2008, Proceedings},
+  series       = {Lecture Notes in Computer Science},
+  volume       = {5142},
+  pages        = {260--284},
+  publisher    = {Springer},
+  year         = {2008},
+  url          = {https://doi.org/10.1007/978-3-540-70592-5\_12},
+  doi          = {10.1007/978-3-540-70592-5\_12},
+  timestamp    = {Tue, 21 Mar 2023 20:55:25 +0100},
+  biburl       = {https://dblp.org/rec/conf/ecoop/MalayeriA08.bib},
+  bibsource    = {dblp computer science bibliography, https://dblp.org}
+}
+
+@inproceedings{structural-refinement-types,
+  author       = {David Binder and
+                  Ingo Skupin and
+                  David L{\"{a}}wen and
+                  Klaus Ostermann},
+  title        = {Structural refinement types},
+  booktitle    = {TyDe '22: 7th {ACM} {SIGPLAN} International Workshop on Type-Driven
+                  Development, Ljubljana, Slovenia, 11 September 2022},
+  pages        = {15--27},
+  publisher    = {{ACM}},
+  year         = {2022},
+  url          = {https://doi.org/10.1145/3546196.3550163},
+  doi          = {10.1145/3546196.3550163},
+  timestamp    = {Sat, 30 Sep 2023 09:45:14 +0200},
+  biburl       = {https://dblp.org/rec/conf/icfp/BinderSLO22.bib},
+  bibsource    = {dblp computer science bibliography, https://dblp.org}
+}
+
+@phdthesis{pierce-thesis,
+  author = {Pierce, Benjamin Crawford},
+  title = {Programming with intersection types and bounded polymorphism},
+  year = {1992},
+  school = {Carnegie Mellon University},
+}
+
+@incollection{essence-of-ml-type-inference,
+    author = {Pottier, Fran{\c c}ois and Rémy, Didier},
+    isbn = {9780262281591},
+    title = {The Essence of ML Type Inference},
+    booktitle = {Advanced Topics in Types and Programming Languages},
+    publisher = {The MIT Press},
+    year = {2004},
+    month = {12},
+    doi = {10.7551/mitpress/1104.003.0016},
+    url = {https://doi.org/10.7551/mitpress/1104.003.0016},
+    eprint = {https://direct.mit.edu/book/chapter-pdf/2389924/9780262281591\_caj.pdf},
+}
+
+@article{bounded-quantification,
+  author       = {Luca Cardelli and
+                  Peter Wegner},
+  title        = {On Understanding Types, Data Abstraction, and Polymorphism},
+  journal      = {{ACM} Comput. Surv.},
+  volume       = {17},
+  number       = {4},
+  pages        = {471--522},
+  year         = {1985},
+  url          = {https://doi.org/10.1145/6041.6042},
+  doi          = {10.1145/6041.6042},
+  timestamp    = {Wed, 14 Nov 2018 10:31:46 +0100},
+  biburl       = {https://dblp.org/rec/journals/csur/CardelliW85.bib},
+  bibsource    = {dblp computer science bibliography, https://dblp.org}
+}
+
+@article{constraint-based-freeze-ml,
+  author       = {Frank Emrich and
+                  Jan Stolarek and
+                  James Cheney and
+                  Sam Lindley},
+  title        = {Constraint-based type inference for FreezeML},
+  journal      = {Proc. {ACM} Program. Lang.},
+  volume       = {6},
+  number       = {{ICFP}},
+  pages        = {570--595},
+  year         = {2022},
+  url          = {https://doi.org/10.1145/3547642},
+  doi          = {10.1145/3547642},
+  timestamp    = {Mon, 28 Aug 2023 21:30:21 +0200},
+  biburl       = {https://dblp.org/rec/journals/pacmpl/EmrichSCL22.bib},
+  bibsource    = {dblp computer science bibliography, https://dblp.org}
+}
+
+@article{linear-haskell,
+  author       = {Jean{-}Philippe Bernardy and
+                  Mathieu Boespflug and
+                  Ryan R. Newton and
+                  Simon Peyton Jones and
+                  Arnaud Spiwack},
+  title        = {Linear Haskell: practical linearity in a higher-order polymorphic
+                  language},
+  journal      = {Proc. {ACM} Program. Lang.},
+  volume       = {2},
+  number       = {{POPL}},
+  pages        = {5:1--5:29},
+  year         = {2018},
+  url          = {https://doi.org/10.1145/3158093},
+  doi          = {10.1145/3158093},
+  timestamp    = {Wed, 17 Feb 2021 08:54:09 +0100},
+  biburl       = {https://dblp.org/rec/journals/pacmpl/BernardyBNJS18.bib},
+  bibsource    = {dblp computer science bibliography, https://dblp.org}
+}
+
+@inproceedings{remy-extensible-records,
+  title={Efficient representation of extensible records},
+  author={R\'emy, Didier},
+  booktitle={Proceedings of the ACM SIGPLAN Workshop on ML and its applications},
+  pages={12--16},
+  year={1994}
+}
+
+@inproceedings{pizza-java,
+  author       = {Martin Odersky and
+                  Philip Wadler},
+  editor       = {Peter Lee and
+                  Fritz Henglein and
+                  Neil D. Jones},
+  title        = {Pizza into Java: Translating Theory into Practice},
+  booktitle    = {Conference Record of POPL'97: The 24th {ACM} {SIGPLAN-SIGACT} Symposium
+                  on Principles of Programming Languages, Papers Presented at the Symposium,
+                  Paris, France, 15-17 January 1997},
+  pages        = {146--159},
+  publisher    = {{ACM} Press},
+  year         = {1997},
+  url          = {https://doi.org/10.1145/263699.263715},
+  doi          = {10.1145/263699.263715},
+  timestamp    = {Tue, 06 Nov 2018 11:07:43 +0100},
+  biburl       = {https://dblp.org/rec/conf/popl/OderskyW97.bib},
   bibsource    = {dblp computer science bibliography, https://dblp.org}
 }
 

@@ -5,10 +5,10 @@
 
 This chapter both builds the motivation of this thesis, and introduces various key concepts -- such as nominal or structural (sub)typing -- that arise throughout the report.
 
-We begin by exploring characteristics of dynamically typed programs that we might like to type statically (Section \ref{sec:background}). I~propose for \textbf{duck typing} to be the key characteristic we should focus our attention on, and argue that \textbf{structural subtyping} is a solid approach for statically modelling this pattern. Afterwards, via the introduction of a \emph{translation} in Section \ref{sec:translations}, I ground intuitions about structural subtyping and its expressivity.
+We begin by exploring characteristics of dynamically typed programs that we might like to type statically (Section \ref{sec:ch2background}). I~propose for \textbf{duck typing} to be the key characteristic we should focus our attention on, and argue that \textbf{structural subtyping} is a solid approach for statically modelling this pattern. Afterwards, via the introduction of a \emph{translation} in Section \ref{sec:translations}, I ground intuitions about structural subtyping and its expressivity.
 
 \section{Background}
-\label{sec:background}
+\label{sec:ch2background}
 
 We first consider the meaning of \emph{dynamic} and \emph{static} typing.
 
@@ -61,10 +61,10 @@ Having identified duck typing as a crucial well-behaved pattern in dynamically-t
 
 \subsubsection{Structural subtyping}
 
-Duck typing leads us to a natural notion of \textbf{subtyping}: if a duck $a$ of type $A$ quacks, and another duck $b$ of type $B$ not only quacks but also walks -- then clearly $b$ can be used in any place $a$ can. A substitution principle holds: the type $B$ supports more operations than $A$, and thus $B$ is a subtype of $A$ -- we denote this $A \sub B$. When speaking of subtyping, we usually refer to its \emph{implicit} variety -- the language does not require an \emph{explicit} annotation every time we treat a type as its supertype.
+Duck typing leads us to a natural notion of \textbf{subtyping}: if a duck $a$ of type $A$ quacks, and another duck $b$ of type $B$ not only quacks but also walks -- then clearly $b$ can be used in any place $a$ can. A substitution principle holds: the type $B$ supports more operations than $A$, and thus $B$ is a subtype of $A$ -- we denote this $B \sub A$. When speaking of subtyping, we usually refer to its \emph{implicit} variety -- the language does not require an \emph{explicit} annotation every time we treat a type as its supertype.
 
 \needspace{1em}
-This is a good time to introduce a distinction between \textbf{nominal} and \textbf{structural} (static) typing \cite{pierce-book}: \begin{description}
+This is a good time to introduce a distinction between \textbf{nominal} and \textbf{structural} (static) typing \cite{tapl}: \begin{description}
     \item[Nominal] Most static type systems in popular programming languages are nominal: types are introduced via a type definition, where they are \emph{named} -- the type is then identified with (e.g.\@ compared by) this name. For example, the type systems in Java, C/C++, and Haskell are predominantly nominal.
     \item[Structural] On the other hand, a structural type system does not pose the requirement for a type to have a name nor a definition. A popular example of a structurally typed language would be TypeScript -- the statically typed dialect of JavaScript. 
 \end{description}
@@ -102,7 +102,7 @@ type opt = [ `None | `Some of int ]
 Intuitively, a nominally typed program can be transformed into a structurally typed one, and as such structurally typed programs are inherently more flexible -- we explore this in Section \ref{sec:translations}. 
 % This fundamental idea of \emph{anonymising types} by erasing their names is formally explored in the \textbf{translations} presented in Section \ref{sec:translations} on the languages we introduce in Section \ref{sec:languages}.
 
-We also introduce a similar distinction between nominal and structural \textbf{subtyping}: while in a language like Java subtyping is defined through the inheritance hierarchy (\fj{class C extends C}'\fj{ \{...\}}) -- on types with specific \emph{names} -- structural subtyping is instead defined in terms of the structure of the type. Structural subtyping naturally arises on records (and, similarly, variants) through the following two rules:\footnote{A traditional formal treatment is given by \textcite{pierce-book}. In this dissertation -- to express it more conveniently for algebraic subtyping in Chapter \ref{algebraic-subtyping} -- we use a slightly different approach with \emph{field types}.}
+We also introduce a similar distinction between nominal and structural \textbf{subtyping}: while in a language like Java subtyping is defined through the inheritance hierarchy (\fj{class C extends C}'\fj{ \{...\}}) -- on types with specific \emph{names} -- structural subtyping is instead defined in terms of the structure of the type. Structural subtyping naturally arises on records (and, similarly, variants) through the following two rules:\footnote{A traditional formal treatment is given by \textcite{tapl}. In this dissertation -- to express it more conveniently for algebraic subtyping in Chapter \ref{algebraic-subtyping} -- we use a slightly different approach with \emph{field types}.}
 \begin{description}
     \item[Width subtyping] A record is a subtype of another if it has more fields and the other are compatible, e.g.: $$ \{ \mathrm{foo} : \mathrm{int}, \mathrm{bar} : \mathrm{string} \} \sub \{ \mathrm{foo} : \mathrm{int} \} $$
     \item[Depth subtyping] A record is a subtype of another if its respective fields are subtypes, e.g.:
@@ -111,7 +111,9 @@ We also introduce a similar distinction between nominal and structural \textbf{s
 
 We formalise this in the type system for the record calculus -- Featherweight Lua -- in Section~\ref{subsec:featherweight-lua}.
 
-Clearly, \textbf{structural subtyping} is most relevant for modelling duck typing: most dynamically typed programs do not feature type definitions.\footnote{A note-worthy exceptions would be OOP-style class definitions, present in e.g.\@ Python.} I am mainly motivated by modelling objects in dynamic languages, following the tradition of \textcite{cardelli-multiple-inheritance}.
+Clearly, \textbf{structural subtyping} is most relevant for modelling duck typing: most dynamically typed programs do not feature type definitions.\footnote{A note-worthy exception would be OOP-style class definitions, present in e.g.\@ Python.} I am mainly motivated by modelling objects in dynamic languages, following the tradition of \textcite{cardelli-multiple-inheritance}.
+
+Note that we use the name structural subtyping in the sense of subtyping in a structurally typed setting, like \textcite{} -- 
 
 I chose structural subtyping as the direction for my thesis -- we briefly consider two possible alternatives in the following subsections. I motivate this choice mainly by the recency -- relative to the plethora of work on structural subtyping from the 90s -- of the seminal work of \textcite{mlsub} on \emph{algebraic subtyping}, as it is directly applicable to languages with structural subtyping. It is thus the topic of Chapter \ref{algebraic-subtyping}.
 
@@ -207,7 +209,7 @@ FL has only two type constructors -- usual functions and slightly-unusual record
 
 \begin{description}
     \item[Recursive types] Types $\tau$ in FL are generated coinductively, so that we have regular (equi)recursive types (everything else generated inductively as usual). This later allows us to statically type (object-oriented) open recursion -- a method calling other methods of the same class and accessing its attributes.
-    \item[Record field types] Instead of the usual width and depth subtyping rules for record subtyping, we instead consider record types $\flrec{\overline{\ell : \phi} \mid \phi'}$ as functions from labels $\ell$ into \emph{field types} $\phi$, which are unequal to the \emph{default} $\phi'$ at finitely many points, which are given by the list $\overline{\ell : \phi}$. This approach is convenient, as it generalises well to keeping track of absent fields (fillable by extension). It is also trivially compatible with the usual definition, like that of \textcite{pierce-book}, taking just present and top field types.
+    \item[Record field types] Instead of the usual width and depth subtyping rules for record subtyping, we instead consider record types $\flrec{\overline{\ell : \phi} \mid \phi'}$ as functions from labels $\ell$ into \emph{field types} $\phi$, which are unequal to the \emph{default} $\phi'$ at finitely many points, which are given by the list $\overline{\ell : \phi}$. This approach is convenient, as it generalises well to keeping track of absent fields (fillable by extension). It is also trivially compatible with the usual definition, like that of \textcite{tapl}, taking just present and top field types.
     \item[Record operations] A freshly constructed record has all its other fields absent by default, and projection does not constrain the rest of the record (it allows $\flftop$ fields). Note no record value has a $\flfbot$ field.
 \end{description}
 
@@ -254,7 +256,10 @@ Via the FL-FJ translation in Section \ref{sec:translations} we will see that, de
 \section{Anonymising types: FL-FJ translation}
 \label{sec:translations}
 
-To serve as groundwork for this thesis, I now build a formal understanding of the relationship between the nominal, structural, and dynamic typing disciplines. To this end, we consider a translation between the languages above -- from the nominally typed Featherweight Java into the structurally (statically) typed fragment of Featherweight Lua.
+To serve as groundwork for this thesis, I now build a formal understanding of the relationship between the nominal, structural, and dynamic typing disciplines. To this end, we consider a translation between the languages above -- from the nominally typed Featherweight Java into the structurally (statically) typed fragment of Featherweight Lua. 
+
+The translation follows long-known relationships between object-oriented programming and lambda calculus with records (summarised by e.g.\@ \textcite{pierce-thesis}) -- but focuses on relating nominal and structural typing rather than semantics.\todo{cite \cite{intrinsic-extrinsic}}
+
 
 \begin{figure}
     \centering
@@ -265,7 +270,7 @@ To serve as groundwork for this thesis, I now build a formal understanding of th
 
 \subsection{Construction}
 
-The translation is described formally in Figure \ref{fig:translation}, with some notational simplifications for brevity. The FJ notation is the same as in the original paper \cite{featherweight-java} (also see the Notation appendix), though its Java-like syntactic constructs should be familiar.
+The translation is described formally in Figure \ref{fig:translation}, with some notational simplifications for brevity. The FJ notation is the same as in the original paper \cite{featherweight-java} -- its Java-like syntactic constructs should be familiar.
 
 The translation follows directly by considering a \textbf{prototype-based} object-oriented programming style: we translate each class into a constructor $\fj C$ and the \emph{prototype} $\fj C_\mathrm{proto}$, holding all of the class's methods. Constructing a new class first calls the subclass constructor, and then extends the object with methods from the prototype and the class's fields.
 
@@ -276,18 +281,18 @@ Lastly, note that while FL's type system only allows absent record fields to be 
 
 \subsection{Correctness}
 
-We now state some theorems about the correctness of the translation.
+We now state and conjecture\todo{prove?} correctness criteria for the translation.
 
-\begin{theorem}[Preservation of typing]
+\begin{conjecture}[Preservation of typing]
     Typing of FJ expressions is preserved, so that if we have $\Gamma \vdash \fj e : \fj C$, then $\denoty{\Gamma} \vdash \denot{\fj e} : \denoty{\fj C}$. Furthermore, translations of FJ definitions yield FL terms with expected types:
     $$ \Gamma \vdash \denot{K}_{\fj C}^{\fj C'} : \denoty{K} \qquad \Gamma \vdash \denot{M}_{\fj C} : \denoty{M}_{\fj C} \qquad \Gamma \vdash \denot{L} : \denoty{L} $$
-\end{theorem}
+\end{conjecture}
 
-\begin{theorem}[Preservation of semantics]
-    If we have $\cdot \vdash \fj e : \fj C$ and $\fj e \step^* \fj v$, then $\denot{\fj e} \rightarrow^* \denot{\fj v}$.
-\end{theorem}
+\begin{conjecture}[Preservation of semantics]
+    If we have $\cdot \vdash \fj e : \fj C$ and $\fj e \step^* \fj v$, then $\denot{\fj e} \step^* \denot{\fj v}$.
+\end{conjecture}
 
-In the statement of these theorems, we implicitly assume a well-typed class table $\mathrm{CT}$ (as defined by \textcite{featherweight-java}) -- it is necessary both for types and semantics.
+In these statements, we implicitly assume a well-typed class table $\mathrm{CT}$ (as defined by \textcite{featherweight-java}) -- it is necessary both for types and semantics.
 
 Note that, as pointed out by \textcite{inheritance-subtyping}, inheritance is \emph{not} subtyping -- it does not follow that $\denoty{\fj C} \sub \denoty {\fj C'}$ for any class $\fj C$ that $\fj{extends C}'$.
 

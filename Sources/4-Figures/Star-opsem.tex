@@ -3,23 +3,23 @@
 % 
 % 
 (\slam{x}{e})\,v 
-&\leadsto [v/x]e 
+&\leadsto \subst{v}{x}{e} 
 & \textsc{StepApply} \\ 
 % 
 \slet{x}{v}{e} 
-&\leadsto [v/x]e 
+&\leadsto \subst{v}{x}{e}
 & \textsc{StepLet} \\ 
 % 
 \sproj{\srecordval{\overline{\ell = v_\ell}}}{\ell} &\leadsto v_\ell 
 & \textsc{StepRecordProj} \\
 % 
 \smatch{\stag{T}{v}}{T\,x\Rightarrow e \mid \cdots} 
-&\leadsto [v/x]e
+&\leadsto \subst{v}{x}{e}
 & \textsc{StepMatch} \\
 % 
 % \dfrac{\forall v : v \inbs \vess \ldotp  \leadsto^* w_v}{
 \sbuild{x}{\vess}{e} 
-&\leadsto \sarrayval{\vess}{\{ v \mapsto [v/x]e \mid v \inbsp \vess \}} 
+&\leadsto \sarrayval{\vess}{\{ v \mapsto \subst{v}{x}{e} \mid v \inbsp \vess \}} 
 & \textsc{StepArray} \\
 % 
 \sindex{\sarrayval{\vess}{I}}{v} 

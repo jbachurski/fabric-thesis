@@ -135,8 +135,8 @@
 % \newacronym{FL}{FL}{Featherweight Lua}
 % \newacronym{FJ}{FJ}{Featherweight Java}
 
-\makeindex
-\makeglossaries
+% \makeindex
+% \makeglossaries
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % Ordinals
@@ -161,6 +161,8 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 \newtheorem{theorem}{Theorem}[chapter]
+\newtheorem{proposition}{Proposition}[chapter]
+\newtheorem{conjecture}{Conjecture}[chapter]
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % Incipit
@@ -211,13 +213,12 @@
 \setcounter{chapter}{1}
 \appendix 
 
-\begingroup
-  \let\clearpage\relax
   \renewcommand{\nomname}{Notation}
   \printnomenclature
-\endgroup
 
-  \include{Sources/Appendix-Proof_of_Type_Safety_for_Star}
+  \include{Sources/Appendix-FJ-FL_Proofs}
+  \include{Sources/Appendix-FL-Constraints}
+  \include{Sources/Appendix-Star_Proofs}
 
 %TC:endignore 
 \end{document}
