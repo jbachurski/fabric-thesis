@@ -28,6 +28,8 @@
   \RequirePackage[utf8]{inputenc}
 \fi
 
+\RequirePackage{microtype}
+
 % Makes it possible to switch between different languages in the text
 % while keeping hyphenation rules correct. Should you add another one
 % in the list, please ensure that `english` is the last one. The last

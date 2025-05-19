@@ -18,6 +18,9 @@
 \newcommand{\irule}[3]{{\renewcommand\arraystretch{1.5} \begin{array}{ll} \textsc{#1} \\ \dfrac{\phantom| #2 \phantom|}{\phantom| #3 \phantom|}\end{array}}}
 \newcommand{\defeq}{\stackrel{\Delta}{=}}
 
+\newcommand{\ctx}[2]{{#1}\left\langle{#2}\right\rangle}
+\newcommand{\ctxhole}{\diamond}
+
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % Symbols
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -137,7 +140,7 @@
 \newnotation{inst}{$\sigma \models \tau$}{Type scheme instantiation}{T011}
 
 \newcommand{\rec}[1]{\mu\,{#1}\ldotp}
-\newnotation{rec}{$\mu \alpha \ldotp \tau$}{Recursive type}{T020}
+\newnotation{rec}{$\rec \alpha \tau$}{Recursive type, where variable $\alpha$ refers to entire type when occuring in $\tau$}{T020}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % Subtyping lattice
@@ -193,10 +196,18 @@
 % Constraints - algebraic subtyping
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-\newnotation{constr}{$c$}{Constraint}{T3}
-\newnotation{constrctx}{$E$}{Constraint rewriting context}{T6}
+\newnotation{constr}{$c$}{Constraint}{T03}
 
-\newcommand{\und}[0]{\;\&\;}
+\newcommand{\equivct}{E}
+\newcommand{\equivctx}{\ctx{\equivct}{\ctxhole}}
+\newnotation{equivctx}{$\equivctx$}{Type equivalence context}{T07}
+
+\newcommand{\solvect}{C}
+\newcommand{\solvectx}{\ctx{\solvect}{\ctxhole}}
+\newnotation{solvectx}{$\solvectx$}{Constraint solving context}{T08}
+
+\newcommand{\undsym}[0]{\&}
+\newcommand{\und}[0]{\;\undsym\;}
 \newnotation{und}{$\comp$}{Conjunction of constraints}{T10}
 
 \newcommand{\tru}[0]{\mathbf T}
@@ -252,7 +263,7 @@
 \newcommand{\srecordtype}[1]{\typecolor{\left\{{#1}\right\}}}
 \newcommand{\svarianttype}[1]{\typecolor{\left[{#1}\right]}}
 
-\newnotation{iota}{$\iota$}{Index of shape: upper bound on index type given shape type}{Z023}
+\newnotation{iota}{$\iota$}{Index for shape: upper bound on index type given shape type}{Z023}
 
 \newcommand{\stwobounds}[2]{\typecolor{\left[ {#1}{.}{.}{#2} \right]}}
 \newcommand{\sonebound}[1]{\typecolor{\left[ {#1} \right]}}
@@ -319,9 +330,9 @@
 \newcommand{\sproducttype}[1]{\shapetypecolor{\left\{\!\left|{#1}\right|\!\right\}}}
 \newcommand{\sconcattype}[1]{\shapetypecolor{\left\llbracket{#1}\right\rrbracket}}
 
-\newcommand{\evalct}[2]{{#1}\left\langle{#2}\right\rangle}
-\newcommand{\evalctx}{C\langle\Box\rangle}
-\newnotation{evalctx}{$\evalctx$}{Evaluation context -- with hole $\Box$ for substitution}{Z070}
+\newcommand{\evalct}{C}
+\newcommand{\evalctx}{\ctx{\evalct}{\ctxhole}}
+\newnotation{evalctx}{$\evalctx$}{Evaluation context}{Z070}
 
 \newcommand{\step}{\leadsto}
 \newcommand{\sterr}{\leadsto \lightning}

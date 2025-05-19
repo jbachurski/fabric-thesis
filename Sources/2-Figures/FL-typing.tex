@@ -19,11 +19,11 @@ $$
 \irule{FL-Typ-Cons}
     {\overline{\Gamma \vdash e_\ell : \tau_\ell}}
     {\Gamma \vdash \flrec{\overline{\ell = e_\ell}} : \flrec{\overline{\ell : \tau_\ell} \mid \flabsent}}
-\quad
+\;
 \irule{FL-Typ-Ext}
-    {\Gamma \vdash e : \flext{\ell^\star : \flabsent, \overline{\ell : \phi_\ell}}{\phi_\ell'}}
-    {\Gamma \vdash \flext{\ell^\star = e^\star}{e} : \flext{\ell^\star : \tau^\star, \overline{\ell : \phi_\ell}}{\phi_\ell'}}
-\quad
+    {\Gamma \vdash e : \flext{\ell' : \flabsent, \overline{\ell : \phi_\ell}}{\phi} \quad \Gamma \vdash e' : \tau'}
+    {\Gamma \vdash \flext{\ell' = e'}{e} : \flext{\ell' : \tau', \overline{\ell : \phi_\ell}}{\phi}}
+\;
 \irule{FL-Typ-Proj}
     {\Gamma \vdash e : \flrec{ \ell : \tau }}
     {\Gamma \vdash e : \tau}

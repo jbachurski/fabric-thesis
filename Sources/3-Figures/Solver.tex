@@ -1,0 +1,51 @@
+$$ \renewcommand\arraystretch{1.5} \begin{array}{cr}
+\dfrac{\tau_1 \equiv \tau_1' \quad \tau_2 \equiv \tau_2'}{\tau_1 \sub \tau_2 \to \tau_1' \sub \tau_2'} 
+& \text{(equivalence)}
+\\[4pt]
+\tru \und c \to c 
+& \text{(identity $\tru$ of $\undsym$)}
+\\
+\fals \und c \to \fals
+& \text{(annihilating $\fals$ of $\undsym$)}
+\\
+c \und (c' \und c'') \to (c \und c') \und c'' 
+& \text{(associative $\undsym$)}
+\\
+c \und c' \to c' \und c
+& \text{(commutative $\undsym$)}
+\\
+c \und c \to c
+& \text{(idempotent $\undsym$)}
+\\
+\exists \alpha \ldotp \tru \to \tru 
+\quad
+\exists \alpha \ldotp \fals \to \fals
+\quad
+(\exists \alpha \ldotp c) \und c' \to \exists \alpha \ldotp (c \und c')
+& \text{(homomorphism $\exists$ of $\undsym$)}
+\\
+\tau \sub \tau' \und \tau' \sub \tau'' \to (\tau \sub \tau' \und \tau' \sub \tau'') \und \tau \sub \tau'' 
+& \text{(transitivity)}
+\\
+T'\left[\overline {\tau'}\right] \sub T''\left[\overline {\tau''}\right] 
+\to T'\left[\overline {\tau'}\right] \triangleleft T''\left[\overline {\tau''}\right]
+& \text{(decomposition)}
+\\
+\comp \tau \sub \tau' \leftrightarrow \comp \tau' \sub \tau 
+& \text{(negation)}
+\\
+\tau \meet \tau' \sub \tau'' \to \tau \sub \comp \tau' \join \tau''
+\qquad
+\tau \sub \tau' \join \tau'' \to \tau \meet \comp \tau' \sub \tau''
+& \text{(swapping)}
+\\
+\tau' \join \tau'' \sub \tau \to \tau' \sub \tau \und \tau'' \sub \tau
+\qquad
+\tau \sub \tau' \meet \tau'' \to \tau \sub \tau' \und \tau \sub \tau''
+& \text{(splitting)} 
+\\[4pt]
+\dfrac{c \step c'}{C[c] \step C[c']}
+& \text{(congruence)} 
+\\
+\end{array} $$
+$$ \solvectx ::= \ctxhole \mid \solvectx \und c \mid c \und \solvectx $$
