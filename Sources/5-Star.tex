@@ -3,15 +3,13 @@
 
 \textbf{Array programming} is a programming paradigm focusing on arrays as a fundamental data structure, stemming from Iverson's \emph{array programming model} \cite{apl}. It plays a key role in now widespread domains like machine learning and data science. In this paradigm, we operate on often multi-dimensional arrays of data, taking particular advantage of data parallelism hiding within many data processing tasks. 
 
-Array programming appears in multiple styles nowadays -- be it point-free (like MatLab, NumPy \cite{numpy}), pointful (like Dex \cite{dex}, Ein \cite{ein}), or combinator-based (like Futhark \cite{futhark}). Despite this variety, array programming lacks a satisfactory typing discipline that balances safety and usability. In fact, array type systems seem to come in one of two extremes: \begin{description}
-\color{red}
-    \item[Nearly-untyped] ...
-    \item[Dependently typed] ...
+Array programming comes in multiple styles: point-free (e.g.\@ MatLab, NumPy~\cite{numpy}), pointful (Dex~\cite{dex}, Ein~\cite{ein}), or combinator-based (Futhark~\cite{futhark}). Despite this variety, array programming lacks a satisfactory typing discipline that balances safety and usability. Type systems seem to come in one of two extremes: \begin{description}
+    \item[Nearly-untyped] Often, arrays feature little to no types -- they might only describe the rank (number of dimensions) or element type. Examples include modern descendants of APL, like MatLab, NumPy~\cite{numpy} or PyTorch~\cite{pytorch}. This is the reality in most general-purpose and practically used array languages.
+    \item[Dependently typed] Research into array programming languages type systems has produced many dependently typed approaches -- where much of the power is used to statically model type-level arithmetic on sizes of arrays. Examples representing the paradigms above (in the same order) are: Remora~\cite{remora}, Dex~\cite{dex}, and the recent extensions to Futhark~\cite{futhark-size-dependent, futhark-size-dependent-towards}.
 \end{description}
 
-The array programming community is at an impasse -- we either have just simple array types, or have to reach for dependent types. My main contribution is the design of a novel calculus, \textbf{Star}, with a type system that provides useful and expressive types, while also admitting type inference. This development reveals a new area in the design space of array programming languages -- a middle-ground between basic and complicated type systems. 
-
-The key idea of Star is in line with the topic of this thesis -- to design array indices and shapes with \textbf{structural subtyping} in mind.
+The array programming community is at an impasse -- array types are either too simple, or we have to reach for dependent types. My main contribution towards a solution is the design of a novel calculus, \textbf{Star}. Its type system provides useful and expressive types, while admitting ML-style type inference.
+The key idea of Star follows my thesis: I designed its array indices and shapes with \textbf{structural subtyping} in mind.
 
 In this chapter, I describe the following contributions: \begin{itemize}
     \item A novel design for an array calculus – Star – which features subtyping and structural types for array shapes. I motivate it in Section \ref{sec:design} and elaborate in Section \ref{sec:calculus}.
@@ -254,7 +252,7 @@ Successful executions eventually reduce to a value $v$ (Figure~\ref{fig:star-val
 We now move on to Star's type system, which features novel aspects, matching the design of structural shape and index types. 
 I give a complete description of the type language in Figure~\ref{fig:types}, subtyping in Figure~\ref{fig:subtyping}, and the typing judgement in Figure~\ref{fig:typing}. 
 
-I first focus on the typing of array shapes and indices.\todo[color=red]{records?}
+I first focus on the typing of array shapes and indices.\todo[color=red]{FL-style records?}
 Afterwards, I state type safety for Star in Section \ref{subsec:type-safety}, and show how to apply the type inference framework from Chapter \ref{algebraic-subtyping} to Star in Section~\ref{subsec:type-inference}.
 
 % I use a standard presentation of record (and similar) types \cite{tapl} for Star, unlike FL (Chapter \ref{static-soul}).
@@ -309,7 +307,7 @@ Hence, $\broadcast$ is the meet in a lattice spanned by the unary predicate $\_ 
 \subsection{Type safety}
 \label{subsec:type-safety}
 
-To show my design of Star is well-behaved, I state and prove type safety for it in the form of theorems of Preservation and Progress (in the simply-typed case, as presented so far). In the statement of Progress we refer to $e \sterr$, which captures errors that can occur even for well-typed programs -- out-of-bounds \emph{integer} indexing and invalid broadcasting.
+To show my design of Star is well-behaved, I state and prove type safety for it in the form of theorems of Preservation and Progress (in the simply-typed case). Stating Progress we write $e \sterr$, which captures errors that can occur for well-typed programs -- out-of-bounds \emph{integer} indexing and invalid broadcasting.
 
 \begin{theorem}[Preservation]
     If \ $\Gamma \vdash e : \tau$ and $e \leadsto e'$, then $\Gamma \vdash e' : \tau$.
@@ -356,7 +354,9 @@ To display the features of Star and its elegance in expressing common array prog
 
 \section{Conclusions}
 
-I have presented a novel design for an array programming calculus, emphasising the use of structural types for array shapes. 
-Though I do not statically ensure bounds checking for \emph{integer} indices -- like dependent type systems -- I circumvent the problem by enabling the programmer to use richer structures for their arrays' shapes (and indices). 
-Thanks to this approach, it is much easier to provide useful static types to common array programming patterns. 
-My novel type system for Star fills the gap between dynamically and dependently typed array programming.
+I have presented a novel design for an array programming calculus, emphasising the use of structural types for shapes and indices. 
+Though I do not statically ensure bounds checking for \emph{integer} indices -- like dependent types -- I circumvent the problem by enabling the programmer to use richer structures for array shapes and indices. 
+This makes it much easier to provide useful static types to common array programming patterns. 
+
+My novel type system for Star fills the gap between dynamically and dependently typed array programming. Thus, I reveal a new area in the design space of array programming languages -- a middle-ground between basic and complicated type systems. 
+ 

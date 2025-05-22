@@ -26,7 +26,7 @@ Furthermore, the line between type checking and other kinds of checks is itself 
 Verifying that an index into an array is an integer is obviously known to be type checking.
 On the other hand, determining whether the index is out-of-bounds is generally thought not to be a type check -- even though it is handled as such in a dependent type system. 
 
-Hence, it is difficult say what dynamic language patterns we should attempt to type statically, and what type safety properties we should ensure. It is necessary to make some assumptions in order to proceed further.\todo{revise}
+Hence, it is difficult to say what dynamic language patterns we should attempt to type statically, and what type safety properties we should ensure. It is necessary to make some assumptions in order to proceed further.
 After all, the space of dynamically typed programs is extremely large -- but there are only so many interesting patterns hiding within.
 
 \needspace{6em}
@@ -34,7 +34,7 @@ After all, the space of dynamically typed programs is extremely large -- but the
 \label{subsec:runtime-type-checking}
 
 Let us distinguish two kinds of runtime type checking -- with the goal of identifying a well-behaving subset: \begin{description}
-    \item[Types as data] A value's type can be read and itself operated on as a value unique to the type. For example, both Python and Lua feature a \texttt{type} built-in function. Since the type becomes a runtime value, it can arbitrarily affect the data and control flow. 
+    \item[Types as data] A value's type can be read and itself operated on as a value \emph{unique to the type}. For example, both Python and Lua feature a \texttt{type} built-in function. Since the type becomes a runtime value, it can arbitrarily affect the data and control flow. 
     Branching on the type (e.g.\@ Python's \texttt{isinstance}) -- a common pattern in literature on \emph{set-theoretic types} -- also treats the type as data. 
     
     I exclude the principle of types as data, as it has the following conseqeuences: \begin{description}
@@ -115,7 +115,9 @@ Clearly, \textbf{structural subtyping} is most relevant for modelling duck typin
 
 Note that we use the name structural subtyping in the sense of subtyping in a structurally typed setting, like \textcite{dolan-thesis} or \textcite{cardelli-power-type} -- and not in the sense of the non-structural and structural split explored by e.g.\@ \textcite{subtyping-decidability}.
 
-I chose structural subtyping as the direction for my thesis -- we briefly consider two possible alternatives in the following subsections. I motivate this choice mainly by the recency -- relative to the plethora of work on structural subtyping from the 90s -- of the seminal work of \textcite{mlsub} on \emph{algebraic subtyping}, as it is directly applicable to languages with structural subtyping. It is thus the topic of Chapter \ref{algebraic-subtyping}.
+I chose structural subtyping as the direction for my thesis. I motivate this choice mainly by the recency -- relative to the plethora of work on structural subtyping from the 90s -- of the seminal work of \textcite{mlsub} on \emph{algebraic subtyping}, as it is directly applicable to languages with structural subtyping. It is thus the topic of Chapter \ref{algebraic-subtyping} and the basis for type systems of languages designed in Chapters \ref{fabric} and \ref{star}.
+
+We briefly consider two possible alternatives in the following subsections, which also represent the main areas of related work.
 
 \subsubsection{Alternative 1: Row polymorphism}
 
@@ -137,7 +139,7 @@ val f : [< `None | `Some of int ]
     \label{fig:ocaml-row-polymorphism}
 \end{figure}
 
-There is a common folklore trick for replacing subtype polymorphism -- as seen for objects/records above -- by an appropriate form of parametric polymorphism \cite{structural-subtyping-as-parameric-polymorphism}. For example, a function of type $\top \to \mathrm{int}$ -- where $\top$ is top, the supertype of any type -- could equivalently be given the type scheme $\forall \alpha \ldotp \alpha \to \mathrm{int}$, since $\alpha$ can be instantiated to any argument type.
+There is a common folklore trick for replacing subtype polymorphism (as for objects/records above) by an appropriate form of parametric polymorphism \cite{structural-subtyping-as-parameric-polymorphism}. For example, a function of type $\top \to \mathrm{int}$ -- where $\top$ is top, the supertype of any type -- could equivalently be given the type scheme $\forall \alpha \ldotp \alpha \to \mathrm{int}$, since $\alpha$ can be instantiated to any argument type.
 \textbf{Row polymorphism} \cite{remy-records}, introduced by \textcite{wand-rows} (more generally \emph{structural polymorphism} \cite{simple-structural-polymorphism}) -- can be seen as an application of this trick to structural record and variant types: we introduce \emph{row type variables} that stand for \enquote{the rest of the record}.
 % Width subtyping correspond to instantiation of row variables, while depth subtyping corresponds to nested instantations.
 
@@ -155,10 +157,10 @@ There is some recent work exploring the relationship between the two \cite{disjo
 With \textbf{set-theoretic types}, we extend the type language with operators corresponding to set operations:
 $$ \tau ::= \cdots \mid \tau \cup \tau \mid \tau \cap \tau \mid \lnot \tau $$
 These operators admit a set-theoretic interpretation -- they are exactly compatible with the sets of expressions (values) that have a given type $\tau$. 
-Under this interpretation, the set-inclusion relation naturally gives us a notion of subtyping, so that e.g.\@ $\tau \cap \tau' \sub \tau'$.
-Set-theoretic types are elegant, expressive, and have seen practical use \cite{set-theoretic-types-for-elixir, set-theoretic-types-for-erlang}. However, it is difficult to efficiently infer and simplify them, and type inference usually lacks \emph{principal types}, enjoyed by ML-style type inference (algebraic subtyping included \cite{mlstruct, castagna-dynamic}). 
+Under this interpretation, the set-inclusion relation naturally gives us a notion of subtyping (e.g.\@ $\tau \cap \tau' \sub \tau'$).
+Set-theoretic types are elegant, expressive, and have seen practical use \cite{set-theoretic-types-for-elixir, set-theoretic-types-for-erlang}. However, it is difficult to efficiently infer and simplify them, and type inference usually lacks \emph{principal types} \cite{polymorphic-set-theoretic-types, castagna-polymorphic-variants, castagna-dynamic}, enjoyed by ML-style type inference (algebraic subtyping included \cite{mlstruct, castagna-dynamic}). 
 
-Later, in algebraic subtyping\todo[color=green]{move?} -- a technique that builds on structural subtyping -- we rely on a type lattice construction featuring meets $\meet$ (least upper bounds) and joins $\join$ (greatest lower bounds). Though similar at first sight, the two approaches are subtly different \cite{mlstruct}: while $(\mathrm{int} \to \mathrm{int}) \cup (\mathrm{nat} \to \mathrm{nat})$ is as valid a type as any other, in the type lattice of MLsub \cite{mlsub} and MLstruct \cite{mlstruct} we have: $$(\mathrm{int} \to \mathrm{int}) \join (\mathrm{nat} \to \mathrm{nat}) = (\mathrm{int} \meet \mathrm{nat} \to \mathrm{int} \join \mathrm{nat}) = \mathrm{nat} \to \mathrm{int} $$
+Later, in algebraic subtyping, we rely on a type lattice construction featuring meets $\meet$ (least upper bounds) and joins $\join$ (greatest lower bounds). Though similar at first sight, the two approaches are subtly different \cite{mlstruct}: while $(\mathrm{int} \to \mathrm{int}) \cup (\mathrm{nat} \to \mathrm{nat})$ is as valid a type as any other, in the type lattice of MLsub \cite{mlsub} and MLstruct \cite{mlstruct} we have: $$(\mathrm{int} \to \mathrm{int}) \join (\mathrm{nat} \to \mathrm{nat}) = (\mathrm{int} \meet \mathrm{nat} \to \mathrm{int} \join \mathrm{nat}) = \mathrm{nat} \to \mathrm{int} $$
 While $\cup$ gives us a function type which preserves its argument's type, $\join$ only grants that the function must accept $\mathrm{nat}$ and only returns $\mathrm{int}$ (cf.\@ subtyping of functions).
 Hence, types no longer have a direct set-theoretic interpretation.\footnote{Note that type lattices exist where the equation does not hold, and that Dolan's system admits some set-theoretic-esque types like $\{\} \meet (\top \to \top)$ (though they can only be used as $\top$) where necessary for \emph{extensibility}.} It thus seems that set-theoretic types are at least as expressive as approaches based on algebraic subtyping, where types are constrained to just the ones in the defined lattice. To the author's knowledge, no formal relationship between the two has been established.
 
@@ -183,7 +185,7 @@ I construct FL as the simply-typed lambda calculus extended with extensible reco
 
 \subsubsection{Expressions}
 
-Since FL's functions and bindings are entirely standard, we consider its records and coercions:\todo{opsem?}
+Since FL's functions and bindings are entirely standard, we consider its records and coercions:\todo[color=green]{opsem?}
 \begin{description}
     \item[Records] Records can be constructed from a list of individual assignments, and individual fields can be projected. Since FL's records are extensible, we have a record extension operator, which, for an existing record lacking a given field, returns a new record with that field set.
     \item[Coercion] FL features a type coercion operator, which is a no-op at runtime. It is included as it plays a role in the FJ-FL translation later.
@@ -264,7 +266,7 @@ The translation follows long-known relationships between object-oriented program
 \begin{figure}
     \centering
     \input{Sources/2-Figures/FL-FJ}
-    \caption{The translation from Featherweight Java into the statically typed fragment of Featherweight Lua. We have translations for expressions $\denot{-} = e$ and types $\denoty{-} = \tau$. Translation of methods also preserves their name, so that they may be used as record labels. Translations of classes $\fj C$ make implicit use of the class table $\mathrm{CT}$, which is part of an FJ program. Since we know the list of fields $\fj C_\mathrm{proto}$, we can abuse notation and use it for extension (and do so in the translation of a constructor $K$).}
+    \caption{The translation from Featherweight Java into the statically typed fragment of Featherweight Lua. We have translations for expressions $\denot{-} = e$ and types $\denoty{-} = \tau$. Translation of a method preserves its name, so that it may be used as a label. Translations of classes $\fj C$ make implicit use of the class table $\mathrm{CT}$ (part of any FJ program). As we know the list of fields of $\fj C_\mathrm{proto}$, we slightly abuse record extension notation.}
     \label{fig:translation}
 \end{figure}
 

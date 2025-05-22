@@ -115,7 +115,7 @@
 \newcommand{\fj}[1]{\texttt{#1}}
 \newcommand{\fjoverline}[1]{$\overline{\mbox{#1}}$}
 
-\newcommand{\fjconsdef}{\fj{C(\fjoverline{C f}) \{ super($\overline{\fj{f}^*}$); \fjoverline{this.f' = f'';} \}}}
+\newcommand{\fjconsdef}{\fj{C(\fjoverline{C f}) \{ super($\overline{\fj{f}^*}$); \fjoverline{this.f'=f'';} \}}}
 \newcommand{\fjmethdefx}{\fj{C}^* \fj{ m(\fjoverline{C x})\{ ... \}}}
 \newcommand{\fjmethdef}{\fj{C}^* \fj{ m(\fjoverline{C x})\{ return e; \}}}
 \newcommand{\fjclassdef}{\fj{class C extends C' \{ \fjoverline{C f}; K; \fjoverline{M}; \}}}
@@ -145,6 +145,9 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % Subtyping lattice
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\newcommand{\typeq}[0]{\equiv}
+\newnotation{typeq}{$\typeq$}{Type equivalence under the Boolean algebra}{S000}
 
 \newcommand{\sub}[0]{\leqslant}
 \newnotation{sub}{$\sub$}{Subtype}{S010}
@@ -208,7 +211,7 @@
 
 \newcommand{\undsym}[0]{\&}
 \newcommand{\und}[0]{\;\undsym\;}
-\newnotation{und}{$\comp$}{Conjunction of constraints}{T10}
+\newnotation{und}{$\und$}{Conjunction of constraints}{T10}
 
 \newcommand{\tru}[0]{\mathbf T}
 \newnotation{tru}{$\tru$}{Always-true constraint}{T20}
@@ -216,14 +219,21 @@
 \newcommand{\fals}[0]{\mathbf F}
 \newnotation{fals}{$\fals$}{Always-false constraint}{T25}
 
+\newcommand{\cstreq}[0]{\cong}
+\newnotation{cstreq}{$\cstreq$}{Constraint equivalence under the Boolean algebra}{T29}
+
 \newcommand{\stepsto}[0]{\to}
 \newnotation{stepsto}{$\stepsto$}{Solver step}{T30}
 
-\newcommand{\progressesto}[0]{\rightsquigarrow}
-\newnotation{progressesto}{$\progressesto$}{Solver progress}{T33}
+\newnotation{solved}{$\mathcal S(c)$}{Constraint in solved form}{T31}
 
-\newcommand{\goesto}[0]{\rightarrowtriangle}
-\newnotation{goesto}{$\goesto$}{Solver return}{T36}
+
+
+% \newcommand{\progressesto}[0]{\rightsquigarrow}
+% \newnotation{progressesto}{$\progressesto$}{Solver progress}{T33}
+
+% \newcommand{\goesto}[0]{\rightarrowtriangle}
+% \newnotation{goesto}{$\goesto$}{Solver return}{T36}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % Fabric

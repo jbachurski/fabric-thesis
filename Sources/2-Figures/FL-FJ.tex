@@ -12,7 +12,7 @@
     \denoty{\overline{\fj x : \fj C}} &= \overline{\fj x : \denoty{\fj C}} \\
     \\
     \Aboxed{\denot{\fj K}_{\fj{C}}^{\fj{C}'} &= e} \\
-    \denot{\fjconsdef}_{\fj{C}}^{\fj{C}'} &= \flletx{\fj C}{\overline{\fllam{\fj f : \denoty{\fj C}}}\, \flext{\fj{\fjoverline{f' = f''}}, \fj C_\mathrm{proto}}{\fj{C'}\,\overline{\fj{f}^*}}}
+    \denot{\fjconsdef}_{\fj{C}}^{\fj{C}'} &= \flletx{\fj C}{\overline{\fllam{\fj f : \denoty{\fj C}}}\, \flext{\overline{\fj{f}'{=}\fj{f}''}, \fj C_\mathrm{proto}}{\fj{C'}\,\overline{\fj{f}^*}}}
     \\ \\
     \Aboxed{\denot{\fj M}_{\fj C} &= e} \\
     \denot{\fjmethdef}_{\fj C} &= \flletx{\fj m}{\fllam{\fj{this} : \denoty{\fj C}} \overline{\fllam{\fj x: \denoty{\fj C}}}\, \denot{\fj e}}
@@ -23,7 +23,7 @@
     \fj{Object}_\mathrm{proto}\,r &= r
     \\ \\
     \Aboxed{\denot{\fj e} &= e} \\
-    \denot{\fj x} &= \fj x \\
+    % \denot{\fj x} &= \fj x \\
     \denot{\fj {e.f}} &= \flproj{\denot{\fj e}}{\fj f} \\
     \denot{\fj {e.m(\fjoverline e)}} &= \fllet{x}{\denot{\fj e}} \flproj{x}{\fj m}\,x\,\overline{\denot{\fj e}} \\
     \denot{\fj {new C(\fjoverline e)}} &= \fj{C}\,\overline{\denot{\fj e}} \\

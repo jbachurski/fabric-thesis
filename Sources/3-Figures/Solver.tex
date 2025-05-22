@@ -1,3 +1,4 @@
+$$ \boxed{c \step c} $$
 $$ \renewcommand\arraystretch{1.5} \begin{array}{cr}
 \dfrac{\tau_1 \equiv \tau_1' \quad \tau_2 \equiv \tau_2'}{\tau_1 \sub \tau_2 \to \tau_1' \sub \tau_2'} 
 & \text{(equivalence)}
@@ -43,6 +44,11 @@ T'\left[\overline {\tau'}\right] \sub T''\left[\overline {\tau''}\right]
 \qquad
 \tau \sub \tau' \meet \tau'' \to \tau \sub \tau' \und \tau \sub \tau''
 & \text{(splitting)} 
+\\
+\tau' \sub \tau \und \tau'' \sub \tau \to \tau' \join \tau'' \sub \tau
+\qquad
+\tau \sub \tau' \und \tau \sub \tau'' \to \tau \sub \tau' \meet \tau''
+& \text{(combining)} 
 \\[4pt]
 \dfrac{c \step c'}{C[c] \step C[c']}
 & \text{(congruence)} 

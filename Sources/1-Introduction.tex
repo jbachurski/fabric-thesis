@@ -10,7 +10,7 @@ Thus, dynamic typing has become not only a matter of preference for higher expre
 
 \section{Strategy}
 
-The benefits of static typing are clear, and researching approaches to bestowing static typing on otherwise dynamically typed programs is a useful problem to resolve -- proven in practice by the success of TypeScript (JavaScript's typed dialect) or Python's optional typing system. 
+The benefits of static typing are clear, and researching approaches to bestowing static typing on otherwise dynamically typed programs is a useful problem to resolve -- as proven in practice by the success of TypeScript -- JavaScript's typed dialect -- or Python's optional typing system. 
 Obviously, not all dynamically typed programs can admit static typing under a reasonably complex type system. 
 Hence, we must consider what \textbf{characteristics} of dynamically typed programs we are interested in capturing, and what \textbf{properties} we desire from our static type system. 
 
@@ -28,7 +28,7 @@ The thesis follows the strategy proposed in the previous section, and is split i
 
 \subsubsection{Chapter \ref{static-soul}. Structural Subtyping: The Static Soul of Dynamic Languages.} 
 
-I identify \textbf{duck typing} as a powerful characteristic pattern applied in dynamically typed programs. I propose \textbf{structural subtyping} as the mechanism for modelling duck typing statically. 
+I identify \textbf{duck typing} as a powerful pattern characteristically applied in dynamically typed programs. I propose \textbf{structural subtyping} as the mechanism for modelling duck typing statically. 
 
 In need of a good model for a dynamic language, I introduce \textbf{Featherweight Lua} (FL) -- a simple $\lambda$ calculus with extensible records, following the tradition of object calculi \cite{abadi-cardelli-object-calculus}. I then give it a static type system with structural subtyping, capturing a \emph{well-behaved} subset of FL.
 
@@ -41,9 +41,9 @@ To truly model a dynamic language, we need to rid programs of type annotations. 
 \subsubsection{Chapter \ref{algebraic-subtyping}. Constraint-Based Algebraic Subtyping}
 
 By using the recently invented \textbf{algebraic subtyping} technique, I develop a general \textbf{type inference framework}, \inference{}, for languages with structural subtyping. 
-The framework builds on algebraic subtyping -- enabling ML-style type inference, combining subtyping with principal types and parametric polymorphism. 
+The framework builds on algebraic subtyping -- enabling ML-style type inference, combining subtyping with parametric polymorphism and principal types. 
 
-Furthermore, I show an extension of algebraic subtyping with \textbf{type lattice homomorphisms}. Using them, I show type inference for extensible records -- as present in FL -- without the usual need for extending the type system with row polymorphism.
+Furthermore, I show an extension of algebraic subtyping with \textbf{type algebra homomorphisms}. Using them, I show type inference for extensible records (as in FL) without the usual need for row polymorphism.
 
 The description of the type inference approach is \emph{independent} of specific expression and type languages. Instead, it is given in terms of a generic \textbf{constraint language} and \textbf{solver} and some requirements. 
 
@@ -58,8 +58,8 @@ I also investigate \fabric{}'s \textbf{implementation} as a general-purpose prog
 As part of \compiler{}, I give a prototype implementation of \inference{}. It features a dedicated constraint generation routine for \fabric{} (and thus FL) -- showcasing that the type inference approach is indeed independent of the specific language specification.
 
 \subsubsection{Chapter \ref{star}. Structuring Arrays with Algebraic Shapes}
-Inspired by the use of structural subtyping, I propose a novel statically typed calculus for array programming -- \textbf{Star}. 
+Inspired by structural subtyping, I propose a novel statically typed calculus for array  programming:~\textbf{Star}. 
 
 The standard in practical array programming has been to forgo types, with dependent type systems proposed as virtually the only options for static typing. I instead propose a middle-ground: \textbf{structural types for array shapes and indices}. These types help the programmer build abstractions and avoid menial index arithmetic. At the same time, Star also admits type inference using my framework.
 
-This chapter is based on a paper of the same name, which was written as part of the work on my thesis and coauthored with my supervisors. It was accepted for publication in the Proceedings of the 11th ACM ARRAY Workshop. 
+This chapter is based on a paper of the same name, written as part of work on my thesis and coauthored with my supervisors. It was accepted for publication in the Proceedings of the 11th ACM ARRAY Workshop. 
