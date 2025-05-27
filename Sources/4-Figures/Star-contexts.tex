@@ -1,0 +1,40 @@
+\begin{align*}
+\evalctx ::=&\, 
+\ctxhole
+\\ \mid&\, 
+\pi(\overline{v}, \evalctx, \overline{e})
+\\ \mid&\, 
+\slet{x}{\evalctx}{e}
+\\ \mid&\, 
+\evalctx\,e \mid v\,\evalctx
+\\ \mid&\, 
+\srecordval{\overline{\ell = v}, \ell = \evalctx, \overline{\ell = e}}
+\mid 
+\evalctx{.}\ell
+\\ \mid&\, 
+T\,\evalctx
+\mid 
+\smatch{\evalctx}{\overline{\mid T\,x\,\Rightarrow e}}
+\\ \mid&\, 
+\sbuild{x}{\evalctx}{e} 
+\\ \mid&\, 
+\sarrayval{s}{\{ v \mapsto \evalctx \} \cup J}
+\\ \mid&\, 
+\evalctx\left[ e \right]
+\mid
+v \left[ \evalctx \right] 
+\mid 
+\sshape{\evalctx}
+\\ \mid&\, 
+\# \evalctx
+\\ \mid&\, 
+\sproductval{\overline{\ell = v}, \ell = \evalctx, \overline{\ell = e}}
+\mid
+\sproductproj{\evalctx}{\ell} 
+\\ \mid&\, 
+\sconcatval{\overline{\ell = v}, \ell = \evalctx, \overline{\ell = e}}
+\mid 
+\sconcatproj{\evalctx}{T}
+\\ \mid&\, 
+\sbroadcast{\evalctx}{e} \mid \sbroadcast{v}{\evalctx}
+\end{align*}

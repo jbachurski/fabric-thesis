@@ -1,7 +1,40 @@
-\chapter{Proofs of Correctness for the FJ-FL~Translation}
+\chapter{Correctness of the FJ-FL~Translation}
 \label{extra:fj-fl-proofs}
 
 \section{Operational semantics for Featherweight Lua}
+
+The following is an operational semantics in the same style as for Star (Section \ref{subsec:semantics}).
+
+$$ \boxed{e \step e} $$
+\begin{align*}
+\fllet x v e &\step [v/x] e
+&\textsc{Let} \\
+(\fllam x e)\,v &\step [v/x]e
+&\textsc{App} \\
+\flext{\ell = e}{\flrec{\overline{\ell = v_\ell}}} &\step \flrec{\overline{\ell = v_\ell}, \ell = e} \quad \text{(if $\ell$ not in $\overline \ell$)}
+&\textsc{Ext} \\
+\flproj{\flrec{\overline{\ell = v_\ell}}}{\ell} &\step v_\ell
+&\textsc{Proj} \\
+\flcast{e}{\tau} &\step e 
+&\textsc{Cast}
+\end{align*}
+$$ \irule{Cong}{e \leadsto e'}{\ctx{\evalct}{e} \leadsto \ctx{\evalct}{e'}} $$
+
+Where we define evaluation contexts $\evalctx$ for the congruence rule:
+\begin{align*}
+\evalctx ::=&\, 
+\ctxhole
+\\ \mid&\, 
+\fllet{x}{\evalctx}{e}
+\\ \mid&\, 
+\evalctx\,e \mid v\,\evalctx
+\\ \mid&\, 
+\flrec{\overline{\ell = v}, \ell = \evalctx, \overline{\ell = e}}
+\\ \mid&\, 
+\flext{\ell = e}{\evalctx} \mid \flext{\ell = \evalctx}{v}
+\\ \mid&\, 
+\evalctx{.}\ell
+\end{align*}
 
 \section{Preservation of typing}
 

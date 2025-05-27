@@ -1,28 +1,28 @@
 \begin{align*}    
-    \Aboxed{\denoty{\fj K} &= \tau} \\
+    \Aboxed{\denoty{\fj K} &= \tau} & \makebox[0mm][r]{(constructor typing)} \\
     \denoty{\fjconsdef} &= \overline{\denoty{\fj C} \to {}} \denoty{\fj{C}} \\
     \\
-    \Aboxed{\denoty{\fj M}_{\fj C} &= x : \tau} \\
-    \denoty{\fjmethdefx} &= \fj m : \denoty{\fj C} \to \overline{\denoty{\fj C} \to {}} \denoty{\fj{C}^*} \\
+    \Aboxed{\denoty{\fj M}_{\fj C} &= x : \tau} & \makebox[0mm][r]{(method typing)} \\
+    \denoty{\fjmethdefx} &= \fj m : \denoty{\fj C} \to \overline{\denoty{\fj C} \to {}} \denoty{\fj{C}'} \\
     \\
-    \Aboxed{\denoty{\fj L} &= x : \tau} \\
+    \Aboxed{\denoty{\fj L} &= x : \tau} & \makebox[0mm][r]{(class definition typing)} \\
     \denoty{\fjclassdef} &= \fj C : \flrec{\overline{\fj{f}: \denoty{\fj{C}}}, \overline{\denoty{\fj M}}} \\
     \\
-    \Aboxed{\denoty{\Gamma_{\fj C}} &= \Gamma_\tau} \\
+    \Aboxed{\denoty{\Gamma_{\fj C}} &= \Gamma_\tau} & \makebox[0mm][r]{(environment)} \\
     \denoty{\overline{\fj x : \fj C}} &= \overline{\fj x : \denoty{\fj C}} \\
     \\
-    \Aboxed{\denot{\fj K}_{\fj{C}}^{\fj{C}'} &= e} \\
-    \denot{\fjconsdef}_{\fj{C}}^{\fj{C}'} &= \flletx{\fj C}{\overline{\fllam{\fj f : \denoty{\fj C}}}\, \flext{\overline{\fj{f}'{=}\fj{f}''}, \fj C_\mathrm{proto}}{\fj{C'}\,\overline{\fj{f}^*}}}
+    \Aboxed{\denot{\fj K}_{\fj{C}}^{\fj{C}'} &= e}  & \makebox[0mm][r]{(constructor)} \\
+    \denot{\fjconsdef}_{\fj{C}}^{\fj{C}'} &= \flletx{\fj C}{\overline{\fllam{\fj f : \denoty{\fj C}}}\, \flext{\overline{\fj{f}'{=}\fj{f}''}, \fj C_\mathrm{proto}}{\fj{C'}\,\overline{\fj{f}^\circ}}}
     \\ \\
-    \Aboxed{\denot{\fj M}_{\fj C} &= e} \\
+    \Aboxed{\denot{\fj M}_{\fj C} &= e} & \makebox[0mm][r]{(method)} \\
     \denot{\fjmethdef}_{\fj C} &= \flletx{\fj m}{\fllam{\fj{this} : \denoty{\fj C}} \overline{\fllam{\fj x: \denoty{\fj C}}}\, \denot{\fj e}}
     \\ \\
-    \Aboxed{\denot{\fj L} &= e} \\
+    \Aboxed{\denot{\fj L} &= e} & \makebox[0mm][r]{(class definition)} \\
     \denot{\fjclassdef} &= \flletx{\fj C}{\denot{\fj K}_{\fj C}^{\fj C'}} \\
     &\phantom{{}={}} \flletx{\fj{C}_\mathrm{proto}}{\flext{\overline{\denot{\fj M}_{\fj C}}}{\fj C'_\mathrm{proto}}} \\
     \fj{Object}_\mathrm{proto}\,r &= r
     \\ \\
-    \Aboxed{\denot{\fj e} &= e} \\
+    \Aboxed{\denot{\fj e} &= e} & \makebox[0mm][r]{(expression)} \\
     % \denot{\fj x} &= \fj x \\
     \denot{\fj {e.f}} &= \flproj{\denot{\fj e}}{\fj f} \\
     \denot{\fj {e.m(\fjoverline e)}} &= \fllet{x}{\denot{\fj e}} \flproj{x}{\fj m}\,x\,\overline{\denot{\fj e}} \\

@@ -1,6 +1,3 @@
-\newcommand{\mlsub}{\textsc{MLsub}}
-\newcommand{\simplesub}{\textsc{Simple-sub}}
-\newcommand{\mlstruct}{\textsc{MLstruct}}
 \newenvironment{example}{%
 \begin{tcolorbox}[%
     colback=blue!5!white,% 
@@ -15,16 +12,16 @@
 \label{algebraic-subtyping}
 
 Part of the convenience of programming with dynamic typing is the absence of type annotations. 
-This comfort comes at a price -- we cannot ensure any safety guarantees at compile-time. 
-The aim of this thesis is to statically type languages with similar flexibility in mind. As such, we need to recover static types in the absence of annotations -- to have \emph{implicit typing} \cite{remy-record-inference}). This is the mission statement of \textbf{type inference} \cite{tapl}.
+This comfort comes at a price -- we cannot ensure safety guarantees at compile-time. 
+The aim of this thesis is to statically type languages with similar flexibility in mind. As such, we need to recover static types in the absence of annotations -- to have \emph{implicit typing} \cite{remy-record-inference}. This is the mission statement of \textbf{type inference} \cite{tapl}.
 
 In this chapter, I explore the problem of type inference for languages with structural subtyping. In doing so, I follow Dolan's seminal thesis on \textbf{algebraic subtyping} -- a type inference technique in the presence of subtyping and (bounded) parametric polymorphism. Specifically, I contribute the following:
 \begin{itemize}
-    \item A \textbf{constraint-based type inference framework} -- \inference{} -- based on the current state-of-the-art in algebraic subtyping. The framework does not fix specific type or expression languages -- it sets out some requirements for them (the \textit{signature}) and operates on an intermediate \emph{constraint language}. The constraint-based description is simple and direct, though formal and close to the implementation. As such, it is a step towards understanding when we can apply algebraic subtyping in practice.
-    \item An extension of algebraic subtyping that supplements the type language with applications of \textbf{type lattice homomorphisms}, described for the framework. Using this extension, I give a method to statically type extensible records using algebraic subtyping -- a novel alternative to row polymorphism. 
+    \item A \textbf{constraint-based type inference framework} -- \inference{} -- based on the current state-of-the-art in algebraic subtyping. My framework does not fix specific type or expression languages -- it sets out some requirements for them (the \textit{signature}) and operates on an intermediate \emph{constraint language}. The constraint-based description is simple and direct, though formal and close to the implementation. As such, it is a step towards understanding when we can apply algebraic subtyping in practice.
+    \item An extension of algebraic subtyping that supplements the type language with \textbf{type lattice homomorphisms}, described for \inference{}. Using this extension, I give a method to statically type extensible records using algebraic subtyping -- a novel alternative to row polymorphism. Thus, I can infer types for Chapter \ref{static-soul}'s Featherweight Lua using \inference{}.
 \end{itemize}
 
-We begin with background on type inference, including our constraint-based setting and a review of the developments in algebraic subtyping (Section \ref{sec:ch3background}).The rest of the chapter's contents are the description of the framework. Firstly, in Section \ref{sec:signature} I give a description of the \textbf{signature} of the source language -- the requirements on the type language. Afterwards, in Section \ref{sec:constraints} I explain the \textbf{constraint solving} approach in \inference{}, and show the homomorphism extension in Section \ref{sec:morphisms}. Finally, I state and conjecture the correctness theorems of the framework in Section \ref{sec:correctness}. 
+We begin with background on type inference, including our constraint-based setting and a review of the developments in algebraic subtyping (Section \ref{sec:ch3background}). The rest of the chapter's contents are the description of the framework. Firstly, in Section \ref{sec:signature} I give a description of the \textbf{signature} of the source language -- the requirements on the type language. Afterwards, in Section \ref{sec:constraints} I explain the \textbf{constraint solving} approach in \inference{}, and show the homomorphism extension in Section \ref{sec:morphisms}. Finally, I state and conjecture the correctness theorems of the framework in Section \ref{sec:correctness}. 
 
 \begin{example}
     To ease understanding, the technical text of this chapter will be interleaved with boxes like this one, containing examples using Featherweight Lua (with some described extensions).
@@ -36,44 +33,43 @@ We begin with background on type inference, including our constraint-based setti
 Since this chapter concerns describing algebraic subtyping in the framework of constraint-based type inference, I explain these two concepts. We also set up the setting of the type inference problem we consider. 
 
 \subsection{Type inference}
-\emph{Type inference} (also called \emph{type reconstruction}), at its core, concerns determining the type $\tau$ of a given expression $e$ under an environment $\Gamma$, under some typing judgement $\Gamma \vdash e : \tau$.
+\emph{Type inference} (also called \emph{type reconstruction}), at its core, concerns determining the type $\tau$ of a given expression $e$ under an environment $\Gamma$ -- as given by the \emph{typing judgement} $\Gamma \vdash e : \tau$.
 
-\paragraph{Polymorphism \& type schemes} Type inference is straightforward in a \emph{simply-typed} setting. This is often unsatisfactory -- for instance, $\mathrm{id} =  \lambda x \ldotp x$ has type $\tau \to \tau$ for any type $\tau$.
+\paragraph{Polymorphism \& type schemes} Type inference is straightforward in a \emph{simply-typed} setting. This is often unsatisfactory -- for instance, $\mathrm{id} =  \lambda x \ldotp x$ has type $\tau \to \tau$ for any type $\tau$, but this is inexpressible at the object-level.
 This leads us to \textbf{parametric polymorphism}, where types contain type variables (denoted $\alpha, \beta, \gamma, \dots$), which can stand for any type. 
-In this setting, expressions are not only given a type $\tau$, but a \textbf{type scheme} $\sch$ which can be \textbf{instantiated} to a type $\tau$ (written $\sch \models \tau$). A type scheme stands for any of these instantiations, and we define a judgement $\Gamma \vdash e : \sigma$ for ascribing a type scheme:
-$$ \dfrac{\forall \tau \ldotp\; \sch \models \tau \implies \Gamma \vdash e : \tau}{\Gamma \vdash e : \sigma} $$
+In this setting, expressions are not only given a type $\tau$, but also a \textbf{type scheme} $\sch$ which can be \textbf{instantiated} to a type $\tau$ (written $\sch \models \tau$). We define a judgement $\Gamma \vdash e : \sigma$ for ascribing a type scheme if the expression is typed at any instantiation:
+$$ \dfrac{\forall \tau \ldotp\; \left( \sch \models \tau \implies \Gamma \vdash e : \tau \right)}{\Gamma \vdash e : \sigma} $$
 As expected, $\cdot \vdash \mathrm{id} : \forall \alpha \ldotp \alpha \to \alpha$.
 
 The classical solution to type inference under parametric polymorphism is through the Hindley-Milner (HM) type system, which relies on unifications to compute most-general type substitutions \cite{essence-of-ml-type-inference, tapl}. It underlies type systems of languages in the ML family.
 
-In this chapter, we will consider type inference in the presence of $F_\sub$-style \textbf{bounded} parametric polymorphism (in essence, \emph{bounded quantification} of \textcite{bounded-quantification}). Our type schemes $\sch$ have a form reminiscent of Java-style generics \cite{generic-java, simple-sub}:
-$$ \sch ::= \forall \overline{\tau \sub \alpha \sub \tau} \ldotp \tau $$
-where the body $\tau$ of $\sch$ must not contain unquantified type variables, and unspecified lower/upper bounds are presumed $\bot$/$\top$. 
-Instantiation $\models$ derives from a type assignment $\psi ::= \cdot \mid \tau/\alpha$, which satisfies the bounds for each free type variable $\alpha$. Writing $[\psi]\tau$ for a substitution in $\tau$ under $\psi$, we have:
-$$ \dfrac{\overline{[\psi]\tau_\alpha^+ \sub \substx{\psi} \alpha \sub [\psi]\tau_\alpha^-}}{\forall \overline{\tau_\alpha^+ \sub \alpha \sub \tau_\alpha^-} \ldotp \tau \models \substx{\psi}{\tau}} $$
-In particular, if $\sigma \models \tau$, then $\tau$ has no free type variables.
+In this chapter, we will consider type inference in the presence of $F_\sub$-style \textbf{bounded} parametric polymorphism (in essence, \emph{bounded quantification} of \textcite{bounded-quantification}). Our type schemes $\sch$ have a form reminiscent of Java-style generics \cite{generic-java, simple-sub}:\footnote{I denote the lower bound of $\tau^+$ and the upper bound $\tau^-$ -- matching how they occur under the polarity restriction in Section~\ref{subsec:algebraic-subtyping-background}. In \inference{}, these metavariables just stand for $\tau$.}
+$$ \sch ::= \forall \, \overline{\tau^+ \sub \alpha \sub \tau^-} \ldotp \tau $$
+where the body $\tau$ of $\sch$ must not contain unquantified type variables, and omitted lower/upper bounds are presumed $\bot$/$\top$. 
+Instantiation $\models$ derives from a type assignment $\psi ::= \cdot \mid \psi, \tau/\alpha$, which satisfies the bounds for each free type variable $\alpha$. Writing $[\psi]\tau$ for a substitution in $\tau$ under $\psi$, we have:
+$$ \dfrac{\overline{[\psi]\tau_\alpha^+ \sub \substx{\psi} \alpha \sub [\psi]\tau_\alpha^-}}{\left( \forall\, \overline{\tau_\alpha^+ \sub \alpha \sub \tau_\alpha^-} \ldotp \tau \right) \models \substx{\psi}{\tau}} $$
 
 \begin{example}
     We extend FL with bounded parametric polymorphism from here onwards. 
 
     Consider $e = \fllam x\, \flproj{x}{\mathrm{foo}}$. Then we have both 
-    $$ \cdot \vdash e : \forall \alpha, (\beta \sub \flrec{\mathrm{foo} : \alpha}) \ldotp \beta \to \alpha  \quad \text{and} \quad \cdot \vdash e : \underbrace{\forall  \alpha \ldotp \flrec{\mathrm{foo} : \alpha} \to \alpha}_\sigma $$
-    And we have that $\sigma \models \flrec{\mathrm{foo} : \sint} \to \sint$ at $\sint/\alpha$.
+    $$ \cdot \vdash e : \forall \alpha, (\beta \sub \flrec{\mathrm{foo} : \alpha}) \ldotp \beta \to \alpha  \quad \text{and} \quad \cdot \vdash e : \underbrace{\forall \alpha \ldotp \flrec{\mathrm{foo} : \alpha} \to \alpha}_\sigma $$
+    and we have that $\sigma \models \flrec{\mathrm{foo} : \sint} \to \sint$ at $\sint/\alpha$.
     
-    The existence of many valid type schemes points us to type scheme simplification -- here, we obtain the second type scheme by \emph{inlining} the bound on $\beta$ in the first. This is an important topic in type inference with subtyping, and one we consider at the end of Section \ref{subsec:simplification}.
+    The existence of multiple valid type schemes points us to type scheme simplification -- here, we obtain the second type scheme by \emph{inlining} the bound on $\beta$ in the first. This is an important topic in type inference with subtyping, and one we consider at the end of Section \ref{subsec:simplification}.
 \end{example}
 
 We shall allow bounds $\tau_\alpha^+$/$\tau_\alpha^-$ in type schemes to refer to other type variables, which naturally leads us to including recursive types in the type language.
-Specifically, we will consider type systems with \textbf{equirecursive types}, meaning they are infinite terms in the type language -- as opposed to isorecursive types, where recursive types are given by finite types which are (un)folded explicitly \cite{tapl}. We will write $\rec \alpha \tau$ for a type  such that instances of $\alpha$ are equal to the entire type.
+Specifically, we will consider type systems with \textbf{equirecursive types}, meaning they are infinite terms in the type language -- as opposed to isorecursive types, where recursive types are given by finite types which are (un)folded explicitly \cite{tapl}. We will write $\rec \alpha \tau$ for a type such that instances of $\alpha$ are equal to the entire type, i.e.\@ $\rec \alpha  \tau = \rec \alpha [\rec \alpha \tau/\alpha] \tau$.
 \begin{example}
     We further extend FL with equirecursive $\mu$ types. 
-    The type $\tau = \rec \alpha \top \to \alpha$ corresponds to the infinite type $\top \to (\top \to (\top \to \cdots)))$. Given $\cdot : e : \tau$ and $\cdot : e' : \top$ we have $\cdot : e\,e' : \tau$. Hence, $\tau$ is the type of a function that takes an infinite number of arguments.
+    The type $\tau = \rec \alpha \top \to \alpha$ corresponds to the infinite type $\top \to (\top \to (\top \to \cdots)))$. Given $\cdot \vdash e : \tau$ and $\cdot \vdash e' : \top$ we have $\cdot \vdash e\,e' : \tau$. Hence, $\tau$ is the type of a function that takes an unbounded number of arguments.
 \end{example}
 
 We define two more concepts useful for dealing with type schemes: \emph{subsumption} and \emph{principality} (minimality). We define that $\sigma'$ \textbf{subsumes} $\sigma$, written $\sigma \subsume \sigma'$, as follows:
 $$ \sigma \subsume \sigma' \iff \forall \tau \ldotp (\sigma \models \tau \impliedby \sigma' \models \tau) $$
-meaning that $\sigma'$ admits all the types that $\sigma$ does.
-Based on subsumption, we define the \textbf{principal} type scheme $\sigma$ for an expression $e$ as the one that subsumes all its other type schemes $\sigma'$ (it is minimal\footnote{When we take the preorder $\subsume$ on all type schemes $\sigma$ for which $\Gamma \vdash e : \sigma$.}), i.e.\@:
+meaning that $\sigma$ admits all the types that $\sigma'$ does.
+Based on subsumption, we define the \textbf{principal} type scheme $\sigma$ for an expression $e$ as one that subsumes all its other type schemes $\sigma'$ (it is minimal\footnote{Taking type schemes $\sigma$ for which $\Gamma \vdash e : \sigma$, the type scheme minimal under $\subsume$ subsumes them all, admitting the most types.}), i.e.\@:\todo{unique?}
 $$ \sigma\text{ principal} \iff \forall \sigma' \ldotp \left( \Gamma \vdash e : \sigma' \implies \sigma \subsume \sigma' \right) $$
 Subsumption can be seen as a generalisation of subtyping to type schemes.
 \begin{example}
@@ -83,11 +79,14 @@ $$    \sigma^+ = \forall \alpha, \beta \ldotp \alpha \to \beta
 \quad \sigma'' = \forall \alpha \ldotp \alpha \to \flrec{} 
 \quad \sigma^- = \flrec{} \to \flrec{} $$
 Then $\sigma^+ \subsume \sigma' \subsume \sigma^-$ and $\sigma^+ \subsume \sigma'' \subsume \sigma^-$, but neither $\sigma' \subsume \sigma''$ nor $\sigma'' \subsume \sigma'$. 
+
+Among the four, $\sigma^+$ is minimal with respect to subsumption.
 \end{example}
 
 \paragraph{Constraint-based approach} While type schemes let us describe the \emph{result} of type inference, we can use \textbf{constraints} to describe type inference \emph{problems}. To this end, we follow the approach outlined in \citetitle{essence-of-ml-type-inference} by \textcite{essence-of-ml-type-inference} (\textcite[Chapter~10]{adv-tapl}).
 
-This chapter will focus on constraint solving in the presence of subtyping, so we give an adequately simple constraint language in Figure \ref{fig:constraints} with only one predicate -- subtyping $\tau \sub \tau$, where types $\tau$ may contain type variables. We also feature constraint conjunction $c \und c$ and allow introducing existential variables $\exists \alpha \ldotp c$. The constraint satisfaction judgement $\psi \vdash c$ (where $\psi$ binds all free type variables in $c$) defined in Figure \ref{fig:satisfaction} gives a semantics to this syntax, specifying what variable assignments $\psi$ satisfy a given constraint $c$. In constraint solving nomenclature, we are dealing with a cylindric constraint system \cite{constraint-based-hm}. 
+This chapter will focus on constraint solving in the presence of subtyping, so we give an adequately simple constraint language in Figure \ref{fig:constraints} with only one predicate -- subtyping $\tau \sub \tau$, where types $\tau$ may contain type variables. We also feature constraint conjunction $c \und c$ and allow introducing existential variables $\exists \alpha \ldotp c$. The constraint satisfaction judgement $\psi \vdash c$ defined\footnote{... in the style of \textcite{constraint-based-freeze-ml}, with \emph{delayed} substitution: notice $\psi \vdash c \iff \cdot \vdash \substx \psi c$.} in Figure \ref{fig:satisfaction} gives a semantics to this syntax, specifying what variable assignments $\psi$ satisfy a given constraint $c$. 
+% In constraint solving nomenclature, we are dealing with a cylindric constraint system \cite{constraint-based-hm}. 
 
 \begin{figure}
     \centering
@@ -123,43 +122,45 @@ This chapter will focus on constraint solving in the presence of subtyping, so w
     \quad 
     \irule{CExist}{\psi, \tau/\alpha \vdash c}{\psi \vdash \exists \alpha \ldotp c}
     $$
-    \caption{Constraint satisfaction judgement $\psi \vdash c$, defined for a type variable assignment $\psi$ and constraint $c$. Note that $\psi \vdash \fals$ is false for any $\psi$ ($\fals$ signals failure of inference -- type errors), and $\psi \vdash \tru$ is true for any $\psi$.}
+    \caption{Constraint satisfaction judgement $\psi \vdash c$, defined for a type variable assignment $\psi$ and constraint $c$. Note that $\psi \vdash \fals$ is false for any $\psi$ ($\fals$ signals failure -- type errors), and $\psi \vdash \tru$ is true for any $\psi$. We~use the Barendregt convention to avoid accidental capture in \textsc{CExist}, and abbreviate $\overline {\exists \alpha}$ to $\exists \overline{\alpha}$.}
     \label{fig:satisfaction}
 \end{figure}
  
-To construct a type inference problem as a constraint $c$ from an expression $e$ in the source language and its expected type $\tau$, we use \textbf{constraint generation} $\denot{e : \tau} = c$. Crucially, we require it agrees with typing:\footnote{Some standard presentations instead modify the type-scheme judgement to involve constraints, i.e.\@ $c; \Gamma \vdash e : \sigma$ \cite{essence-of-ml-type-inference}. For simplicity of the presentation, we take specific instantiations $\substx \psi \tau$, closer to e.g.\@ \cite[Section 3.4]{constraint-based-freeze-ml}.}
-$$ \psi \vdash \denot{e : \tau} \iff \substx{\psi}\Gamma \vdash e : \substx \psi \tau $$
-
-Since in type inference we do not know the specific type $\tau$, we can introduce it as a free variable in a constraint $\denot{e : \alpha}$. Analogously, if an expression contains `type holes' (like unannotated types of function parameters) these can be filled with type variables and constrained appropriately \cite{tapl}.
+To construct a type inference problem as a constraint $c$ from an expression $e$ in the source language and its expected type $\tau$, we use \textbf{constraint generation} $\cstr{\Gamma}{e}{\tau}$. Crucially, it must agree with typing:\footnote{Some presentations modify the type-scheme judgement to involve constraints (like $c; \Gamma \vdash e : \sigma$) \cite{essence-of-ml-type-inference} or focus on constraint entailment instead of satisfaction \cite{constraint-based-hm}. For simplicity, we work with instantiations $\psi$, closer to e.g.\@ \cite[Section 3.4]{constraint-based-freeze-ml}.}
+$$ \psi \vdash \cstr{\Gamma}{e}{\tau} \iff \substx{\psi}\Gamma \vdash \substx{\psi}{e} : \substx \psi \tau $$
+Inferring types, we do not know the specific type $\tau$ -- but we can introduce as a free variable $\alpha$ and take $\cstr{\Gamma}{e}{\alpha}$. Analogously, if an expression contains `type holes' (like unannotated types of function parameters) these can be filled with type variables and constrained appropriately \cite{tapl}.
 
 \begin{example}
-    Consider $e = \fllam{x: \beta} \flproj{x}{\mathrm{quack}}\,\{\}$. Then we might have:
-    $$ \denot{e : \alpha} = \exists \gamma \ldotp \beta \sub \flrec{\mathrm{quack}: \gamma} \und \exists \delta \ldotp \gamma \sub \flrec{} \to \delta \und \delta \sub \alpha $$
+    Consider $e = \fllam{x: \alpha} \flproj{x}{\mathrm{quack}}\,\{\}$. Then we might have:
+    $$ \cstr{\cdot}{e}{\tau} = \exists \beta \ldotp (\alpha \sub \flrec{\mathrm{quack}: \beta}) \und \left( \exists \gamma \ldotp (\beta \sub \flrec{} \to \gamma) \und (\gamma \sub \tau) \right) $$
     where complete constraint generation for FL is defined in Appendix \ref{extra:fl-constraints}. Note that subtyping constraints and introduced type variables roughly follow the program dataflow \cite{mlsub}.
 
-    We will later see this constraint system can be rewritten to $\exists \gamma \ldotp \flrec{\mathrm{quack} : \flrec{} \to \gamma} \to \gamma \sub \alpha$, and hence $\cdot \vdash e : \forall \gamma \ldotp \flrec{\mathrm{quack} : \flrec{} \to \gamma} \to \gamma$.
-\end{example}\todo[color=green]{extra}
+    Later, we see that this constraint system can be rewritten to $\exists \beta \ldotp (\flrec{\mathrm{quack} : \flrec{} \to \beta} \to \beta) \sub \tau$, and hence $\cdot \vdash e : \forall \beta \ldotp \flrec{\mathrm{quack} : \flrec{} \to \beta} \to \beta$.
+\end{example}
 
-Lastly, we shall have \emph{constraint equivalence} $\cstreq$ such that:
+Lastly, we define \emph{constraint equivalence} $\cstreq$:
 $$ c \cstreq c' \iff  \forall \psi \ldotp \; (\psi \vdash c \iff \psi \vdash c') $$
 
-The description of \inference{} is given so that we could instantiate an existing constraint-based type inference framework like $\mathrm{HM}(X)$ of \textcite{constraint-based-hm}. Thus, we do not consider let-polymorphism (like \textcite{dolan-thesis} and \textcite{simple-sub} do algebraic subtyping) which $\mathrm{HM}(X)$ could yield \enquote{for free}.
+The description of \inference{} can be used to instantiate an existing constraint-based framework like $\mathrm{HM}(X)$ of \textcite{constraint-based-hm}. Hence, we do not consider let-polymorphism (like \textcite{dolan-thesis} and \textcite{simple-sub} do for algebraic subtyping), which $\mathrm{HM}(X)$ could yield \enquote{for free}.
 
 % It is worth noting here that this treatment of type inference is a bit different to the common Hindley-Milner type inference. There, we reason about unification and most general substitutions, but are also limited to an equality (rather than subtyping) predicate in constraints. Dolan's \emph{algebraic subtyping} (which we expand on in the next section) also reasoned about \emph{biunification} \emph{bisubstitutions}, more recent work moved towards a constraint-based approach, and this is the one we shall follow.
 
 \subsection{Algebraic subtyping}
+\label{subsec:algebraic-subtyping-background}
 
-Combining bounded parametric polymorphism with both principal type inference and decidability of type scheme subsumption proved to be a difficult problem, which led to a general distrust in implicit subtyping as part of language design \cite{mlstruct} -- so much so that research would avoid subtyping due to its problematic interaction with type inference (see e.g.\@ \cite[Section~3.5]{linear-haskell}). Seminal work in the area is by \textcite{pottier-thesis}, who set out a framework for type inference under subtyping, but did not reach a satisfactory solution. The problem was ultimately resolved by \textcite{dolan-thesis} in his thesis.
+Combining bounded parametric polymorphism with both principal type inference and decidability of type scheme subsumption historically proved to be a difficult problem, which led to a general distrust in implicit subtyping as part of language design \cite{mlstruct} -- so much so that research would avoid subtyping due to its problematic interaction with type inference (see e.g.\@ \cite[Section~3.5]{linear-haskell}). Seminal work in the area is by \textcite{pottier-thesis}, who set out a framework for type inference under subtyping, but did not reach a satisfactory solution. The problem was ultimately resolved by \textcite{dolan-thesis} in his thesis.
 
 \subsubsection{Original work (Dolan)}
-There are two (closely tied) core principles guiding Dolan's approach \cite[Section~1.3]{dolan-thesis}: \begin{description}
+\label{subsubsec:dolan}
+
+There are two (closely linked) core principles guiding Dolan's approach \cite[Section~1.3]{dolan-thesis}: \begin{description}
     \item[Extensibility] Dolan identified that a core problem in previous solutions was closed-world reasoning on the language of types \cite[Section~1.3.1]{dolan-thesis}. Thus, he requires \emph{extensibility}: that for considered type systems, extending their type language preserves typing of programs.
-    \item[Algebra before syntax] Furthermore, Dolan found that the previous focus on syntactic approaches to defining the type language and subtyping over it neglected ensuring these are well-behaved \cite[Section~1.3.2]{dolan-thesis}. Thus, he argued for an algebraic approach to constructing the type language. Indeed, extensibility motivated many of these algebraic properties \cite[Section~2.1.5]{dolan-thesis}.
+    \item[Algebra before syntax] Furthermore, Dolan found that focus on a syntactic approach to defining the type language has neglected ensuring subtyping is well-behaved \cite[Section~1.3.2]{dolan-thesis}. Thus, he argued for an algebraic approach to constructing the type language. Extensibility motivated many of the desired algebraic properties \cite[Section~2.1.5]{dolan-thesis}.
 \end{description}
 Using these principles and a careful formal treatment relying on abstract algebra, Dolan invented \mlsub{} -- a statically typed language with support structural subtyping, building on core ML, and boasting ML-style type inference with bounded parametric polymorphism and decidable type scheme subsumption.
 
 Two assumptions underlie \mlsub{} which enable its properties: subtyping forming a \textbf{distributive lattice}, and the \textbf{polarity restriction} of the type language. While Dolan uses an HM-like presentation to type inference (with \emph{bi}unification and \emph{bi}subsitution), I illustrate these assumptions in a constraint-based setting. \begin{description}
-    \item[Distributive lattice] While constructing a lattice of types for conveniently well-behaved subtyping relations was standard, Dolan found it crucial for the lattice to also be \emph{distributive} \cite[Section~3.2]{dolan-thesis}.\footnote{Looking ahead, \ref{fig:boolean-laws} lists the laws of a distributive lattice ($\mathsf L \cup \mathsf B$).} While his main motivation is to ensure subsumption is decidable, this is a useful assumption in general.
+    \item[Distributive lattice] While constructing a lattice of types for conveniently well-behaved subtyping relations was standard, Dolan found it crucial for the lattice to also be \emph{distributive} \cite[Section~3.2]{dolan-thesis}.\footnote{Looking ahead, Figure \ref{fig:boolean-laws} lists the laws of a distributive lattice ($\mathsf L \cup \mathsf B$).} While his main motivation is to ensure subsumption is decidable, this is a useful assumption in general.
     \item[Polarity restriction] Furthermore, Dolan uses a \emph{polar types} construction due to \textcite{pottier-thesis} \cite[Section~5.1]{dolan-thesis}. It means that we split the type language into positive $\tau^+$ and negative $\tau^-$ types -- corresponding to \emph{outputs} (for which we wish to give lower-bound on the type) and \emph{inputs} (dually: upper-bound). We then restrict joins and meets so that $\tau^+ ::= \cdots \mid \tau^+ \join \tau^+$ and $\tau^- ::= \cdots \mid \tau^- \meet \tau^-$,
     and also restrict type constructors so that polarities agree with their variance.\footnote{Covariance preserves polarity, but contravariance flips it: for functions, $\tau^+ ::= \cdots \mid \tau^- \to \tau^+$ and $\tau^- ::= \cdots \mid \tau^+ \to \tau^-$}
     
@@ -169,7 +170,7 @@ Two assumptions underlie \mlsub{} which enable its properties: subtyping forming
         \tau \sub \tau' \join \tau'' \iff \tau \sub \tau' \text{ and } \tau \sub \tau''
     \end{align*}
 
-    A practical consequence of the polarity restriction is that we cannot type functions as $\alpha \to \alpha \meet \beta$ -- i.e.\@ ones \enquote{strengthening} the type of a value. The assumption was thus too restrictive for my approach to typing extensible records, and I chose to look for follow-up work. 
+    A practical consequence of the polarity restriction is that we cannot type functions as $\alpha \to \alpha \meet \beta$ -- i.e.\@ ones \enquote{strengthening} the type of a value. The assumption was thus too restrictive in my view for typing extensible records, and I chose to look for follow-up work that loosens it. 
 \end{description}
 
 % \color{red}
@@ -188,7 +189,7 @@ Two assumptions underlie \mlsub{} which enable its properties: subtyping forming
         \flext{\mathrm{quack} : \top, \mathrm{walk} : \flrec{}}{\flabsent} \meet \flext{\mathrm{quack} : \top \to \top}{\flftop} &= \flext{\mathrm{quack}: \top \to \top, \mathrm{walk}: \flrec{}}{\flabsent} \\ 
         \flrec{\mathrm{foo}: \flrec{}} \join (\top \to \top) &= \top
     \end{align*}
-\end{example}\todo[color=green]{extra}
+\end{example}
 
 % \paragraph{Polarity restriction} The polarity restriction (used by both \textcite{dolan-thesis} and \textcite{pottier-thesis}) splits types $\tau$ into positive types $\tau^+$ and negative types $\tau^-$, so that we only consider subtyping constraints of form $\tau^+ \sub \tau^-$. Intuitively, positive types are used for \emph{outputs} (thus, we use them as a lower bound, e.g.\@ a function's result), while negative types are used for \emph{inputs} (upper bounds, e.g.\@ function's argument).
 
@@ -210,6 +211,7 @@ Two assumptions underlie \mlsub{} which enable its properties: subtyping forming
 % \paragraph{Formal treatment} Dolan's techniques revolved around the use of abstract algebra to prove the correctness of his techniques. For type inference itself, he parted with Pottier's constraint-oriented methods, and instead used biunification and bisubstitutions -- generalisation of standard notions in Hindley-Milner type inference to a setting with subtyping \cite{tapl, dolan-thesis}. 
 
 \subsubsection{Later work (Parreaux, Chau)}
+\label{subsubsec:parreaux}
 
 % \subsubsection{Later work}
 % The name \textbf{algebraic subtyping} refers to these restrictions and techniques that Dolan invented, but this report also uses the name for closely related methods which followed, particularly due to \textcite{simple-sub} (\simplesub{}) and \textcite{mlstruct} (\mlstruct{}). These methods are connected, particularly by assumptions about the subtyping order forming a well-behaved algebra of types. We now explain the significance of their work as expanding on Dolan.
@@ -219,8 +221,8 @@ Two assumptions underlie \mlsub{} which enable its properties: subtyping forming
 
 While Dolan's work is foundational to this line of work, the approach in \inference{} is more closely descended from follow-up work: \simplesub{} of \textcite{simple-sub}, and \mlstruct{} of \textcite{mlstruct}. I highlight the following developments and their relation to my work: \begin{description}
     \item[Constraint graphs] \textcite{simple-sub} found that the \emph{biunification} approach Dolan uses can be difficult to implement and extend. He proposes an alternative approach in \simplesub{} that relies on explicitly introducing subtyping constraints and imperatively updating a \emph{constraint graph}. I also do not use Dolan's biunification (due to the next point), but my method does not rely on mutation.\footnote{While it is arguably a stylistic choice, purity seems to make the implementation easier to reason about.}
-    \item[Boolean algebra] In Parreaux's constraint graph setting, \textcite{mlstruct} propose \mlstruct{}, featuring \emph{complement (negation) types} and removal of the polarity restriction. They use \simplesub{}-like constraint solving by requiring complements (with meets and joins) to form a \emph{Boolean algebra}\footnote{A bounded, distributive and complemented lattice.}. My approach to constraint solving directly inherits from theirs. However, I attempt to clarify that negations are only added to the type language as a \emph{free extension} of the distributive lattice of type constructors, and explain why they are a safe addition (Section~\ref{subsec:oh-god-complements}).
-    \item[Non-extensibility] For Dolan, extensibility also means that \enquote{useless} types like $(\alpha \to \beta) \join \flrec{\ell : \gamma}$ should not be \emph{equal} to $\top$ \cite[Section~1.4.1]{dolan-thesis} -- even though they can only be eliminated as such. \textcite{mlstruct} disagree with this consequence (but not others, e.g.\@ distributivity), arguing that provides better user experience and eases constraint solving. I also simplify such types, but do not share their scepticism of extensibility \cite{simple-sub}, agreeing with Dolan that it is an important principle. 
+    \item[Boolean algebra] In Parreaux's constraint graph setting, \textcite{mlstruct} propose \mlstruct{}, featuring \emph{complement (negation) types} and removal of the polarity restriction. They use \simplesub{}-like constraint solving by requiring complements (with meets and joins) to form a \emph{Boolean algebra}\footnote{A bounded, distributive and complemented lattice -- see Figure \ref{fig:boolean-laws} as reference.}. My approach to constraint solving directly inherits from theirs. However, I attempt to clarify that negations are only added to the type language as a \emph{free extension} of the distributive lattice of type constructors, and explain why they are a safe addition (Section~\ref{subsec:oh-god-complements}).
+    \item[Non-extensibility] For Dolan, extensibility also means that \enquote{useless} types like $(\alpha \to \beta) \join \flrec{\ell : \gamma}$ should not be \emph{equal} to $\top$ \cite[Section~1.4.1]{dolan-thesis} -- even though they can only be eliminated as such. \textcite{mlstruct} do not follow this consequence of extensibility (but not others, e.g.\@ distributivity), arguing that provides better user experience and eases constraint solving. I also do so, but do not share their scepticism of extensibility \cite{simple-sub}, agreeing with Dolan that it is an important principle. 
 \end{description}
 
 \section{Signature}
@@ -321,7 +323,7 @@ where the resulting constraints contain structurally smaller type constructors.\
 
 \subsection{Type language}
 
-With the necessary structure of type constructors, we describe the syntax of types itself (Figure \ref{fig:signature-types}). Following \textcite{mlstruct}, we define it so that it forms the free Boolean algebra over type constructors and variables\footnote{Like \textcite{dolan-thesis}, our variables are \emph{opaque} in the lattice -- we do not make a closed-world assumption about their possible values.}. This algebra satisfies Boolean algebra laws and the laws of the type constructor lattice (Figure \ref{fig:boolean-laws}) under type equivalence $\tau \equiv \tau$.\footnote{Following this, the algebra of types is free extension of the algebra of type constructors with variables and complements.} As a coherence condition, subtyping $\sub$ must agree with the type algebra and the typing judgement:
+With the necessary structure of type constructors, we describe the syntax of types itself (Figure \ref{fig:signature-types}). Following \textcite{mlstruct}, we define it so that it forms the free Boolean algebra over type constructors and variables\footnote{Like \textcite{dolan-thesis}, our variables are \emph{opaque} in the lattice -- we do not make a closed-world assumption about their possible values.}. This algebra satisfies Boolean algebra laws and the laws of the type constructor lattice (Figure \ref{fig:boolean-laws}) under type equivalence $\tau \equiv \tau$.\footnote{Following this, the algebra of types is free extension of the algebra of type constructors with variables and complements.} For coherence, subtyping $\sub$ must agree with the type algebra and the typing judgement:
 $$ \begin{array}{c}
    \tau \sub \pi \iff \tau \typeq \tau \meet \pi \iff \pi \typeq \tau \join \pi \\[5pt]
    \dfrac{\Gamma \vdash e : \tau \quad \tau \sub \tau'}{\Gamma \vdash e : \tau'}
@@ -329,12 +331,12 @@ $$ \begin{array}{c}
 
 \subsection{Inclusion of complement types} 
 \label{subsec:oh-god-complements}
-Complement (or negation) types are a somewhat controversial addition in a type system. However, following \textcite{mlstruct}, our complement types have algebraic foundation, as opposed to a set-theoretic one. The two have different interpretations of subtyping:\footnote{The algebraic interpretation follows by: $\pi \sub \comp \tau \implies \pi \meet \tau \sub \tau \meet \comp \tau \implies \pi \meet \tau \sub \bot$, and $\pi \meet \tau \sub \bot \implies (\pi \meet \tau) \join \comp \tau \sub \comp \tau \implies (\pi \join \comp \tau) \meet (\pi \join \comp \tau) \sub \comp \tau \implies (\pi \join \comp \tau) \meet \top \sub \comp \tau \implies \pi \join \comp \tau \sub \comp \tau \implies \pi \sub \comp \tau$.}
+Complement (or negation) types are a somewhat controversial addition in a type system. However, following \textcite{mlstruct}, our complement types have algebraic foundation, as opposed to a set-theoretic one. The two have different interpretations of subtyping, denoted $\comp$ and $\dot \comp$:\footnote{The algebraic interpretation follows by: $\pi \sub \comp \tau \implies \pi \meet \tau \sub \tau \meet \comp \tau \implies \pi \meet \tau \sub \bot$, and $\pi \meet \tau \sub \bot \implies (\pi \meet \tau) \join \comp \tau \sub \comp \tau \implies (\pi \join \comp \tau) \meet (\pi \join \comp \tau) \sub \comp \tau \implies (\pi \join \comp \tau) \meet \top \sub \comp \tau \implies \pi \join \comp \tau \sub \comp \tau \implies \pi \sub \comp \tau$.}
 \begin{align*}
     \pi \sub \dot \comp \tau \;&\iff \text{not } \pi \sub \tau & \text{(set-theoretic)} \\
     \pi \sub \comp \tau \;&\iff \pi \meet \tau \sub \bot & \text{(algebraic)} 
 \end{align*}
-Set-theoretic-like complement types notoriously make constraint solving harder, smuggling negations into the underlying logic of constraint satisfaction. On the other hand, our algebraic complement types provide a weaker condition, but will be of great help to constraint solving -- as we explore in Section \ref{fig:constraints}.
+Set-theoretic-like complements notoriously make constraint solving harder, smuggling negations into the underlying logic. On the other hand, our algebraic complement types provide a weaker condition, but will be of great help to constraint solving -- as we explore in Section \ref{fig:constraints}.
 
 \begin{example}
     Take $\pi = \flext{\mathrm{foo}: \flabsent }{\flftop}$ and $\tau = \flext{\mathrm{foo}: \top}{\flftop}$. The two interpretations of $\pi \sub \comp \tau$ disagree: \begin{description}
@@ -352,7 +354,7 @@ Set-theoretic-like complement types notoriously make constraint solving harder, 
     \item We must have an implicit subtyping rule in the type system.
 \end{itemize} 
 To determine these, I was inspired by the requirements of techniques of \textcite{mlsub} and \textcite{mlstruct}.
-Later, we see that both Fabric (Chapter \ref{fabric}) and Star (Chapter \ref{star}) successfully implement the signature of \inference{}, showing it is reasonable in practice.
+Later, we see that both \fabric{} (Chapter \ref{fabric}) and \starr{} (Chapter \ref{star}) successfully implement the signature of \inference{}, showing it is reasonable in practice.
 
 \section{Constraint solving}
 \label{sec:constraints}
@@ -478,13 +480,13 @@ For any $c = \vbnds$, there exist $c' = \sbnd$ such that $c \step^* c'$.
 \end{proof}
 To move towards general constraints, we also give a lemma that existentials can be lifted to the top-level:
 \begin{lemma}[Top-level existentials]
-    For any $c$, there exist $c'$ such that $c'$ has no existentials and $c \step^* \overline{\exists{\alpha \ldotp {}}} c'$.
+    For any $c$, there exist $c'$ such that $c'$ has no existentials and $c \step^* \exists \overline \alpha \ldotp  c'$.
 \end{lemma}
 \begin{proof}
     This is simplified by the constraint language only featuring conjunctions and existentials besides the subtyping predicate. Straightforward using the fact $\exists$ can always be \emph{factored out} from conjunctions.
 \end{proof}
 Finally, we give the normal form of constraints $\hat c$ -- a list-of-bounds with top-level existentials:
-$$ \hat c ::= \mathbf F \mid \overline{\exists \alpha \ldotp {}} \sbnd $$
+$$ \hat c ::= \mathbf F \mid \exists \overline{\alpha} \ldotp \sbnd $$
 and we state that \textbf{constraints normalise}:
 \begin{theorem}[Normalisation of constraints]
 For any $c$, there exist $\hat c$ such that $c \step^* \hat c$.
@@ -514,22 +516,21 @@ While it is expected this process terminates \cite{pottier-framework, simple-sub
 \subsection{Solutions}
 \label{subsec:simplification}
 
-We now consider the question of extracting the type scheme from a solved constraint. Given a generated constraint $\denot{e : \tau}$, if it is solved successfully we have:
-$$ \mathcal S \left( \denot{e : \tau} \right) = \overline{\exists \alpha \ldotp {}} \sbnd $$
-in which case we (abusing notation with $W$) return the type scheme
-$$ \sigma =  \forall W \ldotp \tau $$
+We now consider the question of extracting the type scheme from a solved constraint. Given a generated constraint $\cstr{\cdot}{e}{\tau}$, if it is solved successfully we have some $\mathcal S \left( \cstr{\cdot}{e}{\tau} \right) = \exists \overline{\alpha} \ldotp \sbnd$, in which case we (abusing notation with $W$) we return the type scheme $\sigma =  \forall W \ldotp \tau$.
+
 It is important to simplify type schemes -- however, I do not propose novel ways to do this, and entirely refer to \textcite{simple-sub} and \textcite{mlstruct}. In practice, I have found that to ensure efficient termination I had to simplify the CNF (or DNF) forms. Inlining bounds (particularly done by \textcite{dolan-thesis}) and removing redundant type variables mainly serves to improve readability.
 
 \begin{example}
-    Given:
-    $$ e =  $$
-    we have:
-    $$ \mathcal S(\denot{e : \tau}) = $$
-    thus, $\Gamma \vdash e : \sigma$ at:
-    $$ \sigma = \forall \ldotp  $$
-    which can be equivalently (i.e.\@ $\sigma \subsume \sigma' \subsume \sigma$) simplified to $\sigma'$:
-    $$ \sigma' = \forall \ldotp $$
-\end{example}\todo[color=blue]{ex}
+    Given
+    $e = \fllam x \fllam y \flproj{(x \, \{ \mathrm{quack} = y \})}{\mathrm{sound}}$,
+    my implementation produces $\cdot \vdash e : \sigma$ as such:
+    \begin{align*}
+    \mathcal S(\cstr{\cdot}{e}{\alpha}) \cong \exists \beta, \gamma, \delta, \varepsilon \ldotp \alpha \sub \beta \to \gamma \to \delta \und& \beta \sub \flext{\mathrm{quack}: \gamma}{\flabsent} \to \delta \\ \und& \varepsilon \sub \flext{\mathrm{sound}: \delta}{\flftop}     
+    \end{align*}    
+    $$ \sigma = \forall \alpha \sub \beta \to \gamma \to \delta,\; \beta \sub \flext{\mathrm{quack}: \gamma}{\flabsent} \to \delta,\; \varepsilon \sub \flext{\mathrm{sound}: \varepsilon}{\flftop} \ldotp \alpha $$
+    which we can simplify to $\sigma' \equiv^\forall \sigma$:
+    $$ \sigma' = \forall \gamma, \delta \ldotp (\flext{\mathrm{quack}: \gamma}{\flabsent} \to \flext{\mathrm{sound} : \delta}{\flftop}) \to \gamma \to \delta $$
+\end{example}
 
 \section{Breaking records: Homomorphism extension}
 \label{sec:morphisms}
@@ -578,6 +579,7 @@ I propose to follow the algebraic approach and exploit homomorphisms in the type
 \end{figure}
 
 \subsection{Signature}
+\label{subsec:signature-morphisms}
 
 We begin developing the idea formally by extending the syntax of types with \textbf{homomorphism applications} for some homomorphisms $\morph$ specific to a language, and including a homomorphism $\morph = \mathrm{id}$:
 $$ \tau ::= \cdots \mid \morph(\tau) $$
@@ -631,10 +633,11 @@ The key property we make use of is that we can give a rule equivalent to the \em
 $$ 
 \irule{FL-Typ-HExt}{\Gamma \vdash e : \tau \meet \flext{\ell : \flabsent}{\flftop} \quad \Gamma \vdash e' : \tau'}{\Gamma \vdash \flext{\ell = e'}{e} : \mathrm{forget}_\ell(\tau) \meet \flext{\ell : \tau'}{\flftop}}
 $$
-\textsc{FL-Typ-HExt} makes it straightforward to generate the necessary constraints (see Appendix \ref{extra:fl-constraints} for details).
+\textsc{FL-Typ-HExt} makes it straightforward to generate the necessary constraints.
 % (sketch of the proofs of homomorphisms laws and equivalence of \textsc{FL-Typ-Ext} and \textsc{FL-Typ-HExt})
-\todo[color=green]{extra}
 Thus, I have solved the record update problem under algebraic subtyping without row polymorphism.
+
+As there are various technical details to address here, I consider them in Appendix \ref{extra:fl-constraints}.
 
 \section{Correctness}
 \label{sec:correctness}
@@ -650,7 +653,7 @@ I state correctness theorems for \inference{}, particularly for \emph{solved con
 However, I do not provide proofs for the following -- and only provide evidence based on the prototype implementation (Chapter \ref{fabric}), arguing that \inference{} generalises prior work where these hold. 
 
 \begin{conjecture}[Termination]
-    The constraint solving $\mathcal S(c)$ in Section \ref{sec:constraints} always terminates.
+    Constraint solving $\mathcal S(c)$ described in Section \ref{sec:constraints} always terminates.
 \end{conjecture}
 
 \begin{conjecture}[Completeness]    
@@ -675,5 +678,7 @@ I have described \inference{} -- a language-agnostic, constraint-based type infe
 It soundly infers bounded parametric type schemes in the presence of structural subtyping. 
 I use elegant Boolean algebraic techniques -- as set out by \textcite{mlstruct} -- which I extend with the use of \emph{homomorphisms}. 
 My description lends itself directly to an implementation -- this implementation is part of my deliverable, described in the following chapter.
+
+The main consequence of a framework like \inference{} is that 
 
 

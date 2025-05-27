@@ -3,27 +3,26 @@
 
 \textbf{Array programming} is a programming paradigm focusing on arrays as a fundamental data structure, stemming from Iverson's \emph{array programming model} \cite{apl}. It plays a key role in now widespread domains like machine learning and data science. In this paradigm, we operate on often multi-dimensional arrays of data, taking particular advantage of data parallelism hiding within many data processing tasks. 
 
-Array programming comes in multiple styles: point-free (e.g.\@ MatLab, NumPy~\cite{numpy}), pointful (Dex~\cite{dex}, Ein~\cite{ein}), or combinator-based (Futhark~\cite{futhark}). Despite this variety, array programming lacks a satisfactory typing discipline that balances safety and usability. Type systems seem to come in one of two extremes: \begin{description}
-    \item[Nearly-untyped] Often, arrays feature little to no types -- they might only describe the rank (number of dimensions) or element type. Examples include modern descendants of APL, like MatLab, NumPy~\cite{numpy} or PyTorch~\cite{pytorch}. This is the reality in most general-purpose and practically used array languages.
-    \item[Dependently typed] Research into array programming languages type systems has produced many dependently typed approaches -- where much of the power is used to statically model type-level arithmetic on sizes of arrays. Examples representing the paradigms above (in the same order) are: Remora~\cite{remora}, Dex~\cite{dex}, and the recent extensions to Futhark~\cite{futhark-size-dependent, futhark-size-dependent-towards}.
+Array programming languages comes in multiple styles: point-free (e.g.\@ MatLab, NumPy~\cite{numpy}), pointful (Dex~\cite{dex}, Ein~\cite{ein}), combinator-based (Futhark~\cite{futhark}). Despite this variety, there is no satisfactory typing discipline that balances safety and usability. Type systems seem to come in one of two extremes: \begin{description}
+    \item[Nearly-untyped] Often, arrays feature little to no types, which might only describe the number of dimensions or element type. Such types are only sometimes checked statically. This is the reality for most practically used array languages (like MatLab, NumPy~\cite{numpy} or PyTorch~\cite{pytorch}), but also for arrays in general-purpose languages (like C and Fortran).
+    \item[Dependently typed] Research into array programming languages has produced many approaches reaching for dependent types -- where much of the power is used to statically model type-level arithmetic on sizes of array dimensions. Examples representing the paradigms above (in the same order) are: Remora~\cite{remora}, Dex~\cite{dex}, and the recent extensions to Futhark~\cite{futhark-size-dependent, futhark-size-dependent-towards}.
 \end{description}
 
-The array programming community is at an impasse -- array types are either too simple, or we have to reach for dependent types. My main contribution towards a solution is the design of a novel calculus, \textbf{Star}. Its type system provides useful and expressive types, while admitting ML-style type inference.
-The key idea of Star follows my thesis: I designed its array indices and shapes with \textbf{structural subtyping} in mind.
+The array programming community is at an impasse: array types are either too simple, or we have to reach for dependent types.\footnote{This is reminiscent of the static-dynamic split from Chapter \ref{static-soul} -- structural types also serve as a middle-ground, like in \starr{}.} My main contribution towards a solution is the design of a novel calculus, \textbf{\starr{}}. Its type system provides useful and expressive types, while admitting ML-style type inference.
+The key idea of \starr{} follows my thesis: I designed its array indices and shapes with \textbf{structural subtyping} in mind.
 
-In this chapter, I describe the following contributions: \begin{itemize}
-    \item A novel design for an array calculus – Star – which features subtyping and structural types for array shapes. I motivate it in Section \ref{sec:design} and elaborate in Section \ref{sec:calculus}.
-    \item A formalisation of with an operational semantics (Section \ref{subsec:semantics}), type system (Section \ref{sec:typing};  \emph{without parametric polymorphism}), and proven type safety (Section \ref{subsec:type-safety}).
-    \item Finally, in Section \ref{subsec:type-inference} I describe how to bestow Star (extended with parametric polymorphism) with ML-style type inference in terms of the \inference{} framework from Chapter \ref{algebraic-subtyping}.
+In this chapter (based on a paper of the same name \cite{star}), I describe the following contributions: \begin{itemize}
+    \item A novel design for an array calculus – \starr{} – which features subtyping and structural types for array shapes. I motivate it in Section~\ref{sec:design} and elaborate in Section~\ref{sec:calculus}.
+    \item A formalisation of with an operational semantics (Section~\ref{subsec:semantics}), type system (Section~\ref{sec:typing};  \emph{without parametric polymorphism}), and proven type safety (Section~\ref{subsec:type-safety}).
+    \item Finally, in Section~\ref{subsec:type-inference} I describe how to bestow \starr{} (extended with parametric polymorphism) with ML-style type inference in terms of the \inference{} framework from Chapter \ref{algebraic-subtyping}.
 \end{itemize}
 
 \section{Design}
 \label{sec:design}
 
-We start by motivating the design of Star, showing how common array patterns arise when we use algebraic data types -- records and variants -- for array indices.
+We start by motivating the design of \starr{}, showing how common array patterns arise when we use algebraic data types -- records and variants -- for array indices.
 
-\paragraph{Terminology} Arrays have a \emph{dimensionality} (i.e.\ number of dimensions), also called a \emph{rank}.
-The \emph{shape} of an array defines the extent (\emph{size}) of
+\paragraph{Terminology} I explain standard array programming terms, which \starr{} builds on and generalises. Arrays have a \emph{rank} -- the number of dimensions. The \emph{shape} of an array defines the extent (\emph{size}) of
 each dimension. Dimensions are sometimes referred to as \emph{axes}.
 A \emph{batch} refers to a sequence of something, and we speak of a batch dimension (batch axis).
 
@@ -50,7 +49,7 @@ We might illustrate $\sproducttype{\mathrm{row}: \sint, \mathrm{col}: \sint}$ as
 \end{tikzpicture}
 \end{center}
 
-One might find this idea reminiscent of named tensors~\cite{named-tensors} or \texttt{xarray} \cite{hoyer2017xarray} (among others), and this similarity is not accidental. The practical usefulness of this prior work leads us to generalising this technique.
+One might find this idea reminiscent of named tensors~\cite{named-tensors} or \texttt{xarray} \cite{hoyer2017xarray} (among others), and this similarity is not accidental. The practical usefulness of this prior work led me to generalising this technique.
 
 \subsection{Variant indices concatenate}
 
@@ -76,7 +75,7 @@ $$ \begin{array}{c}
 \end{array} $$
 which allows us to rely on tagging and pattern matching for composing and decomposing concatenations.
 
-We propose that for shapes $\sigma, \dots$ and tags~$T, \dots$ we have a shape type $\sconcattype{T : \sigma, \dots}$ indexed by variants of type $\svarianttype{T : \sigma, \dots}$.
+I propose that for shapes $\sigma, \dots$ and tags~$T, \dots$ we have a shape type $\sconcattype{T : \sigma, \dots}$ indexed by variants of type $\svarianttype{T : \sigma, \dots}$.
 % Variants provide us with \textbf{concatenation} on array shapes.
 
 \section{Calculus}
@@ -85,39 +84,39 @@ We propose that for shapes $\sigma, \dots$ and tags~$T, \dots$ we have a shape t
 \begin{figure}
     \centering
     \input{Sources/4-Figures/Star-expressions}
-    \caption{Expressions $e$ in Star, including shape expressions $\eess$.}
+    \caption{Expressions $e$ in \starr{}, including shape expressions $\eess$.}
     \label{fig:star-expressions}
 \end{figure}
 
 \begin{figure}
     \centering
     \input{Sources/4-Figures/Star-values}
-    \caption{Values $v$ in Star, including shape values $\vess$.}
+    \caption{Values $v$ in \starr{}, including shape values $\vess$.}
     \label{fig:star-values}
 \end{figure}
 
-I now introduce the design of \textbf{Star} (\textbf{st}ructured \textbf{ar}rays), a functional, pointful array programming calculus with a novel type system. We begin by introducing expressions (Section~\ref{subsec:star-intro}) and our novel structured array shapes (Sections~\ref{subsec:array-shapes}~and~\ref{subsec:shape-bounds}) in Star.
+I now introduce the design of \textbf{\starr{}} (\textbf{st}ructured \textbf{ar}rays), a functional, pointful array programming calculus with a novel type system. We begin by introducing expressions (Section~\ref{subsec:star-intro}) and our novel structured array shapes (Sections~\ref{subsec:array-shapes}~and~\ref{subsec:shape-bounds}) in \starr{}.
 Lastly, we give an operational semantics  (Section~\ref{subsec:semantics}).
 
 \subsection{Introduction}
 \label{subsec:star-intro}
 
-The basis of Star is a $\lambda$-calculus with structurally typed records and variants. We define the grammars of expressions $e$ and values $v$ in Star in Figures~\ref{fig:star-expressions}~and~\ref{fig:star-values}.
+The basis of \starr{} is a $\lambda$-calculus with structurally typed records and variants. We define the grammars of expressions $e$ and values $v$ in \starr{} in Figures~\ref{fig:star-expressions}~and~\ref{fig:star-values}.
 We start with some informal explanations:
 
 \begin{itemize}
     \item We write $\pi$ for scalar operations, which consume and produce integers and floats. Examples include $+: \sint \times \sint \sfntype \sint$, $\mathrm{sin} : \sfloat \sfntype \sfloat$, or $\lfloor \cdot \rfloor : \sfloat \sfntype \sint$.
     % \item Functions and let-bindings are standard. For simplicity, we do not include recursive let-bindings.
     \item We include structural records and variants, respectively introduced by construction $\srecordval{\overline{\ell = e}}$ and tagging $T\,e$, and eliminated with with projection $\sproj{e}{\ell}$ and pattern matching. 
-    \item Star's array operations are similar to the likes of pointful calculi like $\tilde F$ \cite{f-smooth}. Our primitives are array comprehensions $\sbuild{x}{e}{e'}$ (constructing an array of shape $e$ and elements at index $x$ given by $e'$) and indexing $\sindex{e}{e'}$ (accessing index $e'$ of array $e$).
+    \item \starr{}'s array operations are similar to the likes of pointful calculi like $\tilde F$ \cite{f-smooth}. Our primitives are array comprehensions $\sbuild{x}{e}{e'}$ (constructing an array of shape $e$ and elements at index $x$ given by $e'$) and indexing $\sindex{e}{e'}$ (accessing index $e'$ of array $e$).
     The shape of an array $e$ is accessed by $\sshape{e}$.
 \end{itemize}
 
 \subsection{Array shapes}
 \label{subsec:array-shapes}
 
-The design of array shapes in Star -- both shape values here and shape types in Section~\ref{sec:typing} -- is a novel contribution.
-In Star, array comprehensions require providing a shape.
+The design of array shapes in \starr{} -- both shape values here and shape types in Section~\ref{sec:typing} -- is a novel contribution.
+In \starr{}, array comprehensions require providing a shape.
 We informally summarise them now and elaborate later. 
 We have three constructors for shape values:
 \begin{itemize}
@@ -149,7 +148,7 @@ Projections on shapes extract dimensions/components of products/concatenations. 
     \label{fig:broadcasting}
 \end{figure}
 
-Lastly, Star's \textit{shape broadcasting}
+Lastly, \starr{}'s \textit{shape broadcasting}
 operation $e \broadcast e'$ (see Figure \ref{fig:broadcasting}) is used to \textit{align} compatible shapes $e$ and $e'$ by finding their common \emph{sub-shape} (cf.\@ broadcasting in NumPy \cite{numpy}), so that, for example:
 $$ \sproductval{\mathrm{row}: \ssized 5} \broadcast \sproductval{\mathrm{col}: \ssized 4} \text{ evaluates to } \sproductval{\mathrm{row}: \ssized 5, \mathrm{col}: \ssized 4}$$
 The name sub-shape refers to the result having possibly more dimensions, paralleling subtyping.
@@ -191,7 +190,7 @@ In the operational semantics, $\inbsp$ determines the indices $v$ for which we s
 \subsection{Representation of array values}
 \label{subsec:array-values}
 
-In Star, array comprehensions $\sbuild{x}{e}{e'}$ eventually evaluate to array values $\sarrayval{\vess}{I}$.
+In \starr{}, array comprehensions $\sbuild{x}{e}{e'}$ eventually evaluate to array values $\sarrayval{\vess}{I}$.
 These consist of a shape value $\vess$ along with a partial function (taken as a set) $I$ from index values to element values.
 The domain of $I$ consists of exactly the indices $v$ which are within bounds of $s$: $v \inbsp s$.
 
@@ -203,10 +202,10 @@ $\sarrayval{\vess}{J}$ is not part of the user-facing expression syntax -- it ex
 \subsection{Semantics}
 \label{subsec:semantics}
 
-Finally, I present a call-by-value operational semantics for Star in Figure~\ref{fig:opsem} via a \emph{steps-to} relation $e \step e$.
+Finally, I present a call-by-value operational semantics for \starr{} in Figure~\ref{fig:opsem} via a \emph{steps-to} relation $e \step e$.
 
 Run-time errors (e.g.\@ out-of-bounds indexing)
-manifest as \emph{stuck states}, which do not step further. Most stuck states are prevented by Star's type system -- for errors which are not, we introduce a \emph{raises-error} relation $e \sterr$ in Figure \ref{fig:opsem-err} (we use it to state type safety in Section \ref{subsec:type-safety}).
+manifest as \emph{stuck states}, which do not step further. Most stuck states are prevented by \starr{}'s type system -- for errors which are not, we introduce a \emph{raises-error} relation $e \sterr$ in Figure \ref{fig:opsem-err} (we use it to state type safety in Section~\ref{subsec:type-safety}).
 
 Successful executions eventually reduce to a value $v$ (Figure~\ref{fig:star-values}). 
 
@@ -221,11 +220,18 @@ Successful executions eventually reduce to a value $v$ (Figure~\ref{fig:star-val
     \centering
     \input{Sources/4-Figures/Star-opsem}
     \caption{
-        Small-step operational semantics for Star. We write $e \step e'$ when $e$ reduces to $e'$.
-        Evaluation contexts $\evalctx$ are defined in Appendix \ref{extra:star-proofs} -- I remark that we never evaluate under $\lambda$ or $\Phi$; but we evaluate expressions in $\sarrayval{s}{J}$.
-        Note that indexing and broadcasting may result in a \emph{stuck state}, and that if $v \inbs s$ holds, then $\scast v s$ is well-defined.
+        Small-step operational semantics for \starr{}. We write $e \step e'$ when $e$ reduces to $e'$.
+        Evaluation contexts $\evalctx$ are defined in Figure \ref{fig:evalctx} -- we never evaluate under $\lambda$ or $\Phi$; but we evaluate expressions in $\sarrayval{s}{J}$.
+        Indexing and broadcasting may result in a \emph{stuck state} -- but note $\scast v s$ is well-defined when $v \inbs s$ holds.
     }
     \label{fig:opsem}
+\end{figure}
+
+\begin{figure}
+    \centering
+    \input{Sources/4-Figures/Star-contexts}
+    \caption{Evaluation contexts $C$ for Star, necessary for specifying the congruence rules for $\leadsto$.}
+    \label{fig:evalctx}
 \end{figure}
 
 \section{Typing}
@@ -234,10 +240,10 @@ Successful executions eventually reduce to a value $v$ (Figure~\ref{fig:star-val
 \begin{figure}[t]
     \centering
     \input{Sources/4-Figures/Star-types}
-    \caption{Types $\tau$ in Star, showing their subtypes: shape types $\sigma$
+    \caption{Types $\tau$ in \starr{}, showing their subtypes: shape types $\sigma$
     and index types $\eta$.
     % Note that $\sigma$ and $\eta$ are in bijection (see Figure~\ref{fig:indices}).
-    Array types $\sarraytype{\sigma_1}{\sigma_2}{\tau}$ are defined only when $\sigma_1 \sub \sigma_2$ (with $\sub$ as in Figure~\ref{fig:subtyping}) -- we elaborate in Section \ref{sec:typing}.
+    Array types $\sarraytype{\sigma_1}{\sigma_2}{\tau}$ are defined only when $\sigma_1 \sub \sigma_2$ (with $\sub$ as in Figure~\ref{fig:subtyping}) -- we elaborate in Section~\ref{sec:typing}.
     }
     \label{fig:types}
 \end{figure}
@@ -249,13 +255,13 @@ Successful executions eventually reduce to a value $v$ (Figure~\ref{fig:star-val
     \label{tab:shape-index-examples}
 \end{table}
 
-We now move on to Star's type system, which features novel aspects, matching the design of structural shape and index types. 
+We now move on to \starr{}'s type system, which features novel aspects, matching the design of structural shape and index types. 
 I give a complete description of the type language in Figure~\ref{fig:types}, subtyping in Figure~\ref{fig:subtyping}, and the typing judgement in Figure~\ref{fig:typing}. 
 
 I first focus on the typing of array shapes and indices.\todo[color=red]{FL-style records?}
-Afterwards, I state type safety for Star in Section \ref{subsec:type-safety}, and show how to apply the type inference framework from Chapter \ref{algebraic-subtyping} to Star in Section~\ref{subsec:type-inference}.
+Afterwards, I state type safety for \starr{} in Section~\ref{subsec:type-safety}, and show how to apply the type inference framework from Chapter \ref{algebraic-subtyping} to \starr{} in Section~\ref{subsec:type-inference}.
 
-% I use a standard presentation of record (and similar) types \cite{tapl} for Star, unlike FL (Chapter \ref{static-soul}).
+% I use a standard presentation of record (and similar) types \cite{tapl} for \starr{}, unlike FL (Chapter \ref{static-soul}).
 
 \begin{figure}[p]
     \centering
@@ -271,7 +277,7 @@ Afterwards, I state type safety for Star in Section \ref{subsec:type-safety}, an
 \begin{figure}[p]
     \centering
     \input{Sources/4-Figures/Star-typing}
-    \caption{Rules for the typing judgement $\Gamma \vdash e : \tau$ for Star expressions $e$. We use $\sigma$ for metavariables standing for shape types.
+    \caption{Rules for the typing judgement $\Gamma \vdash e : \tau$ for \starr{} expressions $e$. We use $\sigma$ for metavariables standing for shape types.
     % \AMcomment{$\tau?$}
     % \AMcomment{CONCAT rule has been `corrected'}
     Note $\iota$ in \textsc{Array} and \textsc{Index} maps shape types $\sigma$ into corresponding index types $\eta$. 
@@ -282,20 +288,20 @@ Afterwards, I state type safety for Star in Section \ref{subsec:type-safety}, an
 
 \paragraph{Shapes and indices}
 
-Recall that in Section \ref{subsec:shape-bounds} we determined that integers index into sized shapes, records into product shapes, and variants into concatenation shapes. This happens both at the value- and type-level, with examples in Table \ref{tab:shape-index-examples}.
+Recall that in Section~\ref{subsec:shape-bounds} we determined that integers index into sized shapes, records into product shapes, and variants into concatenation shapes. This happens both at the value- and type-level, with examples in Table \ref{tab:shape-index-examples}.
 
-While in basic array type systems it is sufficient to presume that the type of a shape $\sigma$ and a matching index $\eta$ are the same, in Star this is clearly not the case. We thus use a $\iota$ metafunction on types (defined in Figure \ref{fig:iota}): given a shape type $\sigma$, $\eta = \iota(\sigma)$ is the supertype of all matching index types for $\sigma$.
+While in basic array type systems it is sufficient to presume that the type of a shape $\sigma$ and a matching index $\eta$ are the same, in \starr{} this is clearly not the case. We thus use a $\iota$ metafunction on types (defined in Figure \ref{fig:iota}): given a shape type $\sigma$, $\eta = \iota(\sigma)$ is the supertype of all matching index types for $\sigma$.
 
-Constructing $\iota$ is unsurprising -- similar concepts often arise when generalising array-like structures, e.g.\@ \textit{containers} \cite{containers} or Naperian (representable) functors, which \textcite{naperian-apl} has found useful for statically modelling certain patterns of array programming. To the author's knowledge, neither of these have yet led to the key ideas present in Star.
+Constructing $\iota$ is unsurprising -- similar concepts often arise when generalising array-like structures, e.g.\@ \textit{containers} \cite{containers} or Naperian (representable) functors, which \textcite{naperian-apl} has found useful for statically modelling certain patterns of array programming. To the author's knowledge, neither of these had led to the key ideas present in \starr{}.
 
 \begin{figure}
     \centering
     \input{Sources/4-Figures/Star-iota}
-    \caption{Definition of the metafunction $\iota$, which given a shape type $\sigma$ gives the least upper bound $\eta = \iota(\sigma)$ on its index type.}
+    \caption{Definition of the metafunction $\iota$. For a shape type $\sigma$, $\eta = \iota(\sigma)$ is the least upper bound on its index~type.}
     \label{fig:iota}
 \end{figure}
 
-\paragraph{Splitting $\sigma$} Let us direct our attention to Star's array types, which have the syntax $\sarraytype{\sigma_1}{\sigma_2}{\tau}$ for $\sigma_1 \sub \sigma_2$. They are carefully constructed to provide \emph{useful} subtyping for array types, and follow a technique used by both \textcite{dolan-thesis} and \textcite{pottier-thesis} (which they use for typing mutable reference types). The crux is to split the shape $\sigma$ in $\sonebound{\sigma}\tau$ into a contravariant part $\sigma_1$ and covariant part $\sigma_2$, so that indexing uses $\sigma_1$, while accessing the shape returns a $\sigma_2$. With a simpler array type like $\sonebound{\sigma}\tau$ (which we write to abbreviate $\sarraytype{\sigma}{\sigma}{\tau}$) array types would have to be invariant.\todo[color=purple]{cite paper} Notice that by requiring $\sigma_1 \sub \sigma_2$ there is a $\sigma$ such that $\sigma_1 \sub \sigma \sub \sigma_2$: we have an \emph{actual} shape $\sigma$ into which we index with $\iota(\sigma_1) \sub \iota(\sigma)$, and when accessing the shape we only obtain one of type $\sigma_2 \super \sigma$.
+\paragraph{Splitting $\sigma$} Consider \starr{}'s array types, which have the syntax $\sarraytype{\sigma_1}{\sigma_2}{\tau}$ for $\sigma_1 \sub \sigma_2$. They are carefully constructed to provide useful subtyping with a technique used by both \textcite{dolan-thesis} and \textcite{pottier-thesis} (which they use for typing mutable reference types). The crux is to split the shape $\sigma$ in $\sonebound{\sigma}\tau$ into a contravariant part $\sigma_1$ and covariant part $\sigma_2$, so that indexing uses $\sigma_1$, and accessing the shape returns a $\sigma_2$. A simpler array type like $\sonebound{\sigma}\tau$ (which we write to abbreviate $\sarraytype{\sigma}{\sigma}{\tau}$) array types would cause them to be invariant.\todo[color=purple]{cite paper} Notice that by requiring $\sigma_1 \sub \sigma_2$ there is a $\sigma$ such that $\sigma_1 \sub \sigma \sub \sigma_2$: we have an \emph{actual} shape $\sigma$ into which we index with $\iota(\sigma_1) \sub \iota(\sigma)$, and when accessing the shape we only obtain one of type $\sigma_2 \super \sigma$.
 
 \paragraph{Broadcasting}
 Our presented subtyping order forms a distributive lattice, in line with algebraic subtyping. 
@@ -307,7 +313,7 @@ Hence, $\broadcast$ is the meet in a lattice spanned by the unary predicate $\_ 
 \subsection{Type safety}
 \label{subsec:type-safety}
 
-To show my design of Star is well-behaved, I state and prove type safety for it in the form of theorems of Preservation and Progress (in the simply-typed case). Stating Progress we write $e \sterr$, which captures errors that can occur for well-typed programs -- out-of-bounds \emph{integer} indexing and invalid broadcasting.
+To show my design of \starr{} is well-behaved, I state and prove type safety for it in the form of theorems of Preservation and Progress (in the simply-typed case). Stating Progress we write $e \sterr$, which captures errors that can occur for well-typed programs -- out-of-bounds \emph{integer} indexing and invalid broadcasting.
 
 \begin{theorem}[Preservation]
     If \ $\Gamma \vdash e : \tau$ and $e \leadsto e'$, then $\Gamma \vdash e' : \tau$.
@@ -322,35 +328,37 @@ I prove these theorems in Appendix \ref{extra:star-proofs}, but they follow stra
 \subsection{Type inference \& polymorphism}
 \label{subsec:type-inference}
 
-It turns out that Star's subtyping relation both forms a distributive lattice\todo{closure!}, and $\iota$ forms a type lattice isomorphism.
+It turns out that \starr{}'s subtyping relation both forms a distributive lattice\todo{closure!}, and $\iota$ forms a type algebra isomorphism.
 Thus, we can apply the type inference framework developed in Chapter \ref{algebraic-subtyping}. 
 
-Though I do not give a complete description of a polymorphic Star calculus, I show a sketch of constraint generation for Star in Figure \ref{fig:star-type-constraints}.
+Though I do not give a complete description of a polymorphic \starr{} calculus, I show a sketch of constraint generation for \starr{} in Figure \ref{fig:star-type-constraints}. We extend $\iota$ to be an involutive isomorphism in the algebra of types ($\iota^{-1} = \iota$, i.e.\@ $\iota$ swaps corresponding shapes and types), so that $\ladj \iota = \radj \iota = \iota$ and $\ladjrest \iota = \radjrest \iota = \tru$.
 
-Extending Star with polymorphism enables a \emph{shape-polymorphic} programming style -- a generalisation of rank polymorphism in existing literature \cite{automap, sac-tensor-comprehensions}. 
+Extending \starr{} with polymorphism enables a \emph{shape-polymorphic} programming style -- a generalisation of rank polymorphism in existing literature \cite{automap, sac-tensor-comprehensions}. 
 It is worth noting that shape polymorphism gives us index safety for free akin to \textcite{theorems-for-free} (modulo integer indices).
 
-Let us consider an example of type inference in action. Given the expression:
-$$ \color{red} \text{TODO: something with broadcasting?} $$
-we would infer for it the type scheme:
-$$ \text{TODO} $$
+\paragraph{Practice} Given the expression:
+$$ e = \fllam a \fllam b \sbuild{x}{\sproductval{a = \ssize 5, b = \ssize 4}}{a[x{.}a] \div b[x{.}b]} $$
+my implementation of \inference{} (given $\div : \sfloat \to \sfloat \to \sfloat$) correctly infers the type scheme:
+$$ \sigma = \sarraytype{\ssized}{\top}{\sfloat} \to \sarraytype{\ssized}{\top}{\sfloat} \to \suniarraytype{\sproducttype{a : \ssized, b : \ssized}}{\sfloat} $$
+On the other hand, given:
+$$ e' = \sbuild{x}{\sproductval{a = \ssize 5}}{x.{b}} $$
+a type error is raised due to the constraint $\iota(\srecordtype{b : \sint}) \sub \sproducttype{a : \ssized}$ (dimension mismatch).
+
+Usability is mainly limited by type scheme simplification (Section \ref{subsec:simplification}), particularly of redundant type variables. While the returned polymorphic type schemes are correct, they are difficult to read for the user. This shortcoming is mainly due to time constraints, as it is clear the type schemes to simplify by-hand.
+
 
 \begin{figure}
     \centering
-    \begin{align*}
-        \color{red} \texttt{\Huge T O D O}
-    \end{align*}
-    \caption{Constraint generation for the key constructs in Star in the developed type inference framework.}
+    \addtolength{\jot}{0.2em}
+    $$ \boxed{\cstr{\Gamma}{e}{\tau} = c} $$
+    \input{Sources/4-Figures/Star-constraints}
+    \caption{Definition of \inference{} constraint generation for \starr{}, defined inductively on $e$. Each case here corresponds to a typing rule of the same name. Note that \textsc{Broadcast} breaks the polarity restriction, and that \textsc{Array} and \textsc{Index} use the $\iota$ homomorphism.}
     \label{fig:star-type-constraints}
 \end{figure}
 
 \section{Case study}
 
-To display the features of Star and its elegance in expressing common array programming patterns, we consider a case study of an array program -- and contrast to similar systems.\todo{todo}
-
-\begin{center}
-    \color{red} Slightly expanded padding example, contrast to NumPy and Dex?
-\end{center}
+To display the features of \starr{} and its elegance in expressing common array programming patterns, we consider a case study of an array program -- and contrast to similar systems.\todo[color=red]{todo}
 
 \section{Conclusions}
 
@@ -358,5 +366,7 @@ I have presented a novel design for an array programming calculus, emphasising t
 Though I do not statically ensure bounds checking for \emph{integer} indices -- like dependent types -- I circumvent the problem by enabling the programmer to use richer structures for array shapes and indices. 
 This makes it much easier to provide useful static types to common array programming patterns. 
 
-My novel type system for Star fills the gap between dynamically and dependently typed array programming. Thus, I reveal a new area in the design space of array programming languages -- a middle-ground between basic and complicated type systems. 
- 
+In addition to contributions presented in this chapter, in the paper \cite{star} I also give an elaborate discussion of possible extensions to this design and avenues for further work, as well as several worked examples.
+
+My novel type system for \starr{} fills the gap between dynamically and dependently typed array programming. Thus, I reveal a new area in the design space of array programming languages -- a middle-ground between basic and complicated type systems.
+

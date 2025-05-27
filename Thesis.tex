@@ -1,5 +1,6 @@
 \documentclass{mimosis}
 
+\usepackage{lastpage}
 \usepackage{metalogo}
 \usepackage{tcolorbox}
 
@@ -9,6 +10,18 @@
 
 \usepackage{needspace}
 \usepackage{etoolbox}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Submission
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+% 1. Render both the normal and anonymised versions.
+%    - check the redacted Star paper reference.
+% 2. Update the word count and date in the Declaration, and month in Title.
+% 3. 
+
+\newif\ifanonymised
+% \anonymisedtrue % comment out to de-anonymise
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % Listings
@@ -172,25 +185,86 @@
 
 \title{Breaking records}
 \subtitle{Language design with structural subtyping}
-\author{Jakub Krzysztof Bachurski}
+\author{Jakub Bachurski}
+
+\newcommand{\candidate}[0]{2491X}
+\newcommand{\authorself}{Jakub Bachurski}
+\newcommand{\college}{Trinity College}
+
+\newcommand{\coursethe}{Computer Science Tripos, Part III}
+\newcommand{\coursefor}{Part III of the Computer Science Tripos}
+
+\newcommand{\submissiondate}{June 4, 2025}
+\newcommand{\submissionmonthyear}{June 2025}
 
 \newcommand{\fabric}{\textsc{Fabric}}
-\newcommand{\inference}{\textsc{Comb}}
+\newcommand{\inference}{\textsc{Warp}}
 \newcommand{\compiler}{\textsc{Weaver}}
+\newcommand{\starr}{\textsc{Star}}
+\newcommand{\wasm}{\textsc{WebAssembly}}
+\newcommand{\mlsub}{\textsc{MLsub}}
+\newcommand{\simplesub}{\textsc{Simple-sub}}
+\newcommand{\mlstruct}{\textsc{MLstruct}}
+
+% Since this is prior to publication and needs to be anonymised
+\ifanonymised
+\begin{filecontents}{star.bib}
+@inproceedings{star,
+  author       = {{\textit{Authors redacted to preserve submission anonymity}}},
+  editor       = {Martin Elsman and Artjoms Sinkarovs},
+  title        = {Structuring Arrays with Algebraic Shapes},
+  booktitle    = {Proceedings of the 11th {ACM} {SIGPLAN} International Workshop on
+                  Libraries, Languages and Compilers for Array Programming, {ARRAY}
+                  2025, Copenhagen, Denmark, 17 June 2025},
+  pages        = {1--16},
+  publisher    = {{ACM}},
+  year         = {2025},
+  url          = {https://doi.org/10.1145/3736112.3736141},
+  doi          = {10.1145/3736112.3736141},
+}
+\end{filecontents}
+\else
+\begin{filecontents}{star.bib}
+@inproceedings{star,
+  author       = {Bachurski, Jakub and Mycroft, Alan and Orchard, Dominic},
+  editor       = {Martin Elsman and Artjoms Sinkarovs},
+  title        = {Structuring Arrays with Algebraic Shapes},
+  booktitle    = {Proceedings of the 11th {ACM} {SIGPLAN} International Workshop on
+                  Libraries, Languages and Compilers for Array Programming, {ARRAY}
+                  2025, Copenhagen, Denmark, 17 June 2025},
+  pages        = {1--16},
+  publisher    = {{ACM}},
+  year         = {2025},
+  url          = {https://doi.org/10.1145/3736112.3736141},
+  doi          = {10.1145/3736112.3736141},
+}
+\end{filecontents}
+\fi
+
+\addbibresource{star.bib}
 
 \begin{document}
 %TC:ignore 
   \input{Sources/Notation}
 
 \frontmatter
+\ifanonymised
+  \include{Sources/CoverSheet}
+\else
   \include{Sources/Title}
-  % \include{Sources/Abstract}
+\fi
+  \include{Sources/Declaration}
+  \include{Sources/Abstract}
+\ifanonymised\else
+  \include{Sources/Acknowledgements}
+\fi
 
   {\hypersetup{hidelinks}
   \tableofcontents}
 
 %TC:endignore 
 \mainmatter
+\label{firstcontentpage}
 
   \include{Sources/1-Introduction}
   \include{Sources/2-SoulOfDynamicTyping}
@@ -198,7 +272,8 @@
   \include{Sources/4-Fabric}
   \include{Sources/5-Star}
   \include{Sources/6-Conclusions}
-  
+
+\label{lastcontentpage}
 %TC:ignore 
 
   % This ensures that the subsequent sections are being included as root
@@ -219,6 +294,7 @@
   \printnomenclature
 
   \include{Sources/Appendix-FJ-FL_Proofs}
+  \include{Sources/Appendix-Inference_Proofs}
   \include{Sources/Appendix-FL-Constraints}
   \include{Sources/Appendix-Star_Proofs}
 

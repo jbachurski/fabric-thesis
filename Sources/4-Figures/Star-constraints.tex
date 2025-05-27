@@ -1,0 +1,40 @@
+\begin{align*}
+\cstr{\Gamma}{x}{\tau} &= \Gamma(x) \sub \tau 
+&\textsc{Var} \\
+\cstr{\Gamma}{n}{\tau} &= \sint \sub \tau
+&\textsc{Int} \\
+\cstr{\Gamma}{e}{\tau} &= \sfloat \sub \tau
+&\textsc{Float} \\
+\cstr{\Gamma}{\slet{x}{e'}{e}}{\tau} &= \exists \tau' \ldotp \cstr{\Gamma}{e'}{\tau'} \und \cstr{\Gamma, e' : \tau'}{e}{\tau}
+&\textsc{Let} \\
+\cstr{\Gamma}{\lambda x \ldotp e}{\tau} &= \exists \tau', \tau'' \ldotp \cstr{\Gamma, x : \tau'}{e}{\tau''} \und \tau \sub \tau' \to \tau''
+&\textsc{Lambda} \\
+\cstr{\Gamma}{e\,e'}{\tau} &= \exists \tau' \ldotp \cstr{\Gamma}{e'}{\tau'} \und \cstr{\Gamma}{e}{\tau' \to \tau}
+&\textsc{Apply} \\
+\cstr{\Gamma}{\srecordval{\overline{\ell = e_\ell}}}{\tau} &= \exists \overline{\tau_\ell} \ldotp \overline{\cstr{\Gamma}{e_\ell}{\tau_\ell}} \und \srecordtype{\overline{\ell : \tau_\ell}} \sub \tau
+&\textsc{Record} \\
+\cstr{\Gamma}{\sproj{e}{\ell}}{\tau} &= \cstr{\Gamma}{e}{\srecordtype{\ell : \tau}}
+&\textsc{RecordProj} \\
+\cstr{\Gamma}{T\,e}{\tau} &= \exists \tau_T \ldotp \cstr{\Gamma}{e}{\tau_T} \und \svarianttype{T : \tau_T} \sub \tau
+&\textsc{Tag} \\
+\cstr{\Gamma}{e\;\overline{T\,x_T \Rightarrow e_T}}{\tau} &= \exists \overline{\tau_T} \ldotp \overline{\cstr{\Gamma, x_T : \tau_T}{e_T}{\tau}} \und \cstr{\Gamma}{e}{\svarianttype{\overline{T : \tau_T}}}
+&\textsc{Match} \\
+\cstr{\Gamma}{\sbuild{x}{e'}{e''}}{\tau} &= \exists \tau'' \ldotp \cstr{\Gamma}{e'}{\tau'} {\undsym} \cstr{\Gamma, x {:} \iota(\tau')}{e''}{\tau''} \und \suniarraytype{\tau'}{\tau''} {\sub} \tau 
+&\textsc{Array} \\
+\cstr{\Gamma}{\sindex{e}{e'}}{\tau} &= \exists \tau_1, \tau_2 \ldotp \cstr{\Gamma}{e}{\sarraytype{\tau_1}{\tau_2}{\tau}} \und \cstr{\Gamma}{e'}{\iota^{-1}(\tau_1)}
+&\textsc{Index} \\
+\cstr{\Gamma}{\sshape e}{\tau_2} &= \exists \tau_1, \tau \ldotp \cstr{\Gamma}{e}{\sarraytype{\tau_1}{\tau_2}{\tau}}
+&\textsc{Shape} \\
+\cstr{\Gamma}{\sbroadcast{e'}{e''}}{\tau} &= \exists \tau', \tau'' \ldotp \cstr{\Gamma}{e'}{\tau'} \und \cstr{\Gamma}{e''}{\tau''} \und \tau' \meet \tau'' \sub \tau
+&\textsc{Broadcast} \\
+\cstr{\Gamma}{\ssize e}{\tau} &= \cstr{\Gamma}{e}{\sint} \und \ssized \sub \tau 
+&\textsc{Sized} \\
+\cstr{\Gamma}{\sproductval{\overline{\ell = e_\ell}}}{\tau} &= \exists \overline{\tau_\ell} \ldotp \overline{\cstr{\Gamma}{e_\ell}{\tau_\ell}} \und \sproducttype{\overline{\ell : \tau_\ell}} \sub \tau
+&\textsc{Product} \\
+\cstr{\Gamma}{\sproductproj{e}{\ell}}{\tau} &= \cstr{\Gamma}{e}{\sproducttype{\ell : \tau}}
+&\textsc{ProductProj} \\
+\cstr{\Gamma}{\sconcatval{\overline{\ell = e_\ell}}}{\tau} &= \exists \overline{\tau_\ell} \ldotp \overline{\cstr{\Gamma}{e_\ell}{\tau_\ell}} \und \sconcattype{\overline{\ell : \tau_\ell}} \sub \tau
+&\textsc{Concat} \\
+\cstr{\Gamma}{\sconcatproj{e}{\ell}}{\tau} &= \cstr{\Gamma}{e}{\sconcattype{\ell : \tau}}
+&\textsc{ConcatProj}
+\end{align*}

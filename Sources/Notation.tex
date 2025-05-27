@@ -11,6 +11,10 @@
   }}}}}}}}%
 ]}
 
+\makeatletter
+\newcommand*\fsize{\dimexpr\f@size pt\relax}
+\makeatother
+
 \newcommand{\newnotation}[4]{\nomenclature[#4]{#2}{#3}}
 
 \newcommand{\graintro}[1]{{#1} \,::=&\; }
@@ -37,7 +41,7 @@
 \newcommand{\subst}[2]{\left[ #1/#2 \right]}
 \newnotation{subst}{$\subst{e}{x}e$}{Substitution}{A060}
 \newcommand{\tsubst}[3]{\subst{#1}{#2}{#3}}
-\newnotation{tsubst}{$\subst{\tau}{\alpha}{\tau}$}{Type substitution}{A061}
+\newnotation{tsubst}{$\subst{\tau}{\alpha}{\tau}$}{Type substitution, with $\psi ::= \cdot \mid \psi, \tau/\alpha$}{A061}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % Common syntax
@@ -89,9 +93,12 @@
 
 \newcommand{\flftop}{\top \!\!\!\! \top}
 \newcommand{\flfbot}{\bot \!\!\!\! \bot}
-\newnotation{flftop}{$\flftop$}{Top field type}{L048}
-\newnotation{flfbot}{$\flfbot$}{Bottom field type}{L049}
-
+\newcommand{\flpresent}[1]{\boxed{#1}}
+\newcommand{\flabsent}{\Box}
+\newnotation{flftop}{$\flftop$}{Top field type}{L046}
+\newnotation{flfbot}{$\flfbot$}{Bottom field type}{L047}
+\newnotation{flpresent}{$\flpresent \tau$}{Present field type}{L048}
+\newnotation{flabsent}{$\flabsent$}{Absent field type}{L049}
 
 \newcommand{\flproj}[2]{{#1}{.}{#2}}
 \newnotation{flproj}{$\flproj e \ell$}{Let-binding}{L050}
@@ -99,8 +106,6 @@
 \newcommand{\flcast}[2]{{#1} \vartriangleright {#2}}
 \newnotation{flcast}{$\flcast{e}{\tau}$}{Runtime type coercion}{L060}
 
-% FL types
-\newcommand{\flabsent}{\Box}
 
 \newcommand{\centredalign}{\hspace{.45\textwidth}\phantom{{}={}}&\phantom{{}={}}\hspace{.45\textwidth}}
 
@@ -115,9 +120,9 @@
 \newcommand{\fj}[1]{\texttt{#1}}
 \newcommand{\fjoverline}[1]{$\overline{\mbox{#1}}$}
 
-\newcommand{\fjconsdef}{\fj{C(\fjoverline{C f}) \{ super($\overline{\fj{f}^*}$); \fjoverline{this.f'=f'';} \}}}
-\newcommand{\fjmethdefx}{\fj{C}^* \fj{ m(\fjoverline{C x})\{ ... \}}}
-\newcommand{\fjmethdef}{\fj{C}^* \fj{ m(\fjoverline{C x})\{ return e; \}}}
+\newcommand{\fjconsdef}{\fj{C(\fjoverline{C f}) \{ super($\overline{\fj{f}^\circ}$); \fjoverline{this.f'=f'';} \}}}
+\newcommand{\fjmethdefx}{\fj{C}' \fj{ m(\fjoverline{C x})\{ ... \}}}
+\newcommand{\fjmethdef}{\fj{C}' \fj{ m(\fjoverline{C x})\{ return e; \}}}
 \newcommand{\fjclassdef}{\fj{class C extends C' \{ \fjoverline{C f}; K; \fjoverline{M}; \}}}
 
 \newnotation{fj}{$\fj e$}{Expression \emph{(written in monospace font)}}{J010}
@@ -132,15 +137,15 @@
 % Type inference
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-\newcommand{\asubst}{\psi}
-\newnotation{asubst}{$\asubst$}{Substitution, e.g.\@ in $\substx{\asubst} e = e$}{T010}
+% \newcommand{\asubst}{\psi}
+% \newnotation{asubst}{$\asubst$}{Substitution, e.g.\@ in $\substx{\asubst} e = e$}{P010}
 
 \newcommand{\sch}{\sigma}
-\newnotation{sch}{$\sch$}{Type scheme}{T010}
-\newnotation{inst}{$\sigma \models \tau$}{Type scheme instantiation}{T011}
+\newnotation{sch}{$\sch$}{Type scheme}{P010}
+\newnotation{inst}{$\sigma \models \tau$}{Type scheme instantiation}{P011}
 
 \newcommand{\rec}[1]{\mu\,{#1}\ldotp}
-\newnotation{rec}{$\rec \alpha \tau$}{Recursive type, where variable $\alpha$ refers to entire type when occuring in $\tau$}{T020}
+\newnotation{rec}{$\rec \alpha \tau$}{Recursive type, where variable $\alpha$ refers to entire type when occuring in $\tau$}{P020}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % Subtyping lattice
@@ -182,6 +187,9 @@
 \newcommand{\morph}{\zeta}
 \newnotation{morphism}{$\morph$}{Homomorphism in the type algebra}{S060}
 
+\newcommand{\id}{\mathrm{id}}
+\newnotation{id}{$\id$}{Identity homomorphism}{S061}
+
 \newcommand{\ladj}[1]{\overleftarrow{#1}}
 \newnotation{ladj}{$\protect\ladj{\morph}$}{Left adjoint of a type homomorphism}{S070}
 
@@ -200,6 +208,9 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 \newnotation{constr}{$c$}{Constraint}{T03}
+
+\newcommand{\cstr}[3]{\left\langle\!\left\langle #1 \vdash #2 : #3 \right\rangle\!\right\rangle}
+\newnotation{cstr}{$\cstr{\Gamma}{e}{\tau}$}{Constraint generation for $\Gamma \vdash e : \tau$}{T04}
 
 \newcommand{\equivct}{E}
 \newcommand{\equivctx}{\ctx{\equivct}{\ctxhole}}
@@ -286,7 +297,7 @@
 \newcommand{\slam}[2]{\exprcolor{\lambda\,{#1} \ldotp {#2}}}
 \newcommand{\slet}[3]{\exprcolor{\mathrm{let}\,#1=#2\,\mathrm{in}\,{#3}}}
 \newcommand{\srecordval}[1]{\exprcolor{\left\{{#1}\right\}}}
-\newcommand{\sarrayval}[2]{\exprcolor{\textsc{Arr}(#1,#2)}}
+\newcommand{\sarrayval}[2]{\exprcolor{\textsf{Arr}(#1,#2)}}
 \newcommand{\sproj}[2]{\exprcolor{{#1}{.}{#2}}}
 \newcommand{\stag}[2]{\exprcolor{{#1}\,{#2}}}
 \newcommand{\smatch}[2]{\exprcolor{\mathrm{match}\,{#1}\,\mathrm{with}\,{#2}}}
@@ -309,7 +320,7 @@
 % \newcommand{\vess}{{v^\mathrm{S}}}  %% was v_s
 \newcommand{\vess}{s}
 \newcommand{\ssize}[1]{\shapeexprcolor{\#{#1}}}
-\newcommand{\sproductval}[1]{\shapeexprcolor{\left\{\!\left|{#1}\right|\!\right\}}}
+\newcommand{\sproductval}[1]{\shapeexprcolor{\left\{\hspace{-2.7pt}\left|{#1}\right|\hspace{-2.7pt}\right\}}}
 \newcommand{\sconcatval}[1]{\shapeexprcolor{\left\llbracket{#1}\right\rrbracket}}
 \newcommand{\sbroadcast}[2]{\shapeexprcolor{{#1} \broadcast {#2}}}
 \newcommand{\sproductproj}[2]{\shapeexprcolor{{{#1}\!\!\phantom{\mid}_{\circ}}#2}}
@@ -337,7 +348,7 @@
 
 % Shape types
 \newcommand{\ssized}{\shapetypecolor{\#}}
-\newcommand{\sproducttype}[1]{\shapetypecolor{\left\{\!\left|{#1}\right|\!\right\}}}
+\newcommand{\sproducttype}[1]{\shapetypecolor{\left\{\hspace{-2.7pt}\left|{#1}\right|\hspace{-2.7pt}\right\}}}
 \newcommand{\sconcattype}[1]{\shapetypecolor{\left\llbracket{#1}\right\rrbracket}}
 
 \newcommand{\evalct}{C}

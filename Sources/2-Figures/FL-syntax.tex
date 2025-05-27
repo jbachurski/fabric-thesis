@@ -32,7 +32,7 @@
     \flrec{\ell = v}
     & \text{(record)}
 \end{align*}
-\caption{Expressions $e$ and values $v$ in Featherweight Lua.}
+\caption{Expressions $e$ and values $v$ in Featherweight Lua. \\ \phantom{|}}
 \label{fig:featherweight-lua-expr}
 \end{subfigure}
 \hfill
@@ -58,13 +58,13 @@
     \flfbot 
     & \text{(bottom)}
     \graitem
-    \tau
+    \flpresent \tau
     & \text{(present)}
     \graitem
     \flabsent 
     & \text{(absent)}
 \end{align*}
-$$ \flrec{ \overline{\ell : \tau_\ell} } \defeq \flrec{ \overline{\ell : \tau_\ell} \mid \flftop } $$
-\caption{Types $\tau$ (def. coinductively \cite{castagna-polymorphic-variants}) and field types $\phi$.}
+$$ \flrec{ \overline{\ell : \phi_\ell} } \defeq \flrec{ \overline{\ell : \phi_\ell} \mid \flftop } $$
+\caption{Types $\tau$ (def. coinductively \cite{castagna-polymorphic-variants}) and field types $\phi$. \\ For brevity, we sometimes write $\flpresent \tau$ as $\tau$.}
 \label{fig:featherweight-lua-types}
 \end{subfigure}

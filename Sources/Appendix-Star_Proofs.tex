@@ -1,2 +1,146 @@
-\chapter{Proof of Type Safety for Star}
+\chapter{Type safety of Star}
 \label{extra:star-proofs}
+
+I give the proof of type safety theorems in the simply-typed case without parametric polymorphism. I give some useful lemmas and prove the Progress and Preservation theorems.
+
+These are largely an extension of the proofs given by \textcite{tapl} for $\lambda_{<:}$ (simply-typed lambda calculus with subtyping and records). We additionally consider variants and Star's arrays.
+
+In the following text, $\Gamma \vdash e :: \tau$ states that the \textit{strongest} (least in the type lattice) type of $e$ is $\tau$, defined: 
+$$ \Gamma \vdash e :: \tau \iff \left( \forall \tau' \ldotp \Gamma \vdash e : \tau' \implies \tau \sub \tau' \right) $$ 
+For a value, any typing derivation that does not apply \textsc{Sub} yields the strongest type.
+
+\section{Lemmas}
+
+We start with a standard substitution lemma. Besides functions, it is also used for array comprehensions.
+\begin{lemma}[Substitution]
+    If $\Gamma \vdash e : \tau$ and $\Gamma, x : \tau \vdash e' : \tau'$, then $\Gamma \vdash [e/x]e' : \tau'$.
+\end{lemma}
+\begin{proof}
+By straightforward induction on the derivation of $\Gamma, x : \tau \vdash e' : \tau'$. 
+\end{proof}
+
+We also include lemmas about values -- their canonical form given their type and that they do not reduce.
+\begin{lemma}[Canonical forms]
+    We have the following canonical forms for well-typed values $v$: \begin{itemize}
+        \item If $\Gamma \vdash v : \mathrm{int}$, then $v = n$.
+        \item If $\Gamma \vdash v : \mathrm{float}$, then $v = f$.
+        \item If $\Gamma \vdash v : \tau \to \tau'$, then $v = \lambda x \ldotp e$.
+        \item If $\Gamma \vdash v : \srecordtype{\overline{\ell : \tau}}$, then $v = \srecordval{\overline{\ell = v_\ell}, \dots}$ (up to ordering).
+        \item If $\Gamma \vdash v : \svarianttype{\overline{T : \tau_T}}$, then $v = T\,v_T$. In particular, we have $\Gamma \vdash v_T : \tau_T$ and $\Gamma \vdash v :: \svarianttype{T : \tau_{T}}$.
+        \item If $\Gamma \vdash v : \sarraytype{\sigma_1}{\sigma_2}{\tau}$, then $v = \sarrayval{\vess}{I}$. In particular, there exist $\sigma$ such that $\sigma_1 \sub \sigma \sub \sigma_2$ and $\Gamma \vdash v :: \suniarraytype{\sigma}{\tau}$.
+        \item If $\Gamma \vdash v : \ssized$, then $v = \ssize n$.
+        \item If $\Gamma \vdash v : \sproducttype{\overline{\ell : \tau}}$, then $v = \sproductval{\overline{\ell = v_\ell}, \dots}$ (up to ordering).
+        \item If $\Gamma \vdash v : \sconcattype{\overline{\ell : \tau}}$, then $v = \sconcatval{\overline{\ell = v_\ell}, \dots}$ (up to ordering).
+    \end{itemize}
+\end{lemma}
+\begin{proof}
+    By inversion on the typing derivation $\Gamma \vdash v : \tau$, eliminating impossible cases which do not match the syntax of values. Where the implicit subtyping rule is applied at the end of a derivation, we proceed from the subtype. 
+    
+    Note that as noted canonical forms might have a stronger type than advertised by the well-typedness assumption -- in particular, records (analogously products and concatenations) might contain more fields than in their type (we denote these by $\dots$). This follows from the subtyping rules.
+\end{proof}
+
+\begin{lemma}[Values are normal forms]
+    For any value $v$ there exist no $e$ such that $v \leadsto e$, nor $v \leadsto \lightning$.
+\end{lemma}
+\begin{proof}
+    By routine check of axioms and rules of $\leadsto$.
+\end{proof}
+
+We then assert that our subtyping relation is well-behaved.
+\begin{lemma}[Subtyping lattice]
+    The relation $\sub$ together with appropriate meets $\meet$ and joins $\join$ forms a distributive lattice $(\sub, \top, \bot, \meet, \join)$.
+\end{lemma}
+\begin{proof}
+    By routine check of all the axioms of a distributive lattice. We also need to construct meets $\meet$ and joins $\join$ and show that they agree with the subtyping order. 
+    
+    We briefly consider just the cases specific to Star for the construction of $\meet$ and $\join$. Product and concatenation shapes behave exactly as records under subtyping, so their their meet takes the union of fields and the elementwise meet of field types. For arrays:
+    $$ \sarraytype{\sigma_1'}{\sigma_2'}{\tau'} \meet \sarraytype{\sigma_1''}{\sigma_2''}{\tau''} \stackrel{\mathrm{def}}{=} \sarraytype{(\sigma_1' \join \sigma_1'')}{(\sigma_2' \meet \sigma_2'')}{(\tau' \meet \tau'')} $$
+    Joins are constructed analogously.
+\end{proof}
+Due to transitivity of $\sub$ (by \textsc{Trans}), we can replace repeated application of \textsc{Sub} with one. Subtyping forming a distributive lattice is also a necessary assumption for algebraic subtyping to apply.
+
+Lastly, we specify crucial lemmas about indexing -- particularly the correspondence of the structurally-in-bounds relation $\inbstr$ with typing.
+
+\begin{lemma}[Typing agrees with indexing]
+    $\cdot \vdash s :: \sigma$ and $\cdot \vdash v : \iota(\sigma)$ if and only if $v \inbstr s$.
+\end{lemma}
+\begin{proof}
+    Right to left is a straightforward check by structural induction on $v$ and $s$.
+    The other direction follows by structural induction on the typing derivations of $s$ and $v$, checking that appropriate cases of $\inbstr$ follow. Avoiding loss of information about $s$ by considering its strongest type ensures that $v$ contains all the necessary dimensions (and possibly more). 
+\end{proof}
+
+It is worth noting that given an array of type $\sarraytype{\sigma_1}{\sigma_2}{\tau}$, for its shape's strongest type $\sigma$ it follows $\sigma_1 \sub \sigma \sub \sigma_2$. Thus, for any index of type $\eta \sub \iota(\sigma_1)$ we also have $\eta \sub \iota(\sigma)$ and the lemma holds for $v$ and the array's shape -- this is key to our proof of Progress.
+
+\begin{lemma}[Casting is idempotent]
+    If $v \inbs s$, then $$\scast{(\scast{v}{s})}{s} = \scast{v}{s}$$
+\end{lemma}
+
+\begin{lemma}[In-bounds relations agree with indexing]
+    If $v \inbs s$, then $(\scast{v}{s}) \inbs s$ -- in particular, $(\scast{v}{s}) \inbsp s$. 
+\end{lemma}
+As a consequence, if an index $v$ occurs in the bounds of the shape $s$ ($v \inbs s$) of an array $\sarrayval{s}{I}$, then \textsc{StepIndex} is sound (as $\scast{v}{s}$ is indeed in the domain of $I$).
+
+\begin{lemma}[Covariance of $\iota$]
+    If $\sigma \sub \sigma'$, then $\iota(\sigma) \sub \iota(\sigma')$.
+\end{lemma}
+\begin{proof}
+    By structural induction on $\sigma$ and $\sigma'$, with the proof following by rules of $\sub$ and definition of $\iota$.
+\end{proof}
+
+\section{Theorems}
+
+\begin{theorem}[Preservation]
+    If $\Gamma \vdash e : \tau$ and $e \leadsto e'$, then $\Gamma \vdash e' : \tau$.
+\end{theorem}
+\begin{proof}
+We perform induction on $\Gamma \vdash e : \tau$. A common case is where we find the reduction $e \leadsto e'$ derived from \textsc{Cong}, we can usually finish by inductive hypothesis -- which states the subject of \textsc{Cong} preserves the type. The most interesting case is \textsc{Array}, where we have to carry through the type of each array element via the Substitution lemma.
+
+\begin{description}
+    \item[Case \textsc{Sub}] We have $\Gamma \vdash e : \tau'$ for some $\tau' \sub \tau$. Since $e \leadsto e'$ we can invoke the inductive hypothesis and obtain $\Gamma \vdash e' : \tau'$ immediately, and finish by \textsc{Sub}.
+    \item[Case \textsc{Var}] Impossible -- no $\leadsto$ rule applies to variables.
+    \item[Case \textsc{Int}, \textsc{Float}] Cannot happen -- $e$ is a value.
+    \item[Case \textsc{Let}] By inversion on $\leadsto$, either \textsc{StepLet} or \textsc{Cong} apply. In the former case, we finish by Substitution.
+    \item[Case \textsc{Lambda}] Cannot happen -- $e$ is a value.
+    \item[Case \textsc{Apply}] By inversion on $\leadsto$, we reduce by \textsc{StepApply} -- and can finish by Substitution.
+    \item[Case \textsc{Record}] By inversion on $\leadsto$, only \textsc{Cong} applies and we finish immediately.
+    \item[Case \textsc{RecordProj}] By inversion on $\leadsto$,  \textsc{StepRecordProj} or \textsc{Cong} apply to our expression $e = e^*{.}\ell$. In the former, we must have $e^* = v^* = \srecordval{\overline{\ell = v_\ell}}$, so that $\Gamma \vdash e : \srecordtype{\ell : \tau_\ell}$, $\tau = \tau_\ell$ and $e' = v_\ell$. Since $e$ is well-typed, we must have $\Gamma \vdash v_\ell : \tau_\ell$ as required.
+    \item[Case \textsc{Tag}] By inversion on $\leadsto$, only \textsc{Cong} applies.
+    \item[Case \textsc{Match}] Similarly to the dual \textsc{RecordProj}. By inversion, we either have \textsc{Cong} (immediate) or \textsc{StepMatch}, in which case $e = \smatch{T\,v}{\overline{T \Rightarrow e_T}}$ for some value $v$ (canonical form $T\,v$ of the match target). Since $e \leadsto e'$, it must be that $e' = [v/x]e_T$ (\textsc{StepMatch}) and we finish by Substitution at $\Gamma, x : \tau_T \vdash e_T : \tau$ (assumption of \textsc{Match}).
+    \item[Case \textsc{Array}] We have $\tau = \suniarraytype{\sigma}{\tau^*}$. By inversion on $\leadsto$, either we evaluate the shape via \textsc{Cong} (and finish immediately), or return an array via \textsc{StepArray}. We check the latter -- $e = \sbuild{x}{\eess}{e^*}$, $e' = \sarrayval{\vess}{J}$, and we have the inductive hypothesis at each element $v \mapsto e_v$ in $J$. By the inductive case $e$ is typed via \textsc{Array}, so we have a well-typed shape value $\Gamma \vdash \vess : \sigma$ and know $\Gamma, x : \iota(\sigma) \vdash e^* : \tau^*$. \textsc{StepArray} reduces via indices $v$ such that $v \inbs \vess$, from which we know it follows $\Gamma \vdash v : \iota(\sigma)$. By the inductive hypothesis and Substitution at $e_v = [v/x]e^*$ it thus follows that $\Gamma \vdash e_v : \tau^*$ at all $v$. We thus ascribed the right types to both the shape $\vess$ and all elements $v \mapsto e_v$ of $J$ and we are done via \textsc{ArrayLit}.
+    \item[Case \textsc{Index}] By inversion on $\leadsto$ we either have \textsc{Cong} or \textsc{StepIndex}, checking the latter. In that case $e = v[e^\circ]$ where $\Gamma \vdash v : \sarraytype{\sigma_1}{\sigma_2}{\tau}$ and $\Gamma \vdash e^\circ : \iota(\sigma_1)$. we know $v = \sarrayval{\vess}{I}$ (canonical form). Since $v$ must be well-typed (by inversion, with \textsc{ArrayVal}), each value in $I$ -- including $v'$ -- must have type $\tau$, finishing the case.
+    \item[Case \textsc{Shape}] Similarly to \textsc{Index} -- in \textsc{StepShape} we must have the canonical form $e = v = \sarrayval{\vess}{I}$, with $\Gamma \vdash e : \sarraytype{\sigma_1}{\sigma_2}{\tau}$, $\Gamma \vdash v : \suniarraytype{\sigma}{\tau}$ for some $\sigma_1 \sub \sigma \sub \sigma_2$, and $e' = \vess$. But then we immediately have $\Gamma \vdash \vess : \sigma$ and $\sigma \sub \sigma_2$ as required so $\Gamma \vdash \vess : \sigma_2$ by \textsc{Sub}.
+    \item[Case \textsc{Broadcast}] We check \textsc{StepBroadcast}. By the definition of broadcasting we find that if it does not get stuck, the result must be of type $\sigma \meet \sigma'$.
+    \item[Case \textsc{Sized}] By inversion on $\leadsto$, only \textsc{Cong} applies.
+    \item[Case \textsc{Product}, \textsc{Concat}] Analogously to \textsc{Record}.
+    \item[Case \textsc{ProductProj}, \textsc{ConcatProj}] Like \textsc{RecordProj}.
+\end{description}
+\end{proof}
+
+\begin{theorem}[Progress]
+    If $\cdot \vdash e : \tau$, then either $e$ is a value, $e \leadsto e'$ for some $e'$, or $e \leadsto \lightning$.
+\end{theorem}
+\begin{proof}
+As before, we apply induction on $\cdot \vdash e : \tau$. Note that $e$ is necessarily closed, since $\Gamma$ is empty. Where we say we can proceed by \textsc{Cong}, \textsc{CongErr} might instead apply if an error is raised -- this still meets the condition in the statement of the theorem. The most interesting case is \textbf{\textsc{Index}}, where we make use of the lemma that typing agrees with the structurally-in-bounds relation $\inbstr$.
+
+\begin{description}
+    \item[Case \textsc{Sub}] Finish by immediate application of the inductive hypothesis at the assumption of \textsc{Sup}, $\cdot \vdash v : \tau' \super \tau$. 
+    \item[Case \textsc{Var}] Impossible -- no $\leadsto$ rule applies to variables.
+    \item[Case \textsc{Int}, \textsc{Float}] Immediate, since $e$ must be a value.
+    \item[Case \textsc{Let}] If the let-bound expression is not a value, then we finish by the inductive hypothesis and $\textsc{Cong}$. Otherwise, we finish by \textsc{StepLet}.
+    \item[Case \textsc{Lambda}] Immediate, since $e = \lambda x \ldotp e'$ is a value.
+    \item[Case \textsc{Apply}] Let $e = e'\,e''$. If either $e'$ or $e''$ are not values, then \textsc{Cong} applies. Otherwise $e = v'\,v''$. But $\cdot \vdash v' : \tau'' \to \tau$ (assumption of \textsc{Apply}) and we know $v'$ is in canonical form $v' = \lambda x \ldotp e^*$, so we can finish by \textsc{StepApply}.
+    \item[Case \textsc{Record}] If not all expressions occurring in fields are values, we can proceed by \textsc{Cong}. Otherwise, $e$ is already a value. 
+    \item[Case \textsc{RecordProj}] Let $e = e^*{.}\ell$. If $e^*$ is not a value, we can apply \textsc{Cong}. Otherwise, $e^* = v^*$ and by assumption of \textsc{RecordProj}, $\cdot \vdash v^* : \{ \ell : \tau \}$, so $v^* = \srecordval{\ell = v, \dots}$. Thus $\ell$ occurs in $v^*$ and we finish by \textsc{StepRecordProj}.
+    \item[Case \textsc{Tag}] Similarly to \textsc{Record}: if the tagged expression is not a value, we \textsc{Cong}. Otherwise, $e$ is a value.
+    \item[Case \textsc{Match}] Dually to \textsc{RecordProj}: since the expression is well-typed, the target of the match is a tagged value that does occur in the case list, and we can finish by \textsc{StepMatch}.
+    \item[Case \textsc{Array}] Let us assume shape $\vess$ is already a value (otherwise we have a \textsc{Cong}) in $e = \sbuild{x}{\vess}{e^*}$ with $\tau = \suniarraytype{\sigma}{\tau}$ and $\cdot \vdash \vess : \sigma$, $\cdot \vdash e : \tau$. In that case, we can immediately finish by \textsc{StepArray}.
+    \item[Case \textsc{ArrayLit}] Either the array literal is already a value -- if all the elements in $J$ have been evaluated -- or we can evaluate by \textsc{Cong}.
+    \item[Case \textsc{Index}] Without loss of generality, let us take both operands to be values -- otherwise, \textsc{Cong} applies. Let $e = v[v']$ so that $\cdot \vdash v : \sarraytype{\sigma_1}{\sigma_2}{\tau}$ and $\cdot \vdash v' : \iota(\sigma_1)$ (assumptions of \textsc{Index}). Then $v = \sarrayval{\vess}{I}$ (canonical), so that in particular $\cdot \vdash \vess :: \sigma$ and $\cdot \vdash v : \suniarraytype{\sigma}{\tau}$ where $\sigma_1 \sub \sigma \sub \sigma_2$. But since $\sigma_1 \sub \sigma$ and thus $\iota(\sigma_1) \sub \iota(\sigma)$, by \textsc{Sub} we also have $\cdot \vdash v' : \iota(\sigma)$. Invoking the agreement of typing and in-bounds lemma on $v'$ and $s$, we immediately get that $v' \inbstr s$. There remain two cases: either $v' \inbs s$, in which case we finish by \textsc{StepIndex} as $v'$ must be in the domain of $I$ (each index $v^*$ in the domain has $v^* \inbs s$ thus $v^* \inbstr s$). Otherwise, $v'$ is not in-bounds up to integer indices, i.e.\@ $\lnot(v' \inbs s) \land (v' \inbstr s)$, and we get \textsc{StepIndexErr}. 
+    \item[Case \textsc{Shape}] Let $e = \sshape{e^*}$. If $e^*$ is not a value, \textsc{Cong}. Otherwise, \textsc{StepShape}.
+    \item[Case \textsc{Broadcast}] If both operands are not already values, \textsc{Cong}. Otherwise, \textsc{StepBroadcast} or \textsc{StepBroadcastErr} apply -- with the two cases exclusive, depending on whether $\broadcast$ is defined.
+    \item[Case \textsc{Sized}] If $e$ is not already a value, we apply \textsc{Cong}.
+    \item[Case \textsc{Product}, \textsc{Concat}] Like \textsc{Record}.
+    \item[Case \textsc{ProductProj}, \textsc{ConcatProj}] Like \textsc{RecordProj}.
+\end{description}
+\end{proof}
+

@@ -1,57 +1,59 @@
 $$ \boxed{c \step c} $$
 $$ \renewcommand\arraystretch{1.5} \begin{array}{cr}
-\dfrac{\tau_1 \equiv \tau_1' \quad \tau_2 \equiv \tau_2'}{\tau_1 \sub \tau_2 \to \tau_1' \sub \tau_2'} 
+\dfrac{\tau_1 \equiv \tau_1' \quad \tau_2 \equiv \tau_2'}{\tau_1 \sub \tau_2 \step \tau_1' \sub \tau_2'} 
 & \text{(equivalence)}
 \\[4pt]
-\tru \und c \to c 
+\tru \und c \step c 
 & \text{(identity $\tru$ of $\undsym$)}
 \\
-\fals \und c \to \fals
+\fals \und c \step \fals
 & \text{(annihilating $\fals$ of $\undsym$)}
 \\
-c \und (c' \und c'') \to (c \und c') \und c'' 
+c \und (c' \und c'') \step (c \und c') \und c'' 
 & \text{(associative $\undsym$)}
 \\
-c \und c' \to c' \und c
+c \und c' \step c' \und c
 & \text{(commutative $\undsym$)}
 \\
-c \und c \to c
+c \und c \step c
 & \text{(idempotent $\undsym$)}
 \\
-\exists \alpha \ldotp \tru \to \tru 
+\exists \alpha \ldotp \tru \step \tru 
 \quad
-\exists \alpha \ldotp \fals \to \fals
-\quad
-(\exists \alpha \ldotp c) \und c' \to \exists \alpha \ldotp (c \und c')
-& \text{(homomorphism $\exists$ of $\undsym$)}
+\exists \alpha \ldotp \fals \step \fals
+& \text{(always-exists)}
 \\
-\tau \sub \tau' \und \tau' \sub \tau'' \to (\tau \sub \tau' \und \tau' \sub \tau'') \und \tau \sub \tau'' 
+(\exists \alpha \ldotp c) \und c' \step \exists \alpha \ldotp (c \und c')
+& \text{(factor-out)}
+\\ 
+\tau \sub \tau' \und \tau' \sub \tau'' \step (\tau \sub \tau' \und \tau' \sub \tau'') \und \tau \sub \tau'' 
 & \text{(transitivity)}
 \\
 T'\left[\overline {\tau'}\right] \sub T''\left[\overline {\tau''}\right] 
-\to T'\left[\overline {\tau'}\right] \triangleleft T''\left[\overline {\tau''}\right]
+\step T'\left[\overline {\tau'}\right] \triangleleft T''\left[\overline {\tau''}\right]
 & \text{(decomposition)}
 \\
-\comp \tau \sub \tau' \leftrightarrow \comp \tau' \sub \tau 
+\comp \tau \sub \tau' \step \comp \tau' \sub \tau  \quad \comp \tau' \sub \tau \step \comp \tau \sub \tau'
 & \text{(negation)}
 \\
-\tau \meet \tau' \sub \tau'' \to \tau \sub \comp \tau' \join \tau''
+\tau \meet \tau' \sub \tau'' \step \tau \sub \comp \tau' \join \tau''
 \qquad
-\tau \sub \tau' \join \tau'' \to \tau \meet \comp \tau' \sub \tau''
+\tau \sub \tau' \join \tau'' \step \tau \meet \comp \tau' \sub \tau''
 & \text{(swapping)}
 \\
-\tau' \join \tau'' \sub \tau \to \tau' \sub \tau \und \tau'' \sub \tau
+\tau' \join \tau'' \sub \tau \step \tau' \sub \tau \und \tau'' \sub \tau
 \qquad
-\tau \sub \tau' \meet \tau'' \to \tau \sub \tau' \und \tau \sub \tau''
+\tau \sub \tau' \meet \tau'' \step \tau \sub \tau' \und \tau \sub \tau''
 & \text{(splitting)} 
 \\
-\tau' \sub \tau \und \tau'' \sub \tau \to \tau' \join \tau'' \sub \tau
+\tau' \sub \tau \und \tau'' \sub \tau \step \tau' \join \tau'' \sub \tau
 \qquad
-\tau \sub \tau' \und \tau \sub \tau'' \to \tau \sub \tau' \meet \tau''
+\tau \sub \tau' \und \tau \sub \tau'' \step \tau \sub \tau' \meet \tau''
 & \text{(combining)} 
 \\[4pt]
 \dfrac{c \step c'}{C[c] \step C[c']}
 & \text{(congruence)} 
-\\
+\\[4pt]
+\solvectx ::= \ctxhole \mid \solvectx \und c \mid c \und \solvectx \mid \exists \alpha \ldotp \solvectx 
+& \text{(solving contexts)}
 \end{array} $$
-$$ \solvectx ::= \ctxhole \mid \solvectx \und c \mid c \und \solvectx $$

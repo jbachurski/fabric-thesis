@@ -1,20 +1,23 @@
 \chapter{Conclusions}
 \label{conclusions}
 
-I set out to show that structural subtyping is an interesting and rich approach to designing flexible type systems. For my approach, I applied both programming language theory and practical design.
+I set out to show that structural subtyping is an interesting and rich approach to designing flexible type systems. I addressed this with techniques from both theory of programming languages and practical design.
 
-From the theoretical side, I argued formally that structural subtyping takes us closer towards the flexibility of dynamic languages -- as opposed to nominally typed approaches -- by giving the FL-FJ translation (Chapter~\ref{static-soul}). I also contributed to the state-of-the-art of type inference under subtyping by formulating it as a general framework, \textbf{\inference{}} (Chapter~\ref{algebraic-subtyping}). 
-I gave a novel extension to this approach -- hence unlocking a new solution to the record update problem. Thus, I widened the range of language features that can be type-checked without annotations -- mirroring the convenience of dynamically typed programming.
+From the theoretical side, I demonstrated that structural subtyping takes us closer towards the flexibility of dynamic languages by giving the FJ-FL translation (Chapter~\ref{static-soul}). 
+I built a constraint-based type inference framework for languages with structural subtyping, \textbf{\inference{}}, deriving from \emph{algebraic subtyping} (Chapter~\ref{algebraic-subtyping}). 
+It generalises prior work and has a simpler presentation, giving clear requirements for the type system.
+By extending the type language of existing systems in a novel way (with \emph{homomorphism applications}), I unlocked a new solution to the record update problem. 
+Thus, I widened the range of language features that can be conveniently type-checked without annotations.
 
-From the practical side, I proposed a design of a general-purpose language with structural subtyping -- \textbf{Fabric} (Chapter~\ref{fabric}). 
-Furthermore, I gave a prototype implementation for its compiler, including my proposed approach to type inference, investigating a modern compilation target (\textsc{WebAssembly}).
-Lastly, I gave a novel design for a statically typed array calculus, \textbf{Star}, which makes rich use of structural subtyping (Chapter~\ref{star}). Its design reveals an unexplored area in the space of array languages, serving as a middle-ground between an untyped (and thus unsafe) discipline, and complicated (but safe) dependently-typed systems. 
+From the practical side, I designed a functional language with structural subtyping -- \textbf{\fabric} (Chapter~\ref{fabric}). 
+I implemented a compiler targeting \wasm{} for it -- \compiler{} -- including my type inference framework (\inference{}).
+Lastly, I gave a novel array calculus design -- \textbf{\starr{}} (Chapter~\ref{star}). It uniquely features array shapes and indices that exploit structural subtyping, providing safety while admitting type inference with \inference{}. It thus serves as a new middle-ground between the conventional untyped discipline (flexible -- but unsafe), and complicated (but safe) dependently-typed systems. 
 
 \paragraph{Further work} I identify the following directions for further work as most interesting: \begin{itemize}
-    \item Formally proving the correctness of algebraic subtyping using the clear constraint-based presentation -- particularly for the extension of the type language with homomorphism applications. 
-    \item Determining the scope of type system features expressible using homomorphisms: I only propose concrete uses for typing extensible records (FL) and expressing an isomorphism between types (Star).
-    \item With the theory of type inference developed, it would be exciting to use it to for typing real-world languages -- particularly ones that provide optional type systems, like Python or Lua.
-    \item Lastly, exploring Star further promises several interesting problems. Implementing and using it in practice (e.g.\@ extending Futhark, or by embedding in Python) might lead to interesting conclusions, and there still remain interesting theoretical problems to address -- like efficient code generation, shape inference and recursive index types.
+    \item Fully proving the correctness of constraint-based algebraic subtyping presentation -- particularly in presence of homomorphism applications. 
+    \item Determining the scope of type system features expressible using homomorphisms, besides extensible records (FL) and type isomorphisms (\starr{}).
+    \item With \inference{} developed, it would be exciting to use it to for typing real-world dynamic languages, like Python or Lua (as done with set-theoretic types \cite{set-theoretic-types-for-elixir, set-theoretic-types-for-erlang, castagna-dynamic}).
+    \item Implementing \starr{} in practice (e.g.\@ extending Futhark \cite{futhark}, embedding in Python \cite{ein}), which leads to interesting problems: performant code generation, shape inference, and recursive indices.
 \end{itemize}
 
-Despite the age of this natural idea, I argue that structural subtyping should be revisited as an effective way for designing practical type systems. Likewise, it still leads to many interesting theoretical questions.
+Despite the age of this natural idea, structural subtyping should be revisited as an effective way for designing practical type systems. Likewise, it still leads to many interesting theoretical questions.
