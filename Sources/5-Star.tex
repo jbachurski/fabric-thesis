@@ -14,7 +14,7 @@ The key idea of \starr{} follows my thesis: I designed its array indices and sha
 In this chapter (based on a paper of the same name \cite{star}), I describe the following contributions: \begin{itemize}
     \item A novel design for an array calculus – \starr{} – which features subtyping and structural types for array shapes. I motivate it in Section~\ref{sec:design} and elaborate in Section~\ref{sec:calculus}.
     \item A formalisation of with an operational semantics (Section~\ref{subsec:semantics}), type system (Section~\ref{sec:typing};  \emph{without parametric polymorphism}), and proven type safety (Section~\ref{subsec:type-safety}).
-    \item Finally, in Section~\ref{subsec:type-inference} I describe how to bestow \starr{} (extended with parametric polymorphism) with ML-style type inference in terms of the \inference{} framework from Chapter \ref{algebraic-subtyping}.
+    \item Finally, in Section~\ref{subsec:type-inference} I describe how to bestow \starr{} (\emph{with parametric polymorphism}) with ML-style type inference using \inference{} (Chapter~\ref{algebraic-subtyping}), testing it in practice with \compiler{} (Chapter~\ref{fabric}).
 \end{itemize}
 
 \section{Design}
@@ -251,7 +251,7 @@ Successful executions eventually reduce to a value $v$ (Figure~\ref{fig:star-val
 \begin{table}[t]
     \centering
     \input{Sources/4-Figures/Star-shape-index-examples}
-    \caption{Examples of shapes and matching indices. Given a shape of type $\sigma$ on the left, we have an index of type $\iota(\sigma)$ on the right.}
+    \caption{Example shapes with matching indices. For a shape of type $\sigma$ on the left, an index of type $\iota(\sigma)$ is on the~right.}
     \label{tab:shape-index-examples}
 \end{table}
 
@@ -290,7 +290,7 @@ Afterwards, I state type safety for \starr{} in Section~\ref{subsec:type-safety}
 
 Recall that in Section~\ref{subsec:shape-bounds} we determined that integers index into sized shapes, records into product shapes, and variants into concatenation shapes. This happens both at the value- and type-level, with examples in Table \ref{tab:shape-index-examples}.
 
-While in basic array type systems it is sufficient to presume that the type of a shape $\sigma$ and a matching index $\eta$ are the same, in \starr{} this is clearly not the case. We thus use a $\iota$ metafunction on types (defined in Figure \ref{fig:iota}): given a shape type $\sigma$, $\eta = \iota(\sigma)$ is the supertype of all matching index types for $\sigma$.
+While in basic array type systems it is sufficient to presume that the type of a shape $\sigma$\footnote{Note that in Chapter \ref{algebraic-subtyping} we denoted type schemes with $\sigma$, as is standard. In this chapter, except for one use in Section~\ref{subsec:type-inference}, $\sigma$ is always a shape type -- matching the paper.} and a matching index $\eta$ are the same, in \starr{} this is clearly not the case. We thus use a $\iota$ metafunction on types (defined in Figure \ref{fig:iota}): given a shape type $\sigma$, $\eta = \iota(\sigma)$ is the supertype of all matching index types for $\sigma$.
 
 Constructing $\iota$ is unsurprising -- similar concepts often arise when generalising array-like structures, e.g.\@ \textit{containers} \cite{containers} or Naperian (representable) functors, which \textcite{naperian-apl} has found useful for statically modelling certain patterns of array programming. To the author's knowledge, neither of these had led to the key ideas present in \starr{}.
 
@@ -301,7 +301,7 @@ Constructing $\iota$ is unsurprising -- similar concepts often arise when genera
     \label{fig:iota}
 \end{figure}
 
-\paragraph{Splitting $\sigma$} Consider \starr{}'s array types, which have the syntax $\sarraytype{\sigma_1}{\sigma_2}{\tau}$ for $\sigma_1 \sub \sigma_2$. They are carefully constructed to provide useful subtyping with a technique used by both \textcite{dolan-thesis} and \textcite{pottier-thesis} (which they use for typing mutable reference types). The crux is to split the shape $\sigma$ in $\sonebound{\sigma}\tau$ into a contravariant part $\sigma_1$ and covariant part $\sigma_2$, so that indexing uses $\sigma_1$, and accessing the shape returns a $\sigma_2$. A simpler array type like $\sonebound{\sigma}\tau$ (which we write to abbreviate $\sarraytype{\sigma}{\sigma}{\tau}$) array types would cause them to be invariant.\todo[color=purple]{cite paper} Notice that by requiring $\sigma_1 \sub \sigma_2$ there is a $\sigma$ such that $\sigma_1 \sub \sigma \sub \sigma_2$: we have an \emph{actual} shape $\sigma$ into which we index with $\iota(\sigma_1) \sub \iota(\sigma)$, and when accessing the shape we only obtain one of type $\sigma_2 \super \sigma$.
+\paragraph{Splitting $\sigma$} Consider \starr{}'s array types, which have the syntax $\sarraytype{\sigma_1}{\sigma_2}{\tau}$ for $\sigma_1 \sub \sigma_2$. They are carefully constructed to provide useful subtyping with a technique used by both \textcite{dolan-thesis} and \textcite{pottier-thesis} (which they use for typing mutable reference types). The crux is to split the shape $\sigma$ in $\sonebound{\sigma}\tau$ into a contravariant part $\sigma_1$ and covariant part $\sigma_2$, so that indexing uses $\sigma_1$, and accessing the shape returns a $\sigma_2$. The obvious array type, $\sonebound{\sigma}\tau$ (which we write to abbreviate $\sarraytype{\sigma}{\sigma}{\tau}$), would necessarily be invariant \cite[Appendix~B]{star}. Note that by requiring $\sigma_1 \sub \sigma_2$ there is a $\sigma$ such that $\sigma_1 \sub \sigma \sub \sigma_2$: we have an \emph{actual} shape $\sigma$ into which we index with $\iota(\sigma_1) \sub \iota(\sigma)$, and but accessing it we only obtain $\sigma_2 \super \sigma$.
 
 \paragraph{Broadcasting}
 Our presented subtyping order forms a distributive lattice, in line with algebraic subtyping. 
@@ -324,11 +324,11 @@ To show my design of \starr{} is well-behaved, I state and prove type safety for
 
 I prove these theorems in Appendix \ref{extra:star-proofs}, but they follow straightforwardly by structural induction. The key lemma shows agreement between the subtyping relation $\sub$ and the structurally-in-bounds relation $\inbstr$.
 
-
+\needspace{4em}
 \subsection{Type inference \& polymorphism}
 \label{subsec:type-inference}
 
-It turns out that \starr{}'s subtyping relation both forms a distributive lattice\todo{closure!}, and $\iota$ forms a type algebra isomorphism.
+It turns out that \starr{}'s subtyping relation both forms a distributive lattice\todo[color=green]{closure!}, and $\iota$ forms a type algebra isomorphism.
 Thus, we can apply the type inference framework developed in Chapter \ref{algebraic-subtyping}. 
 
 Though I do not give a complete description of a polymorphic \starr{} calculus, I show a sketch of constraint generation for \starr{} in Figure \ref{fig:star-type-constraints}. We extend $\iota$ to be an involutive isomorphism in the algebra of types ($\iota^{-1} = \iota$, i.e.\@ $\iota$ swaps corresponding shapes and types), so that $\ladj \iota = \radj \iota = \iota$ and $\ladjrest \iota = \radjrest \iota = \tru$.
@@ -344,7 +344,7 @@ On the other hand, given:
 $$ e' = \sbuild{x}{\sproductval{a = \ssize 5}}{x.{b}} $$
 a type error is raised due to the constraint $\iota(\srecordtype{b : \sint}) \sub \sproducttype{a : \ssized}$ (dimension mismatch).
 
-Usability is mainly limited by type scheme simplification (Section \ref{subsec:simplification}), particularly of redundant type variables. While the returned polymorphic type schemes are correct, they are difficult to read for the user. This shortcoming is mainly due to time constraints, as it is clear the type schemes to simplify by-hand.
+Usability is mainly limited by type scheme simplification (Section \ref{subsec:simplification}), particularly of redundant type variables. While the returned polymorphic type schemes are correct, they are difficult to read for the user. This shortcoming is mainly due to time constraints, as it is easy to simplify the type schemes by hand.
 
 
 \begin{figure}
@@ -358,7 +358,7 @@ Usability is mainly limited by type scheme simplification (Section \ref{subsec:s
 
 \section{Case study}
 
-To display the features of \starr{} and its elegance in expressing common array programming patterns, we consider a case study of an array program -- and contrast to similar systems.\todo[color=red]{todo}
+To display the features of \starr{} and its elegance in expressing common array programming patterns, we consider a case study of an array program -- and contrast it to presently used languages.\todo[color=red]{todo}
 
 \section{Conclusions}
 

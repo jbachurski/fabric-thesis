@@ -1,0 +1,35 @@
+\chapter{Code generation for Fabric}
+
+The OCaml program using \textsc{Binaryer} in Figure \ref{fig:binaryer-example} produces \wasm{} code with the following textual representation:
+\begin{verbatim}    
+(module
+ (type $0 (struct (field (mut i32)) (field i32)))
+ (type $1 (func (param i32)))
+ (type $2 (func))
+ (import "spectest" "print_i32" (func $print_i32 (type $1) (param i32)))
+ (memory $__memory__ 10 10)
+ (export "main" (func $__fun1))
+ (start $__fun1)
+ (func $__fun1 (type $2)
+  (local $0 anyref)
+  i32.const 42
+  i32.const 1295
+  struct.new $0
+  local.set $0
+  local.get $0
+  ref.cast (ref $0)
+  local.get $0
+  ref.cast (ref $0)
+  struct.get $0 0
+  local.get $0
+  ref.cast (ref $0)
+  struct.get $0 1
+  i32.add
+  struct.set $0 0
+  local.get $0
+  ref.cast (ref $0)
+  struct.get $0 0
+  call $print_i32
+ )
+)
+\end{verbatim}

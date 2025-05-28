@@ -13,11 +13,12 @@ From the practical side, I designed a functional language with structural subtyp
 I implemented a compiler targeting \wasm{} for it -- \compiler{} -- including my type inference framework (\inference{}).
 Lastly, I gave a novel array calculus design -- \textbf{\starr{}} (Chapter~\ref{star}). It uniquely features array shapes and indices that exploit structural subtyping, providing safety while admitting type inference with \inference{}. It thus serves as a new middle-ground between the conventional untyped discipline (flexible -- but unsafe), and complicated (but safe) dependently-typed systems. 
 
-\paragraph{Further work} I identify the following directions for further work as most interesting: \begin{itemize}
+\paragraph{Further work}
+I identify the following directions for further work as most interesting: \begin{itemize}
     \item Fully proving the correctness of constraint-based algebraic subtyping presentation -- particularly in presence of homomorphism applications. 
     \item Determining the scope of type system features expressible using homomorphisms, besides extensible records (FL) and type isomorphisms (\starr{}).
     \item With \inference{} developed, it would be exciting to use it to for typing real-world dynamic languages, like Python or Lua (as done with set-theoretic types \cite{set-theoretic-types-for-elixir, set-theoretic-types-for-erlang, castagna-dynamic}).
     \item Implementing \starr{} in practice (e.g.\@ extending Futhark \cite{futhark}, embedding in Python \cite{ein}), which leads to interesting problems: performant code generation, shape inference, and recursive indices.
 \end{itemize}
 
-Despite the age of this natural idea, structural subtyping should be revisited as an effective way for designing practical type systems. Likewise, it still leads to many interesting theoretical questions.
+Despite the age of this natural idea, I have shown structural subtyping should be revisited as an effective way for designing practical type systems. Likewise, it still leads to many interesting theoretical questions.

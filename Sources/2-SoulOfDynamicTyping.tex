@@ -38,8 +38,8 @@ Let us distinguish two kinds of runtime type checking -- with the goal of identi
     Branching on the type (e.g.\@ Python's \texttt{isinstance}) -- common in literature on \emph{set-theoretic types} as an expression $(e \in \tau) \mathop{?} e \mathop{:} e$ \cite{castagna-dynamic} -- treats the type as data. 
     
     I exclude the principle of types as data, as it has the following conseqeuences: \begin{description}
-        \item[Lack of \emph{parametricity}] -- accessing the type of a value is always legal, i.e. it is of type $\forall \alpha \ldotp \alpha \to \textsf{Type}$. However, since the type directly impacts the result of the computation, \emph{parametricity} no longer holds: it is no longer the case a parametrically-polymorphic function performs the same computation in any type instantiation. This stops us from enjoying useful properties -- like theorems for free \cite{theorems-for-free} -- and leads to the second point.
-        \item[Lack of \emph{predictability}] -- Subjectively, code using types as data is more complicated and confusing to follow. This is reflected in attempts at static analysis -- even when we limit ourselves to branching on types, we are computationally limited by \emph{backtracking} \cite{polymorphic-set-theoretic-types, castagna-dynamic, mlstruct} -- because unions (arising in branches $e \in \tau, e \notin \tau$) need to be type-checked independently.
+        \item[Lack of \emph{parametricity}] -- accessing the type of a value is always legal, i.e. it is of type $\forall \alpha \ldotp \alpha \to \textsf{Type}$. However, since the type directly impacts the result of the computation, \emph{parametricity} no longer holds: it is no longer the case a parametrically-polymorphic function performs the same computation in any type instantiation, impeding useful properties (like theorems for free~\cite{theorems-for-free}).
+        \item[Lack of \emph{predictability}] -- Subjectively, code using types as data is more complicated and confusing to follow. This is reflected in attempts at static analysis -- even when we limit ourselves to branching on types, we are computationally limited by \emph{backtracking} \cite{polymorphic-set-theoretic-types, castagna-dynamic, mlstruct} (unions, arising in branches $e \in \tau, e \notin \tau$, need to be type-checked independently).
     \end{description}
     \item[Types as runtime guardrails] A value's type could instead be consulted only when we perform an operation on it, in order to check whether the operation is legal -- with an error raised otherwise -- similarly to how types are used in statically typed languages.     
     
@@ -255,9 +255,9 @@ Reasoning about correctness is more difficult than in the well-typed case: it is
 \end{figure}
 
 Considering structural subtyping, we use FJ in the following thought experiment: what if we \emph{erased} all the type names (FJ classes) in a nominally typed program, inlining their definitions? This process of \textbf{anonymising types} intuitively works -- and shows that nominally typed programs have within them a structurally typed heart. We focus on the case of languages with subtype polymorphism (FJ and FL) -- more complex cases (e.g.\@ like Haskell's higher-kinded polymorphism) can be difficult to combine with structural typing (cf.\@ structural subtyping of ML modules in \textcite{modular-implicits}).
-Via the FL-FJ translation in Section \ref{sec:translations} we will see that, despite its rich classes and objects, FJ is no more expressive than FL.
+Via the FJ-FL translation in Section \ref{sec:translations} we will see that, despite its rich classes and objects, FJ is no more expressive than FL.
 
-\section{Anonymising types: FL-FJ translation}
+\section{Anonymising types: FJ-FL translation}
 \label{sec:translations}
 
 To serve as groundwork for this thesis, I now build a formal understanding of the relationship between the nominal, structural, and dynamic typing disciplines. To this end, we consider a translation between the languages above -- from the nominally typed Featherweight Java into the structurally (statically) typed fragment of Featherweight Lua. 
@@ -267,7 +267,7 @@ The translation follows long-known relationships between object-oriented program
 
 \begin{figure}
     \centering
-    \input{Sources/2-Figures/FL-FJ}
+    \input{Sources/2-Figures/FJ-FL}
     \caption{The translation from Featherweight Java into the statically typed fragment of Featherweight Lua. We have translations for expressions $\denot{-} = e$ and types $\denoty{-} = \tau$. Translation of a method preserves its name, so that it may be used as a label. Translations of classes $\fj C$ make implicit use of the class table $\mathrm{CT}$ (part of any FJ program). As we know the list of fields of $\fj C_\mathrm{proto}$, we slightly abuse record extension notation.}
     \label{fig:translation}
 \end{figure}
@@ -326,10 +326,10 @@ Note that, as pointed out by \textcite{inheritance-subtyping}, inheritance is \e
 
 \subsection{Consequences}
 
-Existence of straightforward FL-FJ translations shows that even very simple structural subtyping is sufficient to capture the essence of classic object-oriented programming, as in (Featherweight) Java -- and its nominal approach to static typing.
+Existence of straightforward FJ-FL translations shows that even very simple structural subtyping is sufficient to capture the essence of classic object-oriented programming, as in (Featherweight) Java -- and its nominal approach to static typing.
 I conclude that structural types are a more flexible typing discipline, as nominal types can be straightforwardly erased from simply-typed programs.
 
-We contextualise this with the fact the structurally typed FL remains useful when we consider its untyped variety. Its statically typed fragment captures some -- but not all -- programs that do not go wrong.
+I contextualise this with the fact the structurally typed FL remains useful when we consider its untyped variety. Its statically typed fragment captures some -- but not all -- programs that do not go wrong.
 
 We conclude that \textbf{structural subtyping brings us closer to dynamic languages}. In conjunction, we have placed nominal, structural, and dynamic typing on a spectrum -- depicted in Figure \ref{fig:nominal-structural-dynamic}.
 

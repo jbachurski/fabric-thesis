@@ -1,0 +1,34 @@
+\begin{tabular}{c}
+\begin{ocaml}
+module type TypeSystem = sig
+  type 'a typ  (* type constructors with holes 'a *)
+  type arrow   (* homomorphisms *)
+
+  (* mapping over type constructor subterms *)
+  val map : f:('a -> 'b) -> 'a typ -> 'b typ
+  (* type constructor lattice *)
+  val top : 'a typ
+  val bot : 'a typ
+  val join : 'a lattice -> 'a typ -> 'a typ -> 'a typ
+  val meet : 'a lattice -> 'a typ -> 'a typ -> 'a typ
+  (* type constructor decomposition *)
+  val decompose : ('a typ * 'a typ) -> ('a * 'a) list Or_error.t
+
+  module Arrow : sig
+    type t = arrow
+
+    (* identity homomorphism *)
+    val id : t
+    val is_id : t -> bool
+    (* composition *)
+    val compose : t -> t -> t
+    (* application to type constructors *)
+    val apply : (t -> 'a -> 'a) -> t -> 'a typ -> 'a typ
+
+    (* adjoint structure *)
+    val swap_left : ('a typ -> 'a) -> t -> t * 'a
+    val swap_right : ('a typ -> 'a) -> t -> t * 'a
+  end
+end
+\end{ocaml}
+\end{tabular}
