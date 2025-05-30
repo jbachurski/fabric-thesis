@@ -1,8 +1,28 @@
-% \begin{center}
-%   \textsc{Abstract}
-% \end{center}
-% %
-% \noindent
-\chapter*{Abstract}
-% Ducks are great. Let us have more of those!
-\textcolor{magenta}{Types are great. Let us have more of those!}
+\vspace*{2cm}
+\begin{center}
+  \Large
+  \textbf{Breaking records: \\ Language design with structural subtyping}
+\end{center}
+\ifanonymised\else
+\vspace{0.5cm}
+\begin{center}
+  \Large Jakub Bachurski
+\end{center}
+\fi
+\vspace{1.5cm}
+\begin{center}
+  \Large
+  \textsc{Abstract}
+\end{center}
+\vspace{0.2cm}
+%
+\begin{center}
+\begin{minipage}{0.6\textwidth}
+    \setlength{\parindent}{1em}
+    Type systems are a staple of programming languages research. Their design balances the provided safety guarantees with the language's flexibility. This thesis argues for designing languages with \emph{structural subtyping} in mind. Structural subtyping provides the safety of traditional nominal typing, while mimicking the flexibility of widely-used dynamically typed languages. 
+
+    To inform language design, reliable type inference is identified as key to programmer productivity. Based on Dolan's seminal \emph{algebraic subtyping} technique, this thesis develops a constraint-based type inference framework. Its expressive power is displayed in the design and implementation of a functional language with structural subtyping. Lastly, structural subtyping is shown to resolve long-standing problems in language design with the invention of a statically typed array programming calculus.
+
+    This research aims to steer programming language design towards structural subtyping, and to lead to improvements in the inference of static types for dynamically typed programs.
+\end{minipage}
+\end{center}

@@ -1,0 +1,19 @@
+\begin{cminted}{ocaml}
+(* strict Y fixed-point combinator *) 
+let fix = f => let z = x => f (v => x x v) in z z in
+let eval = fix (eval => e =>
+  match e with 
+  | Add r => (eval r.fst) + (eval r.snd)
+  | Mul r => (eval r.fst) * (eval r.snd)
+  | _ r => r.default (* match on any tag *)
+) in eval (
+  Add { 
+    fst: Mul { 
+      fst: Lit { default: 2 },
+      snd: Lit { default: 3 } 
+    }, 
+    (* different tag and redundant field *) 
+    snd: Var { default: 1, foo: {} }
+  }
+)
+\end{cminted}

@@ -1,0 +1,36 @@
+\begin{cminted}{ocaml}
+(* Set up Binaryen context *) 
+let (module Ctx) = context () in
+let open Ctx in
+feature C.Features.reference_types;
+feature C.Features.gc;
+Memory.set ~initial:10 ~maximum:10 ();
+(* Declare this function may print *)
+Function.import "print_i32" "spectest" "print_i32" Type.int32 Type.none;
+(* Define the main function *)
+let main =
+  Function.make ~params:Type.none ~result:Type.none (fun _ ->
+    let open Cell in
+    (* Type foobar_t of a structure with fields foo and bar *)
+    let foobar_t =
+      Struct.t Type.[ ("foo", field ~mut:true int32); ("bar", field int32) ]
+    in
+    (* Define a local reference and access it as a foobar_t *)
+    let q = local Type.anyref in
+    let q_foo = Struct.cell foobar_t !q "foo" in
+    let q_bar = Struct.cell foobar_t !q "bar" in
+    Control.block
+      [
+        q :=
+          Struct.make foobar_t
+            [ ("foo", Const.i32' 42); ("bar", Const.i32' (1337 - 42)) ];
+        q_foo := Operator.I32.(!q_foo + !q_bar);
+        Function.call "print_i32" [ !q_foo ] Type.none;
+      ])
+in
+(* Mark the main function *)
+Function.export "main" main;
+Function.start main;
+assert (validate ());
+interpret ();    
+\end{cminted}

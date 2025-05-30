@@ -3,26 +3,27 @@
 
 \textbf{Array programming} is a programming paradigm focusing on arrays as a fundamental data structure, stemming from Iverson's \emph{array programming model} \cite{apl}. It plays a key role in now widespread domains like machine learning and data science. In this paradigm, we operate on often multi-dimensional arrays of data, taking particular advantage of data parallelism hiding within many data processing tasks. 
 
-Array programming languages comes in multiple styles: point-free (e.g.\@ MatLab, NumPy~\cite{numpy}), pointful (Dex~\cite{dex}, Ein~\cite{ein}), combinator-based (Futhark~\cite{futhark}). Despite this variety, there is no satisfactory typing discipline that balances safety and usability. Type systems seem to come in one of two extremes: \begin{description}
-    \item[Nearly-untyped] Often, arrays feature little to no types, which might only describe the number of dimensions or element type. Such types are only sometimes checked statically. This is the reality for most practically used array languages (like MatLab, NumPy~\cite{numpy} or PyTorch~\cite{pytorch}), but also for arrays in general-purpose languages (like C and Fortran).
-    \item[Dependently typed] Research into array programming languages has produced many approaches reaching for dependent types -- where much of the power is used to statically model type-level arithmetic on sizes of array dimensions. Examples representing the paradigms above (in the same order) are: Remora~\cite{remora}, Dex~\cite{dex}, and the recent extensions to Futhark~\cite{futhark-size-dependent, futhark-size-dependent-towards}.
+Array programming languages comes in multiple styles: point-free (\eg{} MatLab, NumPy~\cite{numpy}), pointful (Dex~\cite{dex}, Ein~\cite{ein}), combinator-based (Futhark~\cite{futhark}). Despite this variety, there is no satisfactory typing discipline for array programs that balances safety and usability. Array type systems come in two extremes: \begin{description}
+    \item[Nearly-untyped] Often, arrays feature little to no types, which might only describe the number of dimensions or element type. Such types are only sometimes checked statically. This is the case for common array languages (like MatLab, NumPy~\cite{numpy} or PyTorch~\cite{pytorch}), but also for arrays in general-purpose languages (like C and Fortran).
+    \item[Dependently typed] Research into array programming languages has produced many approaches reaching for dependent types -- where much of the power is used to statically model type-level arithmetic on sizes of array dimensions. Examples representing the paradigms above are: Remora~\cite{remora}, Dex~\cite{dex}, and the recent extensions to Futhark~\cite{futhark-size-dependent, futhark-size-dependent-towards}.
 \end{description}
 
 The array programming community is at an impasse: array types are either too simple, or we have to reach for dependent types.\footnote{This is reminiscent of the static-dynamic split from Chapter \ref{static-soul} -- structural types also serve as a middle-ground, like in \starr{}.} My main contribution towards a solution is the design of a novel calculus, \textbf{\starr{}}. Its type system provides useful and expressive types, while admitting ML-style type inference.
-The key idea of \starr{} follows my thesis: I designed its array indices and shapes with \textbf{structural subtyping} in mind.
+The key idea of \starr{} follows my thesis: to design its array indices and shapes with \textbf{structural subtyping} in mind.
 
 In this chapter (based on a paper of the same name \cite{star}), I describe the following contributions: \begin{itemize}
     \item A novel design for an array calculus – \starr{} – which features subtyping and structural types for array shapes. I motivate it in Section~\ref{sec:design} and elaborate in Section~\ref{sec:calculus}.
-    \item A formalisation of with an operational semantics (Section~\ref{subsec:semantics}), type system (Section~\ref{sec:typing};  \emph{without parametric polymorphism}), and proven type safety (Section~\ref{subsec:type-safety}).
-    \item Finally, in Section~\ref{subsec:type-inference} I describe how to bestow \starr{} (\emph{with parametric polymorphism}) with ML-style type inference using \inference{} (Chapter~\ref{algebraic-subtyping}), testing it in practice with \compiler{} (Chapter~\ref{fabric}).
+    \item A formalisation of with an operational semantics (Section~\ref{subsec:semantics}), type system (Section~\ref{sec:typing};  \emph{without} parametric polymorphism), and proven type safety (Section~\ref{subsec:type-safety}).
+    \item Finally, in Section~\ref{subsec:type-inference} I bestow \starr{} (\emph{extended} with parametric polymorphism) with ML-style type inference using \inference{} (Chapter~\ref{algebraic-subtyping}), testing it with \compiler{}'s implementation (Chapter~\ref{fabric}).
 \end{itemize}
 
+\newpage
 \section{Design}
 \label{sec:design}
 
 We start by motivating the design of \starr{}, showing how common array patterns arise when we use algebraic data types -- records and variants -- for array indices.
 
-\paragraph{Terminology} I explain standard array programming terms, which \starr{} builds on and generalises. Arrays have a \emph{rank} -- the number of dimensions. The \emph{shape} of an array defines the extent (\emph{size}) of
+\paragraph{Terminology} Let us consider standard array programming terms, which \starr{} builds on and generalises. Arrays have a \emph{rank} -- the number of dimensions. The \emph{shape} of an array defines the extent (\emph{size}) of
 each dimension. Dimensions are sometimes referred to as \emph{axes}.
 A \emph{batch} refers to a sequence of something, and we speak of a batch dimension (batch axis).
 
@@ -32,12 +33,10 @@ Consider an array representing a batch of images. We would model this as a 4-dim
 
 We could instead consider a different interpretation for this array. Notice that a value of the record type:
 $$ \srecordtype{ \mathrm{batch}: \sint, \mathrm{row}: \sint, \mathrm{col}: \sint, \mathrm{channel}: \sint } $$
-could clearly be used as an index into our batch of images. In fact, this perspective has its benefits. For example, a simple 4-dimensional structure does not differentiate dimensions beyond their position in the sequence -- the programmer would usually need to keep track of the order of dimensions with e.g.\ unenforceable annotations in code comments. 
+could clearly be used as an index into our batch of images. In fact, this perspective has its benefits. For example, a simple 4-dimensional structure does not differentiate dimensions beyond their position in the sequence -- the programmer would usually need to keep track of the order of dimensions with \eg{} unenforceable annotations in code comments. 
 
-Thus, I propose that for any array, shape types $\sigma, \dots$ and axis labels $\ell, \dots$ we should have a \textit{product shape} $\sproducttype{\ell : \sigma, \dots}$ indexed by records of type $\srecordtype{\ell : \sigma, \dots}$.
-Records provide a \textbf{product} on shapes. 
-
-We might illustrate $\sproducttype{\mathrm{row}: \sint, \mathrm{col}: \sint}$ as:
+\begin{wrapfigure}[6]{r}{2.5cm}
+\vspace{-0.7cm}
 \begin{center}
 \begin{tikzpicture}
     \draw[->] (0, 0) -- (2, 0);
@@ -46,10 +45,16 @@ We might illustrate $\sproducttype{\mathrm{row}: \sint, \mathrm{col}: \sint}$ as
     \node at (0.3, 1.1) {$\vdots$};
     \node at (2, 0.3) {$\mathrm{col}$};
     \node at (1, 0.25) {$\cdots$};
-\end{tikzpicture}
+\end{tikzpicture}    
 \end{center}
+\end{wrapfigure}
 
-One might find this idea reminiscent of named tensors~\cite{named-tensors} or \texttt{xarray} \cite{hoyer2017xarray} (among others), and this similarity is not accidental. The practical usefulness of this prior work led me to generalising this technique.
+I propose that for any array shape types $\sigma, \dots$ and axis labels $\ell, \dots$ we should have a \textit{product shape} $\sproducttype{\ell : \sigma, \dots}$ indexed by records of type $\srecordtype{\ell : \sigma, \dots}$.
+Records provide a \textbf{product} on shapes. 
+An example illustration of $\sproducttype{\mathrm{row}: \sint, \mathrm{col}: \sint}$ is given on the right.
+
+This idea is reminiscent of named tensors~\cite{named-tensors} or \texttt{xarray} \cite{hoyer2017xarray} (among others), and this similarity is not accidental -- their usefulness motivated product shapes.
+% The practical usefulness of this prior work led me to generalising this technique.
 
 \subsection{Variant indices concatenate}
 
@@ -57,9 +62,9 @@ Having seen that indexing arrays with records models (labelled) multidimensional
 Consider an array
 indexed by values of the variant type
 $$\svarianttype{\mathrm{L} : \sint, \mathrm{R} : \sint}$$
-Variants let us compose a sequence of component array shapes so that we can access any \textit{one} of the components -- \textbf{concatenation}. 
+With variants, we compose a sequence of shapes, accessing any \textit{one} of the components -- like a \textbf{concatenation}. 
 
-Why is this perspective useful? Normally, concatenating arrays can require the programmer to perform arithmetic on ranges corresponding to each of the components. For instance, padding a vector of size $n$ with $a$ elements at the front and $b$ at the back creates a vector composed of three ranges: front $[0, a)$, centre $[a, n + a)$, and back $[n + a, n + a + b)$. Normally, composing and decomposing a concatenated vector -- e.g.\@ setting and getting its components -- requires reconstructing these ranges. Instead, let us use an index of variant type:
+Why is this perspective useful? Normally, manipulating concatenated arrays requires the programmer to perform arithmetic on index ranges. For instance, padding a vector of size $n$ with $a$ elements at the front and $b$ at the back creates a vector composed of three ranges: front $[0, a)$, centre $[a, n + a)$, and back $[n + a, n + a + b)$. Normally, composing and decomposing a concatenated vector -- \eg{} setting and getting its components -- requires reconstructing these ranges. Instead, let us use an index of variant type:
 $$ \begin{array}{c}
 \svarianttype{{\color{red} \mathrm{Front}} : \sint, {\color{green} \mathrm{Centre}} : \sint, {\color{blue} \mathrm{Back}} : \sint} \\[0.5em] \begin{tikzpicture}
     \draw (0, 0) -- (8, 0);
@@ -74,8 +79,7 @@ $$ \begin{array}{c}
 \end{tikzpicture} 
 \end{array} $$
 which allows us to rely on tagging and pattern matching for composing and decomposing concatenations.
-
-I propose that for shapes $\sigma, \dots$ and tags~$T, \dots$ we have a shape type $\sconcattype{T : \sigma, \dots}$ indexed by variants of type $\svarianttype{T : \sigma, \dots}$.
+Thus, for shapes $\sigma, \dots$ and tags~$T, \dots$ we should have a shape $\sconcattype{T : \sigma, \dots}$ indexed by variants $\svarianttype{T : \sigma, \dots}$.
 % Variants provide us with \textbf{concatenation} on array shapes.
 
 \section{Calculus}
@@ -107,7 +111,7 @@ We start with some informal explanations:
 \begin{itemize}
     \item We write $\pi$ for scalar operations, which consume and produce integers and floats. Examples include $+: \sint \times \sint \sfntype \sint$, $\mathrm{sin} : \sfloat \sfntype \sfloat$, or $\lfloor \cdot \rfloor : \sfloat \sfntype \sint$.
     % \item Functions and let-bindings are standard. For simplicity, we do not include recursive let-bindings.
-    \item We include structural records and variants, respectively introduced by construction $\srecordval{\overline{\ell = e}}$ and tagging $T\,e$, and eliminated with with projection $\sproj{e}{\ell}$ and pattern matching. 
+    \item We include structural records and variants, respectively introduced by construction $\srecordval{\overline{\ell = e}}$ and tagging $T\,e$, and eliminated with with projection $\sproj{e}{\ell}$ and pattern matching.\footnote{Reflecting the paper \cite{star}, \starr{} uses standard typing for records \& variants (like \textcite{tapl}) -- unlike FL and \fabric{}.}
     \item \starr{}'s array operations are similar to the likes of pointful calculi like $\tilde F$ \cite{f-smooth}. Our primitives are array comprehensions $\sbuild{x}{e}{e'}$ (constructing an array of shape $e$ and elements at index $x$ given by $e'$) and indexing $\sindex{e}{e'}$ (accessing index $e'$ of array $e$).
     The shape of an array $e$ is accessed by $\sshape{e}$.
 \end{itemize}
@@ -123,12 +127,12 @@ We have three constructors for shape values:
     \item A sized shape $\ssize{e}$ is used for a usual flat array. For example, $\ssize{10}$ is the shape of an array indexed by integers in the range $[ 0, 10)$.
     \item Product shapes are used for defining arrays with multiple \textit{named} dimensions. For instance: 
     $$\sproductval{\mathrm{row} = \ssize{5}, \mathrm{col} = \ssize{4}}$$ 
-    is the shape of a $5 \times 4$ matrix (with dimensions named as rows and columns). To index into an array of a product shape, we provide a record -- e.g.\@ $\srecordval{\mathrm{row} = 2, \mathrm{col} = 3}$.
+    is the shape of a $5 \times 4$ matrix (with dimensions named as rows and columns). To index into an array of a product shape, we provide a record -- \eg{} $\srecordval{\mathrm{row} = 2, \mathrm{col} = 3}$.
     Products capture \textit{rectangular} (regular) multidimensional arrays.
     Note that an array of shape~$\sproductval{}$ has a single element.
     \item Concatenation shapes are given by a sequence of \textit{named} component shapes. For example,
     $$\sconcatval{ \mathrm{Left}= \sproductval{}, \mathrm{Centre}= \ssize{8}, \mathrm{Right}= \sproductval{} }$$
-    describes an 8-element array with an extra element at the start and end (i.e.\ a halo/padding/boundary of size 1). We index into arrays of concatenation shapes with variants, e.g.\@ $\stag{\mathrm{Left}}{\srecordval{}}$ or $\stag{\mathrm{Centre}}{2}$.
+    describes an 8-element array with an extra element at the start and end (\ie{} a halo/padding/boundary of size 1). We index into arrays of concatenation shapes with variants, \eg{} $\stag{\mathrm{Left}}{\srecordval{}}$ or $\stag{\mathrm{Centre}}{2}$.
     Note that an array of shape $\sconcatval{}$ is empty.
 \end{itemize}
 Projections on shapes extract dimensions/components of products/concatenations. For example: 
@@ -149,7 +153,7 @@ Projections on shapes extract dimensions/components of products/concatenations. 
 \end{figure}
 
 Lastly, \starr{}'s \textit{shape broadcasting}
-operation $e \broadcast e'$ (see Figure \ref{fig:broadcasting}) is used to \textit{align} compatible shapes $e$ and $e'$ by finding their common \emph{sub-shape} (cf.\@ broadcasting in NumPy \cite{numpy}), so that, for example:
+operation $e \broadcast e'$ (see Figure \ref{fig:broadcasting}) is used to \textit{align} compatible shapes $e$ and $e'$ by finding their common \emph{sub-shape} (\cf{} broadcasting in NumPy \cite{numpy}), so that, for example:
 $$ \sproductval{\mathrm{row}: \ssized 5} \broadcast \sproductval{\mathrm{col}: \ssized 4} \text{ evaluates to } \sproductval{\mathrm{row}: \ssized 5, \mathrm{col}: \ssized 4}$$
 The name sub-shape refers to the result having possibly more dimensions, paralleling subtyping.
 % We define broadcasting precisely and elaborate on its uses in Section~\ref{subsec:shape-broadcasting}.
@@ -204,7 +208,7 @@ $\sarrayval{\vess}{J}$ is not part of the user-facing expression syntax -- it ex
 
 Finally, I present a call-by-value operational semantics for \starr{} in Figure~\ref{fig:opsem} via a \emph{steps-to} relation $e \step e$.
 
-Run-time errors (e.g.\@ out-of-bounds indexing)
+Run-time errors (\eg{} out-of-bounds indexing)
 manifest as \emph{stuck states}, which do not step further. Most stuck states are prevented by \starr{}'s type system -- for errors which are not, we introduce a \emph{raises-error} relation $e \sterr$ in Figure \ref{fig:opsem-err} (we use it to state type safety in Section~\ref{subsec:type-safety}).
 
 Successful executions eventually reduce to a value $v$ (Figure~\ref{fig:star-values}). 
@@ -258,7 +262,7 @@ Successful executions eventually reduce to a value $v$ (Figure~\ref{fig:star-val
 We now move on to \starr{}'s type system, which features novel aspects, matching the design of structural shape and index types. 
 I give a complete description of the type language in Figure~\ref{fig:types}, subtyping in Figure~\ref{fig:subtyping}, and the typing judgement in Figure~\ref{fig:typing}. 
 
-I first focus on the typing of array shapes and indices.\todo[color=red]{FL-style records?}
+I first focus on the typing of array shapes and indices.
 Afterwards, I state type safety for \starr{} in Section~\ref{subsec:type-safety}, and show how to apply the type inference framework from Chapter \ref{algebraic-subtyping} to \starr{} in Section~\ref{subsec:type-inference}.
 
 % I use a standard presentation of record (and similar) types \cite{tapl} for \starr{}, unlike FL (Chapter \ref{static-soul}).
@@ -292,7 +296,7 @@ Recall that in Section~\ref{subsec:shape-bounds} we determined that integers ind
 
 While in basic array type systems it is sufficient to presume that the type of a shape $\sigma$\footnote{Note that in Chapter \ref{algebraic-subtyping} we denoted type schemes with $\sigma$, as is standard. In this chapter, except for one use in Section~\ref{subsec:type-inference}, $\sigma$ is always a shape type -- matching the paper.} and a matching index $\eta$ are the same, in \starr{} this is clearly not the case. We thus use a $\iota$ metafunction on types (defined in Figure \ref{fig:iota}): given a shape type $\sigma$, $\eta = \iota(\sigma)$ is the supertype of all matching index types for $\sigma$.
 
-Constructing $\iota$ is unsurprising -- similar concepts often arise when generalising array-like structures, e.g.\@ \textit{containers} \cite{containers} or Naperian (representable) functors, which \textcite{naperian-apl} has found useful for statically modelling certain patterns of array programming. To the author's knowledge, neither of these had led to the key ideas present in \starr{}.
+Constructing $\iota$ is unsurprising -- similar concepts often arise when generalising array-like structures, \eg{} \textit{containers} \cite{containers} or Naperian (representable) functors, which \textcite{naperian-apl} has found useful for statically modelling certain patterns of array programming. To the author's knowledge, neither of these had led to the key ideas present in \starr{}.
 
 \begin{figure}
     \centering
@@ -328,24 +332,23 @@ I prove these theorems in Appendix \ref{extra:star-proofs}, but they follow stra
 \subsection{Type inference \& polymorphism}
 \label{subsec:type-inference}
 
-It turns out that \starr{}'s subtyping relation both forms a distributive lattice\todo[color=green]{closure!}, and $\iota$ forms a type algebra isomorphism.
-Thus, we can apply the type inference framework developed in Chapter \ref{algebraic-subtyping}. 
+\starr{}'s subtyping forms a distributive lattice,\footnote{The trickiest aspect is that joins/meets are closed for arrays. Checking $\sarraytype{\sigma_1'}{\sigma_2'}{\tau'} \join \sarraytype{\sigma_1''}{\sigma_2''}{\tau''} = \sarraytype{\sigma_1' {\meet} \sigma_1''}{\sigma_2' {\join} \sigma_2''}{(\tau' \join \tau'')}$, indeed $\sigma_1' \sub \sigma_2'$ and $\sigma_1'' \sub \sigma_2''$ implies $\sigma_1' \meet \sigma_1'' \sub \sigma_2' \meet \sigma_2'' \sub \sigma_2' \join \sigma_2''$.} and $\iota$ is an isomorphism -- we can apply \inference{} (Chapter~\ref{algebraic-subtyping}). 
 
-Though I do not give a complete description of a polymorphic \starr{} calculus, I show a sketch of constraint generation for \starr{} in Figure \ref{fig:star-type-constraints}. We extend $\iota$ to be an involutive isomorphism in the algebra of types ($\iota^{-1} = \iota$, i.e.\@ $\iota$ swaps corresponding shapes and types), so that $\ladj \iota = \radj \iota = \iota$ and $\ladjrest \iota = \radjrest \iota = \tru$.
+Though I do not give a complete description of a polymorphic \starr{} calculus, I show a sketch of constraint generation for \starr{} in Figure \ref{fig:star-type-constraints}. To do so, we extend $\iota$ to be an involutive isomorphism in the algebra of types ($\iota^{-1} = \iota$, \ie{} $\iota$ swaps corresponding shapes and types), so that $\ladj \iota = \radj \iota = \iota$ and $\ladjrest \iota = \radjrest \iota = \tru$.
 
 Extending \starr{} with polymorphism enables a \emph{shape-polymorphic} programming style -- a generalisation of rank polymorphism in existing literature \cite{automap, sac-tensor-comprehensions}. 
 It is worth noting that shape polymorphism gives us index safety for free akin to \textcite{theorems-for-free} (modulo integer indices).
 
-\paragraph{Practice} Given the expression:
-$$ e = \fllam a \fllam b \sbuild{x}{\sproductval{a = \ssize 5, b = \ssize 4}}{a[x{.}a] \div b[x{.}b]} $$
-my implementation of \inference{} (given $\div : \sfloat \to \sfloat \to \sfloat$) correctly infers the type scheme:
+\begin{example}
+Given:
+$$ e = \fllam a \fllam b \sbuild{x}{\sproductval{a = \ssize 5, b = \ssize 4}}{\pi(a[x{.}a], b[x{.}b])} $$
+Then \inference{} (at $\pi : \sfloat \times \sfloat \to \sfloat$) infers the type scheme:
 $$ \sigma = \sarraytype{\ssized}{\top}{\sfloat} \to \sarraytype{\ssized}{\top}{\sfloat} \to \suniarraytype{\sproducttype{a : \ssized, b : \ssized}}{\sfloat} $$
-On the other hand, given:
-$$ e' = \sbuild{x}{\sproductval{a = \ssize 5}}{x.{b}} $$
-a type error is raised due to the constraint $\iota(\srecordtype{b : \sint}) \sub \sproducttype{a : \ssized}$ (dimension mismatch).
+Further, given $e' = \sbuild{x}{\sproductval{a = \ssize 5}}{x.{b}}$
+a type error is raised from $\iota(\srecordtype{b : \sint}) \sub \sproducttype{a : \ssized}$. 
 
-Usability is mainly limited by type scheme simplification (Section \ref{subsec:simplification}), particularly of redundant type variables. While the returned polymorphic type schemes are correct, they are difficult to read for the user. This shortcoming is mainly due to time constraints, as it is easy to simplify the type schemes by hand.
-
+Usability is mainly limited by type scheme simplification -- a shortcoming discussed in Section~\ref{subsec:type-inference-impl}. 
+\end{example}
 
 \begin{figure}
     \centering
@@ -358,7 +361,60 @@ Usability is mainly limited by type scheme simplification (Section \ref{subsec:s
 
 \section{Case study}
 
-To display the features of \starr{} and its elegance in expressing common array programming patterns, we consider a case study of an array program -- and contrast it to presently used languages.\todo[color=red]{todo}
+We consider a case study on \emph{padding arrays} -- showing how \starr{}'s elegance shines even in common use-cases.
+
+Consider padding a matrix with $l$ left and $r$ right columns, as well as $t$ top and $b$ bottom rows. Padding should have value $-1$ at top, $+1$ at bottom, and $0$ elsewhere. For instance, for $l = t = b = 1$ and $r = 2$:
+$$ \begin{bmatrix}
+    1 & 2 & 3 \\ 4 & 5 & 6
+\end{bmatrix} \;\mapsto\; \begin{bmatrix}
+    -1 & -1 & -1 & -1 & -1 & -1 \\
+    0 & 1 & 2 & 3 & 0 & 0 \\
+    0 & 4 & 5 & 6 & 0 & 0 \\
+    +1 & +1 & +1 & +1 & +1 & +1 \\
+\end{bmatrix} $$
+Programming this can be inconvenient with unstructured array types: in brief, an array of shape $(n, m)$ becomes one of shape $(n + t + b, m + l + r)$, and the programmer is burdened with keeping track of indices. We consider the example of NumPy -- to pad a \texttt{numpy.ndarray} named \texttt{x} one might write:
+\begin{center}
+\begin{cminted}{python}
+   n, m = x.shape
+   p = numpy.empty((n + t + b, m + l + r))
+   p[t:n+t, l:m+l] = x[:, :]
+   p[:t, :] = -1;    p[n+t:, :] = +1
+   p[t:n+t, :l] = 0; p[t:n+t, n+l:] = 0
+\end{cminted}    
+\end{center}
+The programmer needs to do menial mental arithmetic to find (unsatisfyingly \emph{asymmetric}) index ranges.
+
+\noindent
+Finally, we consider using Star. Intuitively, first note the shape of a padded matrix has different \textit{regions}:
+$$ \vspace{-0.5em} 
+\begin{matrix}
+{\color{gray} \mathrm{col}} & \\
+\begin{bmatrix}
+\mathrm{top\, left} & \mathrm{top\, centre} & \mathrm{top\, right} \\
+\mathrm{centre\, left} & \mathrm{centre\, centre} & \mathrm{centre\, right} \\
+\mathrm{bot\, left} & \mathrm{bot\, centre} & \mathrm{bot\, right} \\
+\end{bmatrix} & {\color{gray} \mathrm{row}} 
+\end{matrix} $$
+These correspond to index ranges used prior. For instance, centre right is in range $[t, n + t) \times [n + l, n + l + r)$.
+With this intuition, we find the Star shape type $\sigma$ -- and its value $s : \sigma$:
+\begin{align*}
+\sigma =  \{\!\mid  &\mathrm{row}: \sconcattype{\mathrm{Top}: \ssized, \mathrm{Centre}: \ssized,\mathrm{Bottom}: \ssized}, \\ 
+&\mathrm{col} : \sconcattype{\mathrm{Left}: \ssized, \mathrm{Centre}: \ssized,\mathrm{Right}: \ssized} \mid\!\} 
+\end{align*}
+\vspace{-2em}
+\begin{align*}
+s =\; \{\!\mid &\,\mathrm{row}= \sconcatval{\mathrm{Top}= \ssize t, \mathrm{Centre}= \sproductproj{\sshape{a}}{\mathrm{row}}, \mathrm{Bottom}= \ssize b}, \\ 
+&\,\mathrm{col}= \sconcatval{ \mathrm{Left}= \ssize l, \mathrm{Centre}= \sproductproj{\sshape{a}}{\mathrm{col}}, \mathrm{Right}= \ssize r} \mid\!\}
+\end{align*}
+and easily construct the padding of an array $a : [\sproducttype{\mathrm{row} : \ssized,\mathrm{col} : \ssized }] \mathrm{int} $:
+\begin{align*}
+\Phi\, x[s] \ldotp&\, \mathrm{match}\,x\,\mathrm{with} \\
+&\mid \mathrm{Centre}\,i, \mathrm{Centre}\,j \Rightarrow a[\srecordval{ \mathrm{row}= i, \mathrm{col}= j }] \\
+&\mid \mathrm{Top}\,\_, \_ \Rightarrow -1 \\
+&\mid \mathrm{Bot}\,\_, \_ \Rightarrow +1  \\
+&\mid \_, \_ \Rightarrow 0
+\end{align*}
+Satisfyingly, index arithmetic has become pattern matching. We do not use index arithmetic -- which existing array languages would have us rely on -- at all, and thus the program's safety is guaranteed.
 
 \section{Conclusions}
 
@@ -366,7 +422,7 @@ I have presented a novel design for an array programming calculus, emphasising t
 Though I do not statically ensure bounds checking for \emph{integer} indices -- like dependent types -- I circumvent the problem by enabling the programmer to use richer structures for array shapes and indices. 
 This makes it much easier to provide useful static types to common array programming patterns. 
 
-In addition to contributions presented in this chapter, in the paper \cite{star} I also give an elaborate discussion of possible extensions to this design and avenues for further work, as well as several worked examples.
+In addition to contributions presented in this chapter, in the paper \cite{star} we give more worked examples and an elaborate discussion of avenues for further work.
 
 My novel type system for \starr{} fills the gap between dynamically and dependently typed array programming. Thus, I reveal a new area in the design space of array programming languages -- a middle-ground between basic and complicated type systems.
 

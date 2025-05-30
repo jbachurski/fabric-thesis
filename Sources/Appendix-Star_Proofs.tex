@@ -9,7 +9,7 @@ In the following text, $\Gamma \vdash e :: \tau$ states that the \textit{stronge
 $$ \Gamma \vdash e :: \tau \iff \left( \forall \tau' \ldotp \Gamma \vdash e : \tau' \implies \tau \sub \tau' \right) $$ 
 For a value, any typing derivation that does not apply \textsc{Sub} yields the strongest type.
 
-\section{Lemmas}
+\section*{Lemmas}
 
 We start with a standard substitution lemma. Besides functions, it is also used for array comprehensions.
 \begin{lemma}[Substitution]
@@ -87,7 +87,7 @@ As a consequence, if an index $v$ occurs in the bounds of the shape $s$ ($v \inb
     By structural induction on $\sigma$ and $\sigma'$, with the proof following by rules of $\sub$ and definition of $\iota$.
 \end{proof}
 
-\section{Theorems}
+\section*{Theorems}
 
 \begin{theorem}[Preservation]
     If $\Gamma \vdash e : \tau$ and $e \leadsto e'$, then $\Gamma \vdash e' : \tau$.

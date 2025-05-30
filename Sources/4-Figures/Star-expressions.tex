@@ -7,16 +7,12 @@ n \mid f
 & \text{(scalar operations)}
 \graitem
 x
-& \text{(variable)}
-\graitem
-\slet{x}{e}{e}
-& \text{(let-binding)}
+\mid \slet{x}{e}{e}
+& \text{(variable, let-binding)}
 \graitem
 \slam{x}{e}
-& \text{(function)}
-\graitem
-e\,e 
-& \text{(application)}
+\mid e\,e 
+& \text{(function, application)}
 \graitem
 \srecordval{\overline{\ell = e}} 
 & \text{(record construction)}

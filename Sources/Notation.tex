@@ -7,8 +7,9 @@
   \ifstrequal{#1}{P}{Type inference}{%
   \ifstrequal{#1}{S}{Subtyping and the type lattice}{%
   \ifstrequal{#1}{T}{Constraint-based algebraic subtyping}{%
+  \ifstrequal{#1}{Y}{Fabric}{%
   \ifstrequal{#1}{Z}{Star}{%
-  }}}}}}}}%
+  }}}}}}}}}%
 ]}
 
 \makeatletter
@@ -105,7 +106,6 @@
 
 \newcommand{\flcast}[2]{{#1} \vartriangleright {#2}}
 \newnotation{flcast}{$\flcast{e}{\tau}$}{Runtime type coercion}{L060}
-
 
 \newcommand{\centredalign}{\hspace{.45\textwidth}\phantom{{}={}}&\phantom{{}={}}\hspace{.45\textwidth}}
 
@@ -250,6 +250,26 @@
 % Fabric
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
+\newcommand{\fbrestricted}{\setminus}
+\newnotation{fbcast}{$e \fbrestricted \ell$}{Record restriction -- removing a field $\ell$ from $e$}{Y010}
+
+\newcommand{\fbcheck}[2]{{#1}_?{#2}}
+\newnotation{fbcheck}{$\fbcheck{\ell}{e}$}{Checked projection -- a tagged value $\mathrm{Some}\,e{.}\ell$ if $\ell$ is in $e$, $\mathrm{None}\,()$ otherwise}{Y011}
+
+\newcommand{\fbopt}[1]{?\boxed{#1}}
+\newnotation{fbopt}{$\fbopt{\tau}$}{Optional field -- absent, or present with $\tau$}{Y012}
+
+\newcommand{\fbtag}[2]{#1\,#2}
+\newnotation{fbtag}{$\fbtag{T}{e}$}{Tagging}{Y020}
+
+\newcommand{\fbuntag}[1]{!#1}
+\newnotation{fbuntag}{$\fbuntag{e}$}{Untagging}{Y021}
+
+\newcommand{\nom}{t}
+\newnotation{nom}{$\nom$}{Nominal type}{Y030}
+
+\newcommand{\fbcast}[3]{{#1} : {#2} \blacktriangleright {#3}}
+\newnotation{fbcast}{$\fbcast{e}{\tau}{\tau}$}{Abbreviation-aware type cast}{Y031}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % Star

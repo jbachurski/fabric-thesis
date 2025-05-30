@@ -1,54 +1,70 @@
+\addtocontents{toc}{\newpage}
 \chapter{Design and Implementation of Fabric}
 \label{fabric}
 
-\begin{center}
-    \Large \color{red} Chapter under construction
-\end{center}
-
-\todo[color=red]{}
+In this short chapter, I present \textbf{\fabric{}} -- a functional programming language with structural subtyping. 
+\fabric{}'s role in my thesis is roughly similar to that of \mlsub{} \cite{dolan-thesis}: my design (Section \ref{sec:fabric-design}) is driven by: \begin{itemize}
+    \item Desire to statically type features present in dynamically typed languages like Python or Lua.
+    \item Requirements of \inference{} (Chapter \ref{algebraic-subtyping}), making \fabric{} an example of its expressive power.
+\end{itemize}
+Furthermore, in Section \ref{sec:fabric-impl} I explore the implementation of a \fabric{} compiler targeting \wasm{}, which includes a complete implementation of \inference{}. I thus report my practical experience working with \wasm{} and \inference{}.
 
 \section{Design}
+\label{sec:fabric-design}
 
-\cite{mlstruct, forsythe, pizza-java}
-\todo[color=red]{}
+The basis of \fabric{} is Chapter \ref{static-soul}'s Featherweight Lua, extended with more record operations, variants, tuples, and \emph{nominal type abbreviations}. \fabric{} is essentially a superset of \mlsub{} \cite{mlsub} (I also consider extensions proposed by \textcite{dolan-thesis}), and is influenced by \mlstruct{} \cite{mlstruct}.\todo[color=green]{expr}\todo[color=green]{opsem}\todo[color=green]{types}\todo[color=green]{typing}
 
-\subsection{Data types}
+\subsubsection{Data types}
 
-\cite{dolan-thesis, mlstruct}
-\todo[color=red]{}
+I focus on records and variants, but \fabric{} also has an integer with arithmetic operations;
+\begin{description}
+\item[Records]
+Beyond FL, I add field restriction $e \fbrestricted \ell$ \cite{operations-on-records} and checked-projection $\fbcheck{e}{\ell}$ (accompanied by an \enquote{optional} field type, $?\boxed{\tau}$), inspired by operations for objects in dynamic languages.
 
-\subsubsection{Rows}
-\todo[color=red]{}
+In contrast to \textcite{mlstruct}, I do not use \textsc{Forsythe}-style singleton record types \cite{forsythe}, as they lead to a surprising type lattice.\footnote{\eg{}: in \mlstruct{} $\flrec{x : \alpha} \join \flrec{y: \beta} = \top \implies \comp \flrec{ x : \alpha } \sub \flrec{ y : \beta } $, as \emph{there is no empty record type} \cite[Section~4.4.5]{mlstruct}.} Instead, I rely on the same \emph{partial-function} strategy for representing record (and variant) types as in FL (Section \ref{subsec:featherweight-lua}).
 
-% \subsubsection{Patterns}
-% \cite{parreaux-patterns}
-% \todo[color=red]{}
+\item[Variants] Following suggestions of \textcite[Section~9.2]{dolan-thesis}, I add variants $\fbtag{T}{e}$ to \fabric{} (and a $\mathrm{match}$), though not in the form of his \emph{tagged records}. To address his motivating example, I instead propose \emph{untagging} -- pattern matching on \emph{any} tag -- easily type checked with my syntax of variant types.
+\end{description}
 
-\subsection{Nominal types} 
+\subsubsection{Patterns}
+Structural typing invites a rich pattern matching facility, as explored by \eg{} \textcite{parreaux-patterns}. I also designed one for \textsc{Fabric}, using conservative typing rules to ensure exhaustive matches. 
 
-\cite{integrating-nominal-and-structural, structural-refinement-types}
-\todo[color=red]{}
+\subsubsection{Nominal types} 
+It is known that combining both nominal and structural types is desirable \cite{mlstruct, integrating-nominal-and-structural}. In Fabric, I propose a way of doing so inspired by OCaml's \href{https://ocaml.org/manual/5.1/privatetypes.html#ss:private-types-abbrev}{private type abbreviations}.
+
+\emph{Nominal abbreviations} $\nom$ in Fabric are declared via $\mathrm{type}\,\nom=\tau\,\mathrm{in}\,e$. They are introduced and eliminated via \textbf{abbreviation-casts} $\fbcast{e}{\tau}{\tau'}$, well-typed exactly when $\tau$ is a subtype of $\tau'$ \emph{up to type abbreviations}, and $e$ is a subtype of $\tau$. The intermediate type $\tau$ is key for type checking.
+
+The same problem is addressed by \textcite{mlstruct}. However, their approach -- \emph{nominal tags} (reminiscent of Dolan's \emph{tagged records}) -- \emph{refines} existing structural types. It thus does not create a truly nominal type, and requires dedicated runtime support for pattern matching.
+
+This strategy of adding nominal types of the system could lead to integrating algebraic subtyping with higher-kinded types and higher-rank polymorphism (as set out by \textcite[Section~11.1]{dolan-thesis}). 
+
+\paragraph{Example} \fabric{} programs written in code accepted by \compiler{} are given in Figures~\ref{fig:fabric-example-eval}~and~\ref{fig:fabric-example-pairwise}.
+
+\begin{figure}[p]
+    \centering
+    \input{Sources/5-Figures/Fabric-eval}
+    \caption{Fabric program implementing a recursive function for evaluating arithmetic expressions, where some nodes return a \enquote{default} value. Code generated by \compiler{} correctly computes \mintinline{ocaml}{7}. \inference{} infers a polymorphic type scheme for \mintinline{ocaml}{eval}, \eg{} rejecting \mintinline{ocaml}{eval (Lit {})}.}
+    \label{fig:fabric-example-eval}
+\end{figure}
+
+\begin{figure}[p]
+    \centering
+    \input{Sources/5-Figures/Fabric-pairwise}
+    \caption{Fabric program implementing function \texttt{stutter} (duplicating elements in a list, doubling its length) and \texttt{pairwise} (pairing up adjacent elements, expecting an even-length list). \inference{} detects the error: an odd-length list is passed to \texttt{pairwise}, which expects an even-length list.}
+    \label{fig:fabric-example-pairwise}
+\end{figure}
 
 \section{Implementation}
+\label{sec:fabric-impl}
 
-For my implementation of \compiler{}, I used the OCaml language. Main dependencies included: \href{https://opensource.janestreet.com/core/}{Core}, \href{https://github.com/janestreet/ppx_jane}{\texttt{ppx\_jane}}, \href{https://github.com/mirage/alcotest}{\texttt{alcotest}} (test framework), and \href{https://github.com/inhabitedtype/angstrom}{\texttt{angstrom}} (parsing \fabric{} using parser combinators).
+I used OCaml for my implementation of the \compiler{} compiler for Fabric. My main dependencies are: \href{https://opensource.janestreet.com/core/}{Core}, \href{https://github.com/janestreet/ppx_jane}{\texttt{ppx\_jane}} (pre-processor macros, \eg{} S-expression pretty-printing), \href{https://github.com/mirage/alcotest}{\texttt{alcotest}} (test framework), and \href{https://github.com/inhabitedtype/angstrom}{\texttt{angstrom}} (parser combinators).
 
-I summarise the contents of the repository in Table \ref{tab:repository},\todo[color=red]{}. The implementation is complete with only negligible omissions with respect to the specification. For brevity, I only describe some interesting aspects of type inference (Section \ref{subsec:type-inference-impl}) and code generation (Section \ref{subsec:codegen}).
-
-\begin{table}[p]
-    \centering
-    \begin{tabular}{c|c}
-         &  \\
-         & 
-    \end{tabular}
-    \caption{The structure of my repository containing the implementation of \compiler{}.}
-    \label{tab:repository}
-\end{table}
+The implementation is complete with minor omissions (some cases of constraint and code generation). For brevity, I describe interesting aspects of type inference (Section \ref{subsec:type-inference-impl}) and code generation (Section~\ref{subsec:codegen}).
 
 \subsection{Type inference} 
 \label{subsec:type-inference-impl}
 
-I devised an implementation of \inference{} usable with any type system implementing its signature. 
+I devised an implementation of \inference{} usable with any type system implementing its signature -- not just for \fabric{}, but for any language for which we can generate constraints.
 
 \paragraph{Use of the module language} The framework was particularly satisfying to implement using OCaml's module language. Firstly, the framework's signature is given by an module \emph{signature} (given in Figure \ref{fig:inference-signature}). Type systems satisfying are specified by an \emph{implementation} module satisfying the signature, from which we can derive all aspects of constraint solving and simplification via a \emph{functor}.
 
@@ -59,30 +75,33 @@ I devised an implementation of \inference{} usable with any type system implemen
     \label{fig:inference-signature}
 \end{figure}
 
-\paragraph{Type language representations} The OCaml version of the signature is polymorphic with respect to different type languages. This is because we have to change between different representations of types. 
-Usually, we use the full type language (following \inference{}'s $\tau$), represented using the OCaml type \texttt{Alg.t}. On the other hand, in constraint solving (precisely as in Section \ref{sec:constraints}) we rely on the use of normal forms -- the clause-based CNF/DNF (represented by OCaml types \texttt{CNF.t}/\texttt{DNF.t}). As converting between the two can blow up the number of clauses, I try to keep subtyping constraints in the form $\tau_\mathrm{dnf} \sub \tau_\mathrm{cnf}$. To avoid code duplication, I implement DNF in terms of CNF, exploiting the duality between them. 
+\paragraph{Type language representations} The OCaml version of the signature is polymorphic with respect to different type languages. 
+% This is because we have to change between different representations of types. 
+Usually, we use the full type language (following \inference{}'s $\tau$), represented using the OCaml type \texttt{Alg.t}. On the other hand, in constraint solving we rely on the use of normal forms -- the clause-based CNF/DNF (OCaml types \texttt{CNF.t}/\texttt{DNF.t}). As CNF--DNF conversion can blow up the number of clauses, I try to manipulate constraints as $\tau_\mathrm{dnf} \sub \tau_\mathrm{cnf}$. To avoid code duplication, I implement DNF in terms of CNF, exploiting the duality between them. 
 
 % \paragraph{Constraint solving} As advertised, the implementation of constraint solving is close to the technical description in Section \ref{sec:constraints}. It is infeasible to solve constraints directly by pattern matching on $\tau$/\texttt{Alg.t} due to mismatched-polarity cases like $\alpha \join \beta \sub \gamma \meet \delta$.
 
 \paragraph{Simplification of type schemes} In Section \ref{subsec:simplification} I hinted at the possible approaches to simplifying the result of type inference. In \compiler{}, I implemented the following (among others): \begin{itemize}
-    \item Simplification of CNF/DNF forms: removing subsumed clauses, removing  clauses equal to $\top$/$\bot$.
-    \item Inlining bounds: if a type variable only occurs in covariant (or contravariant) positions, it can be replaced directly with the corresponding bound.
+    \item Simplification of CNF/DNF forms: removing subsumed clauses and clauses equal to $\top$/$\bot$.
+    \item Inlining bounds: replacing a type variable with its bound if it only occurs in co/contravariant positions.
     \item Sandwich inequalities: if we find $\tau \sub \alpha \sub \tau$, then we can substitute $\alpha$ for $\tau$.
 \end{itemize}
 
-\paragraph{Constraint generation} To make implementing constraint generation $\cstr{\Gamma}{e}{\tau}$ more straightforward, I devised a simple DSL (example in Figure \ref{fig:cstr-gen}). I used OCaml's let-binding operators for composing constraints and introducing fresh type variables. 
+\paragraph{Constraint generation} I devised a simple DSL to make constraint generation straightforward (example in Figure \ref{fig:cstr-gen}). I used OCaml's let-binding operators for composing constraints and introducing fresh type variables, giving the code a declarative feel. 
 
 \begin{figure}
     \centering
-\begin{tabular}{c}
-\begin{ocaml}
+% \begin{tabular}{c}
+% \begin{ocaml}
+\begin{cminted}{ocaml}
 | Let (p, e, e') ->
     let* xs, t = pat p in
     let* e = go env e in
     let* () = e <: t in
     go (push xs env) e'
-\end{ocaml}
-\end{tabular}
+\end{cminted}
+% \end{ocaml}
+% \end{tabular}
     \caption{Example of constraint generation for \fabric{} let-bindings ($\fllet p e e'$). Here, \texttt{go env e} stands for a type $\tau$ such that $\texttt{env} \vdash \texttt{e} : \tau$ (under some carried constraint) -- a slight deviation from the specification.}
     \label{fig:cstr-gen}
 \end{figure}
@@ -90,114 +109,28 @@ Usually, we use the full type language (following \inference{}'s $\tau$), repres
 \subsection{Code generation} 
 \label{subsec:codegen}
 
-In order to execute \fabric{} code, I sought to generate code that could be lowered directly to machine code. I chose to go with \wasm{} \cite{wasm} and to use the \binaryen{} \cite{binaryen} toolchain, because it is modern, stable, relatively high-level, well-documented, and an open standard.\footnote{I also considered other targets -- C, Lua, .NET or JVM bytecode, or LLVM. Ultimately, the choice came down to what I thought would be most interesting and easiest to use.} Furthermore, I wanted to explore its new extension with garbage collection \cite{wasm-gc}, enabling automatic memory management for \fabric{}.
+In order to execute \fabric{} code, I sought to generate code that could be lowered directly to machine code. I chose to go with \wasm{} \cite{wasm} and to use the \binaryen{} \cite{binaryen} toolchain, because it is modern, stable, relatively high-level, and well-documented.\footnote{I also considered other targets -- C, Lua, .NET or JVM bytecode, or LLVM. Ultimately, the choice came down to what I thought would be most interesting and easiest to use.} Furthermore, I wanted to explore its new extension with garbage collection \cite{wasm-gc}, enabling automatic memory management for \fabric{}.
 
-% I give a breakdown of the other targets I considered in Table \ref{tab:targets}.
+\binaryen{} is only accessible from OCaml using the C~API.\footnote{There are ready solutions -- like \href{https://github.com/grain-lang/binaryen.ml}{\texttt{binaryen.ml}} -- but outdated (\eg{} no \textsc{WasmGC}) or broken with newer \binaryen{} versions.} I used the brilliant work of \textcite{ocaml-ctypes} on \href{https://github.com/yallop/ocaml-ctypes}{\texttt{ocaml-ctypes}} to produce my own, type-safe bindings.
 
-% \begin{table}[]
-%     \centering
-%     \begin{tabular}{c|ccc}
-%         Target & IR & Memory management & Stable & Toolchain \\ \hline
-%         LLVM & SSA-based IR & No & No & C/C++ API
-%         .NET & Stack & Yes & Yes & 
-%         JVM & Stack & Yes & Yes &
-%         C & Low-level language & No & Yes &
-%         Lua & High-level language & Yes & Yes & 
-%         \wasm{} & Stack/low-level & Yes & Yes & \binaryen{}, C/C++ API
-%     \end{tabular}
-%     \caption{Caption}
-%     \label{tab:targets}
-% \end{table}
-% From the potential targets (of which I also considered LLVM, {.}NET bytecode, JVM bytecode, C, and Lua), 
-
-\subsubsection{\binaryendsl{}}
-\binaryen{} is only accessible from OCaml using the C~API.\footnote{There are ready solutions -- like \href{https://github.com/grain-lang/binaryen.ml}{\texttt{binaryen.ml}} -- but outdated (e.g.\@ no \textsc{WasmGC}) or broken with newer \binaryen{} versions.} I used the brilliant work of \textcite{ocaml-ctypes} on \href{https://github.com/yallop/ocaml-ctypes}{\texttt{ocaml-ctypes}} to produce my own, type-safe bindings.
-
-Invoking the bindings directly often led to clumsy, imperative code. Instead, I devised a DSL on top of \binaryen{}, dubbed \binaryendsl{}. The most prevalent abstraction is \texttt{Cell} (Figure \ref{fig:cell-def}), which encapsulates the different types of storage available in \wasm{}, making it easier to write generic helpers for code generation.
+Invoking the bindings directly often led to clumsy, imperative code, so I created a DSL on top of \binaryen{}, dubbed \binaryendsl{}. Its most prevalent abstraction is \texttt{Cell} (Figure \ref{fig:cell-def}), which encapsulates the different types of storage available in \wasm{}, making it easier to write generic helpers for code generation.
 I give a basic example of using \binaryendsl{} in Figure \ref{fig:binaryer-example}. 
 
-I used \binaryendsl{} to implement code generation for \fabric{}, and included simple unit tests.
-
+I used \binaryendsl{} to implement code generation for almost all of \fabric{}. I included a suite of unit tests using a basic printing function, \texttt{\%print\_i32}, provided by \binaryen{}. The implementation is complete with minor omissions (\eg{} compound patterns and nominal types).\todo{revise}
 
 \begin{figure}[p]
     \centering
-\begin{tabular}{c}
-\begin{ocaml}
-type loc = Cell0.loc =
-| Local of { idx : T.Index.t }
-| Global of { name : string; mut : bool; handle : T.Global.t }
-| Table of { name : string; idx : T.Expression.t }
-| Address of {
-    addr : T.Expression.t;
-    size : uint32;
-    offset : uint32;
-    align : uint32;
-    mem : string;
-  }
-| Struct of {
-    target : T.Expression.t;
-    struct_type : T.HeapType.t;
-    field_idx : T.Index.t;
-  }
-| Array of {
-    target : T.Expression.t;
-    array_type : T.HeapType.t;
-    idx : T.Expression.t;
-  }
-
-type t = { typ : T.Type.t; loc : Cell0.loc }
-
-
-(* val ( ! ) : t -> expr *)
-(* val ( := ) : t -> expr -> expr *) 
-
-\end{ocaml}
-\end{tabular}
-    \caption{Definition of a \texttt{Cell.t} -- abstracting over locals, globals, tables, memory addresses, structure fields, and array elements. I also give the signature of its two primitives: read (\texttt{!}) and write (\texttt{:=}). \texttt{T.<thing>.t} is the OCaml type for \binaryen{}'s representation of \texttt{<thing>}s.}
+    \input{Sources/5-Figures/Weaver-cell}
+    \caption{Definition of a \texttt{Cell.t} -- abstracting over locals, globals, tables, memory addresses, structure fields, and array elements. I also give the signature of its two primitives: read (\texttt{!}) and write (\texttt{:=}). 
+    % \texttt{T.<thing>.t} is the OCaml type for \binaryen{}'s representation of \texttt{<thing>}s.
+    }
     \label{fig:cell-def}
 \end{figure}
 
 \begin{figure}[p]
     \centering
-\begin{tabular}{c}
-\begin{ocaml}
-(* Set up Binaryen context *) 
-let (module Ctx) = context () in
-let open Ctx in
-feature C.Features.reference_types;
-feature C.Features.gc;
-Memory.set ~initial:10 ~maximum:10 ();
-(* Declare this function may print *)
-Function.import "print_i32" "spectest" "print_i32" Type.int32 Type.none;
-(* Define the main function *)
-let main =
-  Function.make ~params:Type.none ~result:Type.none (fun _ ->
-    let open Cell in
-    (* Type foobar_t of a structure with fields foo and bar *)
-    let foobar_t =
-      Struct.t Type.[ ("foo", field ~mut:true int32); ("bar", field int32) ]
-    in
-    (* Define a local reference and access it as a foobar_t *)
-    let q = local Type.anyref in
-    let q_foo = Struct.cell foobar_t !q "foo" in
-    let q_bar = Struct.cell foobar_t !q "bar" in
-    Control.block
-      [
-        q :=
-          Struct.make foobar_t
-            [ ("foo", Const.i32' 42); ("bar", Const.i32' (1337 - 42)) ];
-        q_foo := Operator.I32.(!q_foo + !q_bar);
-        Function.call "print_i32" [ !q_foo ] Type.none;
-      ])
-in
-(* Mark the main function *)
-Function.export "main" main;
-Function.start main;
-assert (validate ());
-interpret ();    
-\end{ocaml}
-\end{tabular}
-    \caption{Basic program defined using \binaryendsl{}. Under the hood, it calls \binaryen{}'s API, producing \wasm{} code (given in Appendix \ref{subsec:codegen}) which prints \texttt{1337} at runtime.}
+    \input{Sources/5-Figures/Binaryer}
+    \caption{Basic program defined using \binaryendsl{}. Under the hood, it calls \binaryen{}'s API, producing \wasm{} code (given in Appendix \ref{extra:codegen}) which prints \texttt{1337} at runtime.}
     \label{fig:binaryer-example}
 \end{figure}
 
@@ -213,16 +146,15 @@ This problem also arises for \fabric{}'s record and variant types:
 
 \section{Conclusions}
 
-I summarise my experience with the three main areas covered in this chapter: the use and implementation of \inference{}, targeting \wasm{}, and the design of languages for algebraic subtyping.
+I summarise my experience with the three main areas covered in this chapter: the use and implementation of \inference{}, targeting \wasm{}, and the design of languages for algebraic subtyping. 
+% I also give some more code examples in Appendix \ref{extra:fabric}.\todo[color=green]{extra}
 
 \paragraph{Experience with \inference{}}
-\textcite{pottier-framework} outlined the benefits of a general constraint-based type inference framework as a good way for researching language extensions. 
 % His work resulted in \textsc{Inferno}, a framework for constraint-based Hindley-Milner type inference -- I performed a similar task in a setting with subtyping. 
-By separating concerns of the type language and the constraint language in my implementation of \compiler{}, I was able to quickly experiment with type inference for not only \fabric{}, but also \starr{} (Chapter \ref{star}).
+By separating concerns of the type language and the constraint language in my implementation of \compiler{}, I was able to experiment with type inference for not only \fabric{}, but also \starr{} (Chapter \ref{star}). \textcite{pottier-framework} also outlined the benefits of such a type inference framework. Unfortunately, type signatures for complex programs are unclear -- mostly due to my incomplete simplification. 
 
 \paragraph{Experience with \wasm{}}
-By getting hands-on experience with \wasm{}, I found that while its tooling for high-level languages is limited, bespoke solutions are possible -- e.g.\@ building on \textsc{Binaryen}. Its formal specification and stability are also great boons towards its practical use. However, existing tooling could improve its error diagnostics for invalid emitted programs, as debugging was difficult.
+I found that while the \wasm{} tooling for high-level languages is limited, good bespoke solutions are possible. However, \binaryen{} specifically could improve its error diagnostics for invalid emitted programs, as debugging was difficult. \wasm{}'s formal specification and stability are great boons towards its practical use.
+However, I observed that the current design of automatically managed reference types is limiting in terms of achievable performance, \eg{} making some efficient memory representations impossible \cite{double-ended-bit-stealing}.
 
-The current specification of reference types to only structures and arrays is limiting in terms of efficiency. Reference types are also opaque (e.g.\@ we cannot coerce them to integers like C-style pointers), making some efficient memory representations impossible \cite{double-ended-bit-stealing}.
-
-\paragraph{Experience with algebraic subtyping} My biggest grudge with type inference is with the user-visible output of type inference -- type signatures -- as my implementation lacked in terms of simplification, confirming historical sentiment about inference with subtyping. I did not find the requirement of constructing a lattice of type constructors constraining during design, and it prevented me from constructing misbehaved type system features. Rapidly experimenting with new features using \inference{} was liberating.
+\paragraph{Language design with algebraic subtyping} Constructing a lattice of type constructors was helpful in preventing misbehaved type system features, and did not prove to be a constraint. Rapidly experimenting with new features using \inference{} was liberating during design.

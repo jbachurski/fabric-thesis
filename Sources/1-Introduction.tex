@@ -19,7 +19,7 @@ Having found such an approach, we can then inform the design of a statically typ
 Deriving it by statically typing dynamically typed programs, we get the best of both worlds: a sliver of the expressiveness of dynamic languages with a healthy dose of statically ensured safety.
 
 The design of a new language is not in itself useful, but it productively informs the evolution and extension of existing languages.
-By restricting ourselves to our approach to static typing, we can also identify novel approaches to programming in domains which are traditionally untyped, upending existing conventions for dynamic typing. 
+By restricting ourselves to our approach to static typing, we can also identify novel approaches to programming in domains which are traditionally untyped -- upending existing conventions for dynamic typing. 
 
 \section{Overview}
 
@@ -35,7 +35,7 @@ To show that FL remains adequately powerful when typed statically, I develop a \
 I thus formally show the intuitive notion that we can obtain a structurally typed language by erasing type definitions from a nominally typed one.
 Indeed, the FJ-FL translation preserves well-typedness -- showing that the statically typed fragment of FL is at least as expressive as FJ, even though FL needs none of FJ's explicit class (type) definitions. 
 
-To truly model a dynamic language, we need to rid programs of type annotations. This naturally leads to the question of providing \emph{type inference} for FL -- and generally, any language with a type system relying on structural subtyping -- which I address in the next chapter.
+To truly model a dynamic language, we need to rid programs of type annotations. This naturally leads to the question of providing \emph{type inference} for FL -- and generally, any language with a type system relying on structural subtyping -- which I address in Chapter~\ref{algebraic-subtyping}.
 
 \subsubsection{Chapter \ref{algebraic-subtyping}. Constraint-Based Algebraic Subtyping}
 
@@ -49,20 +49,27 @@ The description of the type inference approach is \emph{independent} of specific
 With this framework in hand, I can freely take advantage of its flexibility by designing a new language.
 
 \subsubsection{Chapter \ref{fabric}. Design and Implementation of Fabric}
-I present my \textbf{design} of a functional language with structural subtyping -- \textbf{\fabric{}}. 
-I consider case studies in which I show how \fabric{} can express patterns naturally possible in dynamically typed languages, but difficult to type statically without structural subtyping. 
+I present my \textbf{design} of a functional language with structural subtyping -- \textbf{\fabric{}} -- mainly building on the design of Dolan's \mlsub{}. I focus on designing its type system to take advantage of \inference{}'s algebraic subtyping -- enabling type inference for non-trivial language features which mirror dynamic languages.
+% I consider case studies in which I show how \fabric{} can express patterns naturally possible in dynamically typed languages, but difficult to type statically without structural subtyping. 
 
-I also investigate \fabric{}'s \textbf{implementation} as a general-purpose programming language featuring structural subtyping and describe my compiler, \compiler{} for it. In particular, I consider the implications of supporting structural subtyping on code generation -- for which I target \wasm{}.
-
-As part of \compiler{}, I give a prototype implementation of \inference{}. It features a dedicated constraint generation routine for \fabric{} (and thus FL) -- showcasing that the type inference approach is indeed independent of the specific language specification.
+I also investigate \fabric{}'s \textbf{implementation}. I describe my compiler for it -- \compiler{} -- which targets \wasm{}. 
+As part of \compiler{}, I give a prototype implementation of \inference{}. It can be universally applied to any language for which I can generate appropriate constraints.
 
 \subsubsection{Chapter \ref{star}. Structuring Arrays with Algebraic Shapes}
 Inspired by structural subtyping, I propose a novel statically typed calculus for array  programming -- \textbf{Star} -- as an application of the findings of the prior chapters. 
 
-The standard in practical array programming has been to forgo types, with dependent type systems proposed as virtually the only options for static typing \cite{dex}. I instead propose a middle-ground: \textbf{structural types for array shapes and indices}. These types help the programmer build abstractions and avoid menial index arithmetic. At the same time, Star also admits type inference using my framework.
+The standard in practical array programming has been to forgo types, with dependent type systems proposed as virtually the only options for static typing \cite{dex}. I instead propose a middle-ground: \textbf{structural types for array shapes and indices}. These types help the programmer build abstractions and avoid menial index arithmetic. At the same time, Star also admits type inference using \inference{}.
 
 This chapter is based on a paper of the same name, written as part of work on my thesis and coauthored with my supervisors. It was accepted for publication in the Proceedings of the 11th ACM ARRAY Workshop. 
 
-\section*{Notes}
-
-When in need, the reader may consult the index of notation located at the end of this report.
+%TC:ignore
+\vfill
+\begin{tcolorbox}[
+    colback=violet!5!white,
+    colframe=violet!70!black,
+    title=\textsc{Reading notes}
+]
+The reader may find it useful to consult the index of notation located at the end of this report. \\ 
+Provided appendices give additional technical details and examples.
+\end{tcolorbox}
+%TC:endignore

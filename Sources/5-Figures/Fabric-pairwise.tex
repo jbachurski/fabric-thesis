@@ -1,0 +1,23 @@
+\begin{cminted}{ocaml}
+let stutter = xs => 
+  match xs with
+  | Nil _ => Nil ()
+  | Cons c => Cons {
+      head: c.head,
+      tail: Cons { 
+        head: c.head, tail: stutter c.tail 
+      }
+    } 
+(* xs must be of even length *)
+in let pairwise = xs => 
+  match xs with
+  | Nil _ => Nil () 
+  | Cons a => (
+      match a.tail with 
+      | Cons b => Cons { 
+          head: (a.head, b.head), tail: pairwise b.tail 
+        }
+    )
+(* type error! *) 
+in xs => pairwise (Cons { head: 0, tail: stutter xs }) 
+\end{cminted}

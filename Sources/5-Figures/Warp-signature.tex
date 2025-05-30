@@ -1,5 +1,6 @@
-\begin{tabular}{c}
-\begin{ocaml}
+% \begin{tabular}{c}
+% \begin{ocaml}
+\begin{cminted}{ocaml}
 module type TypeSystem = sig
   type 'a typ  (* type constructors with holes 'a *)
   type arrow   (* homomorphisms *)
@@ -30,5 +31,6 @@ module type TypeSystem = sig
     val swap_right : ('a typ -> 'a) -> t -> t * 'a
   end
 end
-\end{ocaml}
-\end{tabular}
+\end{cminted}
+% \end{ocaml}
+% \end{tabular}

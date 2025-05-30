@@ -3,6 +3,7 @@
 \usepackage{lastpage}
 \usepackage{metalogo}
 \usepackage{tcolorbox}
+\usepackage{wrapfig}
 
 \usepackage{tikz}
 
@@ -11,17 +12,22 @@
 \usepackage{needspace}
 \usepackage{etoolbox}
 
+\usepackage{minted,xpatch,letltxmacro}
+\LetLtxMacro{\cminted}{\minted}
+\let\endcminted\endminted
+\xpretocmd{\cminted}{\RecustomVerbatimEnvironment{Verbatim}{BVerbatim}{}}{}{}
+%TC:envir minted [ignore] ignore
+%TC:envir cminted [ignore] ignore
+
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % Submission
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 % 1. Render both the normal and anonymised versions.
-%    - check the redacted Star paper reference.
 % 2. Update the word count and date in the Declaration, and month in Title.
-% 3. 
 
 \newif\ifanonymised
-% \anonymisedtrue % comment out to de-anonymise
+\anonymisedtrue % comment out to de-anonymise
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % Listings
@@ -197,6 +203,11 @@
 \newcommand{\submissiondate}{June 4, 2025}
 \newcommand{\submissionmonthyear}{June 2025}
 
+
+\newcommand{\eg}{e.g.\@}
+\newcommand{\cf}{cf.\@}
+\newcommand{\ie}{i.e.\@}
+
 \newcommand{\fabric}{\textsc{Fabric}}
 \newcommand{\inference}{\textsc{Warp}}
 \newcommand{\compiler}{\textsc{Weaver}}
@@ -275,7 +286,7 @@
   \include{Sources/5-Star}
   \include{Sources/6-Conclusions}
 
-\label{lastcontentpage}
+\label{lastcontentpage} 
 %TC:ignore 
 
   % This ensures that the subsequent sections are being included as root
@@ -296,9 +307,10 @@
   \printnomenclature
 
   \include{Sources/Appendix-FJ-FL_Proofs}
-  \include{Sources/Appendix-Inference_Proofs}
+  % \include{Sources/Appendix-Inference_Proofs}
   \include{Sources/Appendix-FL-Constraints}
   \include{Sources/Appendix-CodeGen}
+  % \include{Sources/Appendix-Fabric_Examples}
   \include{Sources/Appendix-Star_Proofs}
 
 %TC:endignore 

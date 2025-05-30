@@ -13,7 +13,7 @@ The lattice of type constructors in FL is defined as such:
     (\tau_1 \to \tau_1') \cjoin (\tau_2 \to \tau_2') &= (\tau_1 \cmeet \tau_2) \to (\tau_1' \cjoin \tau_2') \\ 
     \flext{\overline{\ell: \phi_\ell}}{\phi} \cjoin \flext{\overline{\ell': \phi_\ell'}}{\phi'} &= \flext{\overline{\ell: \phi_\ell \cjoin \phi_\ell'}}{\phi \cjoin \phi'}
 \end{align*}
-with $\meet$ defined dually (by swapping $\cjoin$ with $\cmeet$, and $\top$ with $\bot$).
+with $\meet$ defined dually (by swapping $\cjoin$ with $\cmeet$, and $\top$ with $\bot$). It can be straightforwardly proven this definition yields a distributive lattice.
 
 \section{Constraint generation}
 \label{extra-sec:fl-cstrs}
@@ -114,9 +114,9 @@ $$
 \irule{FL-Typ-HExt}{\Gamma \vdash e : \tau \meet \flext{\ell' : \flabsent}{\flftop} \quad \Gamma \vdash e' : \tau'}{\Gamma \vdash \flext{\ell' = e'}{e} : \mathrm{forget}_{\ell'}(\tau) \meet \flext{\ell' : \tau'}{\flftop}}
 $$
 \begin{proof}
-    Firstly, note that the assumptions of the two rules are equivalent. The only difference is in the constraint on $e$ -- to see that the two are equivalent, notice that $\flext{\ell' : \flabsent, \overline{\ell : \phi_\ell}}{\phi}$ are exactly the types of form $\tau \meet \flext{\ell : \flabsent}{\flftop}$ for some $\tau = \flext{\overline{\ell : \phi_\ell}}{\phi}$. Otherwise, the meet $\meet$ is at $\bot$ and the assumption is satisfied as well.
+    Firstly, note that the assumptions of the two rules are equivalent. The only difference is in the constraint on $e$ -- to see that the two are equivalent, notice that $\flext{\ell' : \flabsent, \overline{\ell : \phi_\ell}}{\phi}$ are exactly the types of form $\tau \meet \flext{\ell : \flabsent}{\flftop}$ for some $\tau = \flext{\overline{\ell : \phi_\ell}}{\phi}$ (unless $\ell : \flfbot$, in which case the assumption also follows).
 
-    Since assumptions of the two rules are equivalent, it remains to show their consequences are as well. However, this also follows straightforwardly via the reasoning presented in the FL example given in Section \ref{sec:morphisms} -- $\mathrm{forget}_\ell(\tau) \meet \flext{\ell : \phi}{\flftop}$ sends the field $\ell$ in $\tau$ to $\phi$. 
+    Since assumptions of the two rules are equivalent, it remains to show their consequences are as well. However, this also follows straightforwardly via the reasoning presented in the FL example given in Section~\ref{sec:morphisms} -- $\mathrm{forget}_\ell(\tau) \meet \flext{\ell : \phi}{\flftop}$ sends the field $\ell$ in $\tau$ to $\phi$. 
 \end{proof}
 
 Is is then straightforward to see that constraint generation (Sec. \ref{extra-sec:fl-cstrs}) in the case \textsc{Ext} is correct, as it follows the form of the corresponding rule.

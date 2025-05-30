@@ -1,0 +1,30 @@
+\begin{cminted}{ocaml}
+type loc = Cell0.loc =
+| Local of { idx : T.Index.t }
+| Global of { name : string; mut : bool; handle : T.Global.t }
+| Table of { name : string; idx : T.Expression.t }
+| Address of {
+    addr : T.Expression.t;
+    size : uint32;
+    offset : uint32;
+    align : uint32;
+    mem : string;
+  }
+| Struct of {
+    target : T.Expression.t;
+    struct_type : T.HeapType.t;
+    field_idx : T.Index.t;
+  }
+| Array of {
+    target : T.Expression.t;
+    array_type : T.HeapType.t;
+    idx : T.Expression.t;
+  }
+
+type t = { typ : T.Type.t; loc : Cell0.loc }
+
+
+(* val ( ! ) : t -> T.Expression.t *)
+(* val ( := ) : t -> T.Expression.t -> T.Expression.t *) 
+
+\end{cminted}
