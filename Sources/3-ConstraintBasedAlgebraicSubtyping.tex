@@ -172,15 +172,6 @@ Two assumptions underlie \mlsub{} which enable its properties: subtyping forming
     A practical consequence of the polarity restriction is that we cannot type functions as $\alpha \to (\alpha \meet \beta)$ (\ie{} ones \enquote{strengthening} the type of a value). Such types seem necessary for typing extensible records, as we need types like $\alpha \to \alpha \meet \flrec{\ell : \gamma}$. Since I sought to infer types for FL, this led me to investigate follow-up work which loosens the restriction. 
 \end{description}
 
-% \color{red}
-% \subsubsection{Dolan's original work}
-
-% The key aspects of Dolan's approach were to restrict the subtyping order to form a \textbf{distributive lattice} algebra and to impose the \textbf{polarity restriction} on types. Using these, \textcite{mlsub} gave a language design -- \mlsub{} -- with all the desired properties.
-
-% \paragraph{Distributive lattice} Like Dolan, we also consider a distributive lattice of types (with some extensions). This means that our type language contains meets $\meet$ (least upper bounds) and joins $\join$ (greatest lower bounds):
-% $$ \tau ::= \cdots \mid \tau \meet \tau \mid \tau \join \tau $$
-% where we consider types under an equivalence relation given by algebraic laws of the distributive lattice. 
-
 \begin{example}
     In the distributive lattice of FL types (see Appendix \ref{extra:fl-constraints}), we compute:
     \begin{align*}
@@ -190,33 +181,8 @@ Two assumptions underlie \mlsub{} which enable its properties: subtyping forming
     \end{align*}
 \end{example}
 
-% \paragraph{Polarity restriction} The polarity restriction (used by both \textcite{dolan-thesis} and \textcite{pottier-thesis}) splits types $\tau$ into positive types $\tau^+$ and negative types $\tau^-$, so that we only consider subtyping constraints of form $\tau^+ \sub \tau^-$. Intuitively, positive types are used for \emph{outputs} (thus, we use them as a lower bound, \eg{} a function's result), while negative types are used for \emph{inputs} (upper bounds, \eg{} function's argument).
-
-% Crucially, \textcite{mlsub} not only adapt \mlsub{}'s type constructors to respect these polarities (in a manner matching their covariance/contravariance; \eg{} $\tau^+ ::= \cdots \mid \tau^- \to \tau^+$) -- this way, we only ever have subtyping constraints with matched polarities, \ie{} $\tau^+ \sub \tau^-$. Furthermore, they only permit joins in positive types, and meets in negative types:
-% $$ \tau^+ ::= \cdots \mid \tau^+ \join \tau^+ \quad \tau^- ::= \cdots \mid \tau^- \meet \tau^- $$
-% Together with the properties of the lattice algebra, this allows us to cleanly decompose and solve constraints $\tau^+ \sub \tau^-$ via the following pair of properties:
-% \begin{align*}
-% \tau' \join \tau'' \sub \tau \;&\iff \tau' \sub \tau \und \tau'' \sub \tau \\
-% \tau \sub \tau' \meet \tau'' \;&\iff \tau \sub \tau' \und \tau \sub \tau'' 
-% \end{align*}
-% This property of lattices remains crucial in approaches that follow algebraic subtyping.
-
-% However, the restriction of where meets and joins can occur in types -- and thus constraint solving -- means the language and its type system has to be carefully designed and certain types might not be expressible. 
-% Notionally, to type-check updating the field of a record, we will need a primitive of a form that further constrains the type to a subtype with the field updated:
-% $$ \forall \alpha, \beta \ldotp \alpha \to \alpha \land \flrec{\mathrm{foo}: \beta}  $$
-% Such a type breaks the polarity restriction, since a negative type (with a $\meet$) occurs in a positive position (since the inferred type of an expression is a lower bound).
-% Note this is not the type we actually use for typing extensible records, as there are problems with it -- we expand on this in Section \ref{sec:morphisms}.
-
-% \paragraph{Formal treatment} Dolan's techniques revolved around the use of abstract algebra to prove the correctness of his techniques. For type inference itself, he parted with Pottier's constraint-oriented methods, and instead used biunification and bisubstitutions -- generalisation of standard notions in Hindley-Milner type inference to a setting with subtyping \cite{tapl, dolan-thesis}. 
-
 \subsubsection{Later work (Parreaux, Chau)}
 \label{subsubsec:parreaux}
-
-% \subsubsection{Later work}
-% The name \textbf{algebraic subtyping} refers to these restrictions and techniques that Dolan invented, but this report also uses the name for closely related methods which followed, particularly due to \textcite{simple-sub} (\simplesub{}) and \textcite{mlstruct} (\mlstruct{}). These methods are connected, particularly by assumptions about the subtyping order forming a well-behaved algebra of types. We now explain the significance of their work as expanding on Dolan.
-
-% \paragraph{\simplesub{}} 
-% Dolan's approach, although formally solid, leads to a complex implementation. This is shown by \textcite{simple-sub}, when they find demonstrable bugs in Dolan's reference implementation, and introduce a comparatively simpler approach operating on a \emph{constraint graph}. 
 
 While Dolan's work is foundational to this line of work, the approach in \inference{} is more closely descended from follow-up work: \simplesub{} of \textcite{simple-sub}, and \mlstruct{} of \textcite{mlstruct}. I highlight the following developments and their relation to my work: \begin{description}
     \item[Constraint graphs] \textcite{simple-sub} found that the \emph{biunification} approach Dolan uses can be difficult to implement and extend. He proposes an alternative approach in \simplesub{} that relies on explicitly introducing subtyping constraints and imperatively updating a \emph{constraint graph}. I also do not use Dolan's biunification (due to the next point), but my method does not rely on mutation.\footnote{While this is arguably a stylistic choice, purity seems to make the implementation easier to reason about.}
@@ -546,7 +512,7 @@ Early on, \textcite{operations-on-records} identified a crucial issue with typin
 $$ e = \fllam x \fllam y \flext{\ell = y}{x} $$
 which would naively be given the (non-principal) type scheme
 $$ \cdot \vdash e : \forall \alpha \ldotp \flext{\ell : \flabsent}{\flftop} \to \alpha \to \flext{\ell : \alpha}{\flftop} $$
-causing \emph{loss of information} about the non-$\ell$ fields of $x$. There is no obvious way to address this with just subtyping and parametric polymorphism. Hence, the standard solution is row polymorphism \cite{remy-records}, as row type variables can stand for other fields. 
+causing \emph{loss of information} about the non-$\ell$ fields of $x$. We cannot obviously address this with just subtyping and parametric polymorphism, and the standard solution is extending the system with row polymorphism~\cite{remy-records}. Such an extension of algebraic subtyping was sketched by \citeauthor*{algebraic-subtyping-row-polymorphism} \cite{algebraic-subtyping-row-polymorphism}.
 
 We might prefer to avoid adding rows to the system -- avoiding the inherent complexity -- and to stick to just bounded parametric polymorphism. One approach to do so is updating a record type underlying a type variable via a \enquote{type-function} $\mathrm{update}_\ell(\tau, \phi) = \tau$, like:
 $$ \qquad \cdot \vdash e : \forall \alpha, \rho \sub \flext{\ell : \flabsent}{\flftop} \ldotp \rho \to \alpha \to \mathrm{update}_\ell(\rho, \alpha) \qquad \text{(only a sketch!)} $$
@@ -583,7 +549,7 @@ I propose to follow the algebraic approach and exploit homomorphisms in the type
     \label{fig:morphism-laws}
 \end{figure}
 
-\textcite{oxcaml} use a similar approach, introducing a function $\dagger$ in a simple polar \emph{mode language}. In contrast, my approach works with variables and without polarities.
+\textcite{oxcaml} use a similar approach, introducing a \emph{dagger} function $\dagger$ in a simple polar \emph{mode language}. In contrast, my approach works with variables and without polarities.
 
 \subsection{Signature}
 \label{subsec:signature-morphisms}
@@ -645,15 +611,24 @@ $$
   {\tau = \flext{\ell' : \phi_{\ell'},  \overline{\ell : \phi_\ell}}{\phi}}
   {\mathrm{free}_\ell(\tau) = \flext{\ell' : \flfbot,  \overline{\ell : \phi_\ell}}{\phi}}
 $$
-We can now give a rule \textsc{FL-Typ-HExt}, equivalent to the \emph{rule scheme} \textsc{FL-Typ-Ext} (which we cannot generate constraints for while avoiding the update problem \cite{operations-on-records}):
-$$ 
-\irule{FL-Typ-HExt}{\Gamma \vdash e : \tau \meet \flext{\ell : \flabsent}{\flftop} \quad \Gamma \vdash e' : \tau'}{\Gamma \vdash \flext{\ell = e'}{e} : \mathrm{forget}_\ell(\tau) \meet \flext{\ell : \tau'}{\flftop}}
+We can now give a rule \textsc{FL-Typ-HExt}, equivalent to the \emph{rule scheme} \textsc{FL-Typ-Ext} -- which we cannot generate constraints for, while avoiding the update problem \cite{operations-on-records}. The two are given below:
+$$
+\irule{FL-Typ-Ext}
+    {\Gamma \vdash e : \flext{\ell' : \flabsent, \overline{\ell : \phi_\ell}}{\phi} \quad \Gamma \vdash e' : \tau'}
+    {\Gamma \vdash \flext{\ell' = e'}{e} : \flext{\ell' : \tau', \overline{\ell : \phi_\ell}}{\phi}}
+\quad 
+\irule{FL-Typ-HExt}{\Gamma \vdash e : \tau \meet \flext{\ell' : \flabsent}{\flftop} \quad \Gamma \vdash e' : \tau'}{\Gamma \vdash \flext{\ell' = e'}{e} : \mathrm{forget}_{\ell'}(\tau) \meet \flext{\ell' : \tau'}{\flftop}}
 $$
 We can straightforwardly generate constraints for 
 \textsc{FL-Typ-HExt}.
 % (sketch of the proofs of homomorphisms laws and equivalence of \textsc{FL-Typ-Ext} and \textsc{FL-Typ-HExt})
 Thus, the development solves the record update problem under algebraic subtyping without row polymorphism. For details, see Appendix \ref{extra:fl-constraints}.
 
+\paragraph{Polarity restriction} Lastly, I note that:
+$$ \mathrm{update}_\ell(\tau, \phi) = \mathrm{free}_\ell(\tau) \join \flext{ \ell : \phi }{\flfbot} = \mathrm{forget}_\ell(\tau) \meet \flext{ \ell : \phi }{\flftop}  $$ 
+Hence, the approach is compatible with the polarity restriction: we can use the meet or join version of $\mathrm{update}$ depending on the target polarity. Likewise, adjoints agree with polarities.
+
+\needspace{6em}
 \section{Correctness}
 \label{sec:correctness}
 
@@ -692,7 +667,7 @@ We do not consider decidability of subsumption of type schemes (to the well-foun
 I have described \inference{} -- a language-agnostic, constraint-based type inference framework based on algebraic subtyping, as introduced by \textcite{mlsub}.
 It soundly infers bounded parametric type schemes in the presence of structural subtyping. 
 
-I use elegant Boolean algebraic techniques, as set out by \textcite{mlstruct}. I extend their work with \emph{type homomorphisms}, uncovering a new direction in the design of type systems using algebraic subtyping. They are used to infer types for not only FL (Chapter \ref{static-soul}; thus \fabric{} in Chapter \ref{fabric}), but later also  \starr{} (Chapter \ref{star}; with a $\iota$ \emph{shape-index isomorphism}).
+I use elegant Boolean algebraic techniques, as set out by \textcite{mlstruct}. I extend their work with \emph{type homomorphisms}, uncovering a new direction in the design of type systems using algebraic subtyping. They are used to infer types for not only FL (Chapter \ref{static-soul}; thus \fabric{} in Chapter \ref{fabric}), but later also \starr{} (Chapter \ref{star}; with a $\iota$ \emph{shape-index isomorphism}).
 
 Thanks to its general specification in terms of a necessary signature of the source language, \inference{} improves the understanding of what languages can have their types inferred using algebraic subtyping.
 

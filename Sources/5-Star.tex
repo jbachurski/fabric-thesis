@@ -216,7 +216,7 @@ Successful executions eventually reduce to a value $v$ (Figure~\ref{fig:star-val
 \begin{figure}
     \centering
     \input{Sources/4-Figures/Star-opsem-err}
-    \caption{Raises-error step relation $e \sterr$, used for specifying errors which \emph{can} occur in well-typed Star programs.}
+    \caption{Raises-error step relation $e \sterr$, used for specifying errors which \emph{can} occur in well-typed \starr{} programs.}
     \label{fig:opsem-err}
 \end{figure}
 
@@ -234,7 +234,7 @@ Successful executions eventually reduce to a value $v$ (Figure~\ref{fig:star-val
 \begin{figure}
     \centering
     \input{Sources/4-Figures/Star-contexts}
-    \caption{Evaluation contexts $C$ for Star, necessary for specifying the congruence rules for $\leadsto$.}
+    \caption{Evaluation contexts $C$ for \starr{}, necessary for specifying the congruence rules for $\leadsto$.}
     \label{fig:evalctx}
 \end{figure}
 
@@ -259,7 +259,7 @@ Successful executions eventually reduce to a value $v$ (Figure~\ref{fig:star-val
     \label{tab:shape-index-examples}
 \end{table}
 
-We now move on to \starr{}'s type system, which features novel aspects, matching the design of structural shape and index types. 
+We move on to \starr{}'s type system, which features novel aspects matching the design of structural shape and index types. 
 I give a complete description of the type language in Figure~\ref{fig:types}, subtyping in Figure~\ref{fig:subtyping}, and the typing judgement in Figure~\ref{fig:typing}. 
 
 I first focus on the typing of array shapes and indices.
@@ -372,7 +372,7 @@ $$ \begin{bmatrix}
     0 & 4 & 5 & 6 & 0 & 0 \\
     +1 & +1 & +1 & +1 & +1 & +1 \\
 \end{bmatrix} $$
-Programming this can be inconvenient with unstructured array types: in brief, an array of shape $(n, m)$ becomes one of shape $(n + t + b, m + l + r)$, and the programmer is burdened with keeping track of indices. We consider the example of NumPy -- to pad a \texttt{numpy.ndarray} named \texttt{x} one might write:
+Programming this can be inconvenient with unstructured array types: an array of shape $(n, m)$ becomes one of shape $(n + t + b, m + l + r)$, burdening us with index manipulation. Consider the example of NumPy -- to pad a \texttt{numpy.ndarray} named \texttt{x} one might write:
 \begin{center}
 \begin{cminted}{python}
    n, m = x.shape
@@ -384,11 +384,12 @@ Programming this can be inconvenient with unstructured array types: in brief, an
 \end{center}
 The programmer needs to do menial mental arithmetic to find (unsatisfyingly \emph{asymmetric}) index ranges.
 
+\needspace{3em}
 \noindent
-Finally, we consider using Star. Intuitively, first note the shape of a padded matrix has different \textit{regions}:
-$$ \vspace{-0.5em} 
+Finally, we consider using \starr{}. Intuitively, first note the shape of a padded matrix has different \textit{regions}: \\[-0.5em]
+$$
 \begin{matrix}
-{\color{gray} \mathrm{col}} & \\
+{\color{gray} \mathrm{col}} & \\[0.5em]
 \begin{bmatrix}
 \mathrm{top\, left} & \mathrm{top\, centre} & \mathrm{top\, right} \\
 \mathrm{centre\, left} & \mathrm{centre\, centre} & \mathrm{centre\, right} \\
@@ -396,7 +397,7 @@ $$ \vspace{-0.5em}
 \end{bmatrix} & {\color{gray} \mathrm{row}} 
 \end{matrix} $$
 These correspond to index ranges used prior. For instance, centre right is in range $[t, n + t) \times [n + l, n + l + r)$.
-With this intuition, we find the Star shape type $\sigma$ -- and its value $s : \sigma$:
+With this intuition, we find the \starr{} shape type $\sigma$ -- and its value $s : \sigma$:
 \begin{align*}
 \sigma =  \{\!\mid  &\mathrm{row}: \sconcattype{\mathrm{Top}: \ssized, \mathrm{Centre}: \ssized,\mathrm{Bottom}: \ssized}, \\ 
 &\mathrm{col} : \sconcattype{\mathrm{Left}: \ssized, \mathrm{Centre}: \ssized,\mathrm{Right}: \ssized} \mid\!\} 
@@ -419,10 +420,10 @@ Satisfyingly, index arithmetic has become pattern matching. We do not use index 
 \section{Conclusions}
 
 I have presented a novel design for an array programming calculus, emphasising the use of structural types for shapes and indices. 
-Though I do not statically ensure bounds checking for \emph{integer} indices -- like dependent types -- I circumvent the problem by enabling the programmer to use richer structures for array shapes and indices. 
-This makes it much easier to provide useful static types to common array programming patterns. 
+Though I do not statically ensure bounds checking for \emph{integer} indices -- like dependent types -- I circumvent the problem with \emph{structured} array shapes and indices. 
+This makes it much easier to provide useful static types to common array programming patterns -- bringing down conventions for writing nearly-untyped array code. 
 
-In addition to contributions presented in this chapter, in the paper \cite{star} we give more worked examples and an elaborate discussion of avenues for further work.
+In addition to contributions presented in this chapter, in the paper \cite{star} we give further examples and avenues for further work.
 
 My novel type system for \starr{} fills the gap between dynamically and dependently typed array programming. Thus, I reveal a new area in the design space of array programming languages -- a middle-ground between basic and complicated type systems.
 
