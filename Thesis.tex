@@ -27,7 +27,7 @@
 % 2. Update the word count and date in the Declaration, and month in Title.
 
 \newif\ifanonymised
-\anonymisedtrue % comment out to de-anonymise
+% \anonymisedtrue % comment out to de-anonymise
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % Listings
@@ -278,15 +278,14 @@
 %TC:endignore 
 \mainmatter
 \label{firstcontentpage}
-
   \include{Sources/1-Introduction}
   \include{Sources/2-SoulOfDynamicTyping}
   \include{Sources/3-ConstraintBasedAlgebraicSubtyping}
   \include{Sources/4-Fabric}
   \include{Sources/5-Star}
+\label{lastcontentpage} % Conclusions are one page
   \include{Sources/6-Conclusions}
 
-\label{lastcontentpage} 
 %TC:ignore 
 
   % This ensures that the subsequent sections are being included as root
@@ -306,6 +305,7 @@
   \renewcommand{\nomname}{Notation}
   \printnomenclature
 
+  \include{Sources/Appendix-FL-OpSem}
   \include{Sources/Appendix-FJ-FL_Proofs}
   % \include{Sources/Appendix-Inference_Proofs}
   \include{Sources/Appendix-FL-Constraints}

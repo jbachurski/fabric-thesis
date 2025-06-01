@@ -23,7 +23,9 @@ In this chapter (based on a paper of the same name \cite{star}), I describe the 
 
 We start by motivating the design of \starr{}, showing how common array patterns arise when we use algebraic data types -- records and variants -- for array indices.
 
-\paragraph{Terminology} Let us consider standard array programming terms, which \starr{} builds on and generalises. Arrays have a \emph{rank} -- the number of dimensions. The \emph{shape} of an array defines the extent (\emph{size}) of
+\paragraph{Standard terminology} 
+% Let us consider standard array programming terms, which \starr{} builds on and generalises.
+Arrays have a \emph{rank} -- the number of dimensions. The \emph{shape} of an array defines the extent (\emph{size}) of
 each dimension. Dimensions are sometimes referred to as \emph{axes}.
 A \emph{batch} refers to a sequence of something, and we speak of a batch dimension (batch axis).
 
@@ -36,7 +38,7 @@ $$ \srecordtype{ \mathrm{batch}: \sint, \mathrm{row}: \sint, \mathrm{col}: \sint
 could clearly be used as an index into our batch of images. In fact, this perspective has its benefits. For example, a simple 4-dimensional structure does not differentiate dimensions beyond their position in the sequence -- the programmer would usually need to keep track of the order of dimensions with \eg{} unenforceable annotations in code comments. 
 
 \begin{wrapfigure}[6]{r}{2.5cm}
-\vspace{-0.7cm}
+\vspace{-0.8cm}
 \begin{center}
 \begin{tikzpicture}
     \draw[->] (0, 0) -- (2, 0);
@@ -53,7 +55,7 @@ I propose that for any array shape types $\sigma, \dots$ and axis labels $\ell, 
 Records provide a \textbf{product} on shapes. 
 An example illustration of $\sproducttype{\mathrm{row}: \sint, \mathrm{col}: \sint}$ is given on the right.
 
-This idea is reminiscent of named tensors~\cite{named-tensors} or \texttt{xarray} \cite{hoyer2017xarray} (among others), and this similarity is not accidental -- their usefulness motivated product shapes.
+This idea is reminiscent of named tensors~\cite{named-tensors} or \texttt{xarray} \cite{hoyer2017xarray} (among others), and this similarity is not accidental -- their usefulness motivated generalisation to product shapes.
 % The practical usefulness of this prior work led me to generalising this technique.
 
 \subsection{Variant indices concatenate}
@@ -191,7 +193,7 @@ In the operational semantics, $\inbsp$ determines the indices $v$ for which we s
     \label{fig:cast}
 \end{figure}
 
-\subsection{Representation of array values}
+\subsection{Array values}
 \label{subsec:array-values}
 
 In \starr{}, array comprehensions $\sbuild{x}{e}{e'}$ eventually evaluate to array values $\sarrayval{\vess}{I}$.
@@ -308,8 +310,8 @@ Constructing $\iota$ is unsurprising -- similar concepts often arise when genera
 \paragraph{Splitting $\sigma$} Consider \starr{}'s array types, which have the syntax $\sarraytype{\sigma_1}{\sigma_2}{\tau}$ for $\sigma_1 \sub \sigma_2$. They are carefully constructed to provide useful subtyping with a technique used by both \textcite{dolan-thesis} and \textcite{pottier-thesis} (which they use for typing mutable reference types). The crux is to split the shape $\sigma$ in $\sonebound{\sigma}\tau$ into a contravariant part $\sigma_1$ and covariant part $\sigma_2$, so that indexing uses $\sigma_1$, and accessing the shape returns a $\sigma_2$. The obvious array type, $\sonebound{\sigma}\tau$ (which we write to abbreviate $\sarraytype{\sigma}{\sigma}{\tau}$), would necessarily be invariant \cite[Appendix~B]{star}. Note that by requiring $\sigma_1 \sub \sigma_2$ there is a $\sigma$ such that $\sigma_1 \sub \sigma \sub \sigma_2$: we have an \emph{actual} shape $\sigma$ into which we index with $\iota(\sigma_1) \sub \iota(\sigma)$, and but accessing it we only obtain $\sigma_2 \super \sigma$.
 
 \paragraph{Broadcasting}
-Our presented subtyping order forms a distributive lattice, in line with algebraic subtyping. 
-This allows us to view as a meet in the lattices of both shape bounds and their types. 
+% Our presented subtyping order forms a distributive lattice, in line with algebraic subtyping. 
+We view broadcasting as a meet in the lattices of both shape bounds and their types. 
 Indeed, $\vess' \broadcastsem \vess''$ (for shape values $\vess': \sigma'$, $\vess'' : \sigma''$ of types $\sigma', \sigma''$) is a partial operator that finds the shape $\vess : \sigma$ for which $\sigma = \sigma' \meet \sigma''$ (where $\meet$ is the meet on types agreeing with $\sub$), so that for any index $v$: 
 $$ v \inbs \vess \iff v \inbs \vess' \text{ and } v \inbs \vess'' $$
 Hence, $\broadcast$ is the meet in a lattice spanned by the unary predicate $\_ \inbs s$, and its result type takes the meet of shape types: clarifying how broadcasting finds sub-shapes, as defined in Section~\ref{subsec:array-shapes}.
@@ -326,7 +328,7 @@ To show my design of \starr{} is well-behaved, I state and prove type safety for
     If \ $\cdot \vdash e : \tau$, then either $e$ is a value, $e \leadsto e'$ for some $e'$, or $e \leadsto \lightning$.
 \end{theorem}
 
-I prove these theorems in Appendix \ref{extra:star-proofs}, but they follow straightforwardly by structural induction. The key lemma shows agreement between the subtyping relation $\sub$ and the structurally-in-bounds relation $\inbstr$.
+I prove these theorems in Appendix \ref{extra:star-proofs}, but they follow straightforwardly by structural induction. Crucially, I show agreement between the subtyping relation $\sub$ and the structurally-in-bounds relation $\inbstr$.
 
 \needspace{4em}
 \subsection{Type inference \& polymorphism}
@@ -334,7 +336,7 @@ I prove these theorems in Appendix \ref{extra:star-proofs}, but they follow stra
 
 \starr{}'s subtyping forms a distributive lattice,\footnote{The trickiest aspect is that joins/meets are closed for arrays. Checking $\sarraytype{\sigma_1'}{\sigma_2'}{\tau'} \join \sarraytype{\sigma_1''}{\sigma_2''}{\tau''} = \sarraytype{\sigma_1' {\meet} \sigma_1''}{\sigma_2' {\join} \sigma_2''}{(\tau' \join \tau'')}$, indeed $\sigma_1' \sub \sigma_2'$ and $\sigma_1'' \sub \sigma_2''$ implies $\sigma_1' \meet \sigma_1'' \sub \sigma_2' \meet \sigma_2'' \sub \sigma_2' \join \sigma_2''$.} and $\iota$ is an isomorphism -- we can apply \inference{} (Chapter~\ref{algebraic-subtyping}). 
 
-Though I do not give a complete description of a polymorphic \starr{} calculus, I show a sketch of constraint generation for \starr{} in Figure \ref{fig:star-type-constraints}. To do so, we extend $\iota$ to be an involutive isomorphism in the algebra of types ($\iota^{-1} = \iota$, \ie{} $\iota$ swaps corresponding shapes and types), so that $\ladj \iota = \radj \iota = \iota$ and $\ladjrest \iota = \radjrest \iota = \tru$.
+Though I do not give a complete description of a polymorphic \starr{} calculus, I show a sketch of constraint generation for \starr{} in Figure \ref{fig:star-type-constraints}. To do so, we extend $\iota$ to be an involutive isomorphism in the algebra of types ($\iota^{-1} = \iota$, \ie{} $\iota$ swaps shapes and indices), so that $\ladj \iota = \radj \iota = \iota$ and $\ladjrest \iota = \radjrest \iota = \tru$.
 
 Extending \starr{} with polymorphism enables a \emph{shape-polymorphic} programming style -- a generalisation of rank polymorphism in existing literature \cite{automap, sac-tensor-comprehensions}. 
 It is worth noting that shape polymorphism gives us index safety for free akin to \textcite{theorems-for-free} (modulo integer indices).
@@ -397,10 +399,10 @@ $$
 \end{bmatrix} & {\color{gray} \mathrm{row}} 
 \end{matrix} $$
 These correspond to index ranges used prior. For instance, centre right is in range $[t, n + t) \times [n + l, n + l + r)$.
-With this intuition, we find the \starr{} shape type $\sigma$ -- and its value $s : \sigma$:
+With this intuition, we find the \starr{} shape type $\sigma$ -- and its value $s$:
 \begin{align*}
-\sigma =  \{\!\mid  &\mathrm{row}: \sconcattype{\mathrm{Top}: \ssized, \mathrm{Centre}: \ssized,\mathrm{Bottom}: \ssized}, \\ 
-&\mathrm{col} : \sconcattype{\mathrm{Left}: \ssized, \mathrm{Centre}: \ssized,\mathrm{Right}: \ssized} \mid\!\} 
+\sigma =  \{\!\mid &\, \mathrm{row}: \sconcattype{\mathrm{Top}: \ssized, \mathrm{Centre}: \ssized,\mathrm{Bottom}: \ssized}, \\ 
+&\, \mathrm{col} : \sconcattype{\mathrm{Left}: \ssized, \mathrm{Centre}: \ssized,\mathrm{Right}: \ssized} \mid\!\} 
 \end{align*}
 \vspace{-2em}
 \begin{align*}
@@ -415,7 +417,7 @@ and easily construct the padding of an array $a : [\sproducttype{\mathrm{row} : 
 &\mid \mathrm{Bot}\,\_, \_ \Rightarrow +1  \\
 &\mid \_, \_ \Rightarrow 0
 \end{align*}
-Satisfyingly, index arithmetic has become pattern matching. We do not use index arithmetic -- which existing array languages would have us rely on -- at all, and thus the program's safety is guaranteed.
+Satisfyingly, index arithmetic (which most existing array languages would have us rely on) has become pattern matching -- and the program's safety is guaranteed.
 
 \section{Conclusions}
 

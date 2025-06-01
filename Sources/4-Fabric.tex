@@ -4,17 +4,20 @@
 
 In this short chapter, I present \textbf{\fabric{}} -- a functional programming language with structural subtyping. 
 \fabric{}'s role in my thesis is roughly similar to that of \mlsub{} \cite{dolan-thesis}: my design (Section \ref{sec:fabric-design}) is driven by: \begin{itemize}
-    \item Desire to statically type features present in dynamically typed languages like Python or Lua.
-    \item Requirements of \inference{} (Chapter \ref{algebraic-subtyping}), making \fabric{} an example of its expressive power.
+    \item Desire to statically type features present in dynamically typed languages, like Python or Lua.
+    \item Applying \inference{} (Chapter \ref{algebraic-subtyping}) -- making \fabric{} an example of its expressive power.
 \end{itemize}
-Furthermore, in Section \ref{sec:fabric-impl} I explore the implementation of a \fabric{} compiler targeting \wasm{}, which includes a complete implementation of \inference{}. I thus report my practical experience working with \wasm{} and \inference{}.
+Furthermore, in Section \ref{sec:fabric-impl} I explore the implementation of a \fabric{} compiler -- \compiler{} -- targeting \wasm{}, which includes a complete implementation of \inference{}. I thus report my practical experience working with \wasm{} and \inference{}.
 
 \section{Design}
 \label{sec:fabric-design}
 
-The basis of \fabric{} is Chapter \ref{static-soul}'s Featherweight Lua, extended with more record operations, variants, tuples, and \emph{nominal type abbreviations}. \fabric{} is essentially a superset of \mlsub{} \cite{mlsub} (I also consider extensions proposed by \textcite{dolan-thesis}), and is influenced by \mlstruct{} \cite{mlstruct}.\todo[color=green]{expr}\todo[color=green]{opsem}\todo[color=green]{types}\todo[color=green]{typing}
+The basis of \fabric{} is Chapter \ref{static-soul}'s Featherweight Lua, extended with more record operations, variants, tuples, and \emph{nominal type abbreviations}. \fabric{} is essentially a superset of \mlsub{} \cite{mlsub} -- and I consider extensions proposed by \textcite{dolan-thesis}) -- and is influenced by \mlstruct{} \cite{mlstruct}.\todo[color=green]{expr}\todo[color=green]{opsem}\todo[color=green]{types}\todo[color=green]{typing}
+
+Due to time (and space) constraints, I only state type safety (Progress and Preservation) for \starr{} (Chapter~\ref{star}; Section \ref{subsec:type-safety}). However, \fabric{}'s design is also intended to admit type safety.
 
 Selected \fabric{} programs written in code accepted by \compiler{} are given in Figures~\ref{fig:fabric-example-eval}~and~\ref{fig:fabric-example-pairwise}.
+
 
 \begin{figure}[p]
     \centering

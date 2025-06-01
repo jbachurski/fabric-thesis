@@ -1,42 +1,58 @@
 \chapter{Correctness of the FJ-FL~Translation}
 \label{extra:fj-fl-proofs}
 
-\section{Operational semantics for Featherweight Lua}
+\section{Correctness theorems}
 
-The following is an operational semantics in the same style as for Star (Section \ref{subsec:semantics}).
+Proving completeness (stated as injectivity) is straightforward, so we focus on soundness -- preservation of types and semantics. 
 
-$$ \boxed{e \step e} $$
-\begin{align*}
-\fllet x v e &\step [v/x] e
-&\textsc{Let} \\
-(\fllam x e)\,v &\step [v/x]e
-&\textsc{App} \\
-\flext{\ell = e}{\flrec{\overline{\ell = v_\ell}}} &\step \flrec{\overline{\ell = v_\ell}, \ell = e} \quad \text{(if $\ell$ not in $\overline \ell$)}
-&\textsc{Ext} \\
-\flproj{\flrec{\overline{\ell = v_\ell}}}{\ell} &\step v_\ell
-&\textsc{Proj} \\
-\flcast{e}{\tau} &\step e 
-&\textsc{Cast}
-\end{align*}
-$$ \irule{Cong}{e \leadsto e'}{\ctx{\evalct}{e} \leadsto \ctx{\evalct}{e'}} $$
+For brevity (as the proofs are similarly straightforward), we assume \emph{soundness of the class table translation}, stating that definitions introduced by $\denot {\fj K}/\denot {\fj M}/\denot {\fj L}$ have the claimed types $\denoty {\fj K}/\denoty {\fj M}/\denoty {\fj L}$, which is straightforward to see.
 
-Where we define evaluation contexts $\evalctx$ for the congruence rule:
-\begin{align*}
-\evalctx ::=&\, 
-\ctxhole
-\\ \mid&\, 
-\fllet{x}{\evalctx}{e}
-\\ \mid&\, 
-\evalctx\,e \mid v\,\evalctx
-\\ \mid&\, 
-\flrec{\overline{\ell = v}, \ell = \evalctx, \overline{\ell = e}}
-\\ \mid&\, 
-\flext{\ell = e}{\evalctx} \mid \flext{\ell = \evalctx}{v}
-\\ \mid&\, 
-\evalctx{.}\ell
-\end{align*}
+\subsection{Preservation of typing}
 
-\section{Preservation of typing}
+\begin{proof}
+We are required to prove 
+$$\Gamma \vdash \fj e : \fj C \implies \denoty \Gamma \vdash \denot{\fj e} : \denoty{\fj C}$$
+We proceed by structural induction on FJ typing $\Gamma \vdash \fj e : \fj C$ and consider possible cases.
+\begin{description}
+    \item[Variable $\fj x$] Obvious.
+    \item[Attribute $\fj{e.f}$] By rule inversion, $\Gamma \vdash \fj e : \fj C$ for some $\fj C$ whose instances have the field $\fj f$. But then since $\denoty{\Gamma} \vdash \denot{\fj e} : \denoty{\fj C}$ (inductive hypothesis) and thus $\denoty{\Gamma} \vdash \denot{\fj e} : \flrec{f : \denoty{\fj C'}}$ (subsumption; soundness of translating $\fj L$), and thus $\denoty{\Gamma} \vdash \denot{\fj e}{.}{\fj f} : \denoty{\fj C'}$.
+    \item[Method $\fj{e.m}(\overline {\fj e})$] By rule inversion, we get that $\Gamma \vdash \fj e : \fj C$ for some $\fj C$ which has the method $\fj m$ defined, and the typing of arguments $\overline{\Gamma \vdash \fj e : \fj C}$ matches $\fj m$. We then finish immediately, as as above $\fj m$ is among the fields of the record $\denot{\fj e}$, and all argument types match in the application $\denot{\fj {e.m(\fjoverline e)}} = \fllet{x}{\denot{\fj e}} \flproj{x}{\fj m}\,x\,\overline{\denot{\fj e}}$ (by soundness of translating $\fj M$ and inductive hypothesis).
+    \item[Constructor $\fj{new C}(\overline{\fj e})$] We see that $\overline{e}$ are well-typed, \ie{} $\overline{\Gamma \vdash e : \fj C}$. By the inductive hypothesis, we then have $\overline{\denoty{\Gamma} \vdash \denot{e} : \denoty{\fj C}}$. Since $\denoty{\Gamma} \vdash \fj C : \overline{\denoty{\fj C} \to {}} \denoty{\fj C}$ (where $\fj C$ is the translated constructor) by soundness of the \fj{CT} translation at constructors \fj{K}, we immediately see that all argument types match in the repeated application $\denot{\fj{new C}(\overline{\fj e})} = \fj{C}\,\overline{\denot{\fj e}}$, finishing the inductive step.  
+    \item[Cast $\fj{(C)e}$] Immediate, as FL does not check casts. Nominal-style runtime type checking would require adding an extra type-tag field to each record for representing objects \cite{tapl}. Including such tags would extend soundness with respect to semantics, so that if $\fj e$ gets stuck then does $\denot{\fj e}$ too.
+\end{description}
+\end{proof}
 
-\section{Preservation of semantics}
+\vfill
+\subsection{Preservation of semantics}
 
+We recall that in FJ, values are expressions in normal form, which are composed of only \fj{new} (with \enquote{leaves} given by nullary constructors).
+Furthermore, we state a canonical form lemmas for FL and a sketch of the canonical form lemma for translated FJ values.
+\begin{lemma}[Canonical forms in FL]
+    Records and functions have the following canonical forms:
+    \begin{itemize}
+        \item If $\cdot \vdash v : \tau \to \tau'$, then $v = \lambda x \ldotp e$ so that $x : \tau \vdash e : \tau'$.
+        \item If $\cdot \vdash v : \flrec{\overline{\ell : \tau}}$, then $v = \flrec{\overline{\ell = v}, \dots}$.
+    \end{itemize}
+\end{lemma}
+\begin{lemma}[Soundness: canonical form of translated FJ values]
+    If $\cdot \vdash \fj v : \fj C$, then $\cdot \vdash \denot{\fj v}_{\fj{CT}} : \denoty{\fj{C}}$, so that $\denot{\fj v}$ is a record containing all attributes $\fj f$ (defined in $\denoty{\fj C}$) and methods $\fj m$ (which match definitions in $\fj{C}_\mathrm{proto}$).
+\end{lemma}
+% We also state FL's type safety in a Progress theorem.
+% \begin{theorem}[Progress]
+%     If $\cdot \vdash e : \tau$, then $e = v$ or $e \step e'$ for some $e'$.
+% \end{theorem}
+We now prove the theorem.
+
+\begin{proof}
+We prove that
+$$\cdot \vdash \fj e : \fj C \implies \fj e \step^* \fj v \implies \denot{\fj e} \step^* \denot{\fj v}$$
+and, as before, proceed by structural induction on $\Gamma \vdash \fj e : \fj C$. 
+\begin{description}
+    \item[Variable $\fj x$] Vacuously, as encountering a variable is contradictory with $\cdot \vdash \fj e : \fj C$.
+    \item[Attribute $\fj{e.f}$] By inductive hypothesis, $\denot{\fj e} \step^* \denot{\fj v}$. But then $\denot{\fj v}$ must be a record with a field $\fj f$ (canonical form for an object with attribute $\fj f$). Since a record's field is its substructure up to congruence, we immediately get $\denot{\fj {e.f}} \step^* \denot{\fj {v.f}}$, which is sufficient as $\fj e \step^* \fj v \implies \fj{e.v} \step^* \fj{v.f}$. 
+    \item[Method $\fj{e.m}(\overline {\fj e})$] Accessing the field $\fj m$ proceeds analogically, so we focus on application. By looking at the definition of $\denot{\fj M}$ for the accessed method $\fj m$, it is clear to see that in instantiation $\fj{this}$ and all arguments $\fj{x}$ all substituted into the method's body as in FJ (specifically, we need a class table translation soundness for semantics as we did for typing). Here, it is key that the object itself is passed as $\fj{this}$ and its attributes and methods are accessible therein. With that said, clearly if $\fj{e.m}(\overline {\fj e}) \step^* \fj e'$ -- where $\fj e'$ is the body of $\fj m$ with arguments substituted -- then likewise $\denot{\fj{e.m}(\overline {\fj e})} \step^* \denot{\fj e'}$, and we proceed by induction from $\fj e'$ (which is well-founded, as we only consider terminating programs).
+    \item[Constructor $\fj{new C}(\overline{\fj e})$] Since constructors $\fj{new}$ with all arguments evaluated serve as canonical forms in FJ, the inductive hypothesis tells us that all these arguments evaluate as required ($\overline{\denot{\fj e} \step^* \denot{\fj v}}$), and thus we can apply the translated constructor \fj{C} to obtain a record matching the canonical form of the translated value $\denot{\fj v}$ for $\fj{new C}(\overline{\fj e}) \step^* \fj v$.
+    \item[Cast $\fj{(C)e}$] Immediate -- but see note about casts in the preceding proof.
+\end{description}
+
+\end{proof}

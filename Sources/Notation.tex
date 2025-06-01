@@ -120,7 +120,7 @@
 \newcommand{\fj}[1]{\texttt{#1}}
 \newcommand{\fjoverline}[1]{$\overline{\mbox{#1}}$}
 
-\newcommand{\fjconsdef}{\fj{C(\fjoverline{C f}) \{ super($\overline{\fj{f}^\circ}$); \fjoverline{this.f'=f'';} \}}}
+\newcommand{\fjconsdef}{\fj{C(\fjoverline{C f}) \{ super($\overline{\fj{f}'}$); \fjoverline{this.f=f;} \}}}
 \newcommand{\fjmethdefx}{\fj{C}' \fj{ m(\fjoverline{C x})\{ ... \}}}
 \newcommand{\fjmethdef}{\fj{C}' \fj{ m(\fjoverline{C x})\{ return e; \}}}
 \newcommand{\fjclassdef}{\fj{class C extends C' \{ \fjoverline{C f}; K; \fjoverline{M}; \}}}
