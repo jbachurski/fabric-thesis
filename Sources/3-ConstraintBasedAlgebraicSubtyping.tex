@@ -637,7 +637,7 @@ Thus, the development solves the record update problem under algebraic subtyping
 $$ \mathrm{update}_\ell(\tau, \phi) = \mathrm{free}_\ell(\tau) \join \flext{ \ell : \phi }{\flfbot} = \mathrm{forget}_\ell(\tau) \meet \flext{ \ell : \phi }{\flftop}  $$ 
 Hence, the approach is compatible with the polarity restriction: we can use the meet or join version of $\mathrm{update}$ depending on the target polarity. Likewise, adjoints agree with polarities.
 
-In fact, \inference{} has a polarity-restricted subset, in which all constraints are of form $\tau^+ \sub \tau^-$ and thus intermediate $\typcnf$ have single-literal clauses.
+In fact, \inference{} has a polarity-restricted subset, in which all constraints are of form $\tau^+ \sub \tau^-$, and thus intermediate $\typcnf$ have single-literal clauses. There, we require homomorphisms preserve polarity.
 
 \needspace{6em}
 \section{Correctness}

@@ -17,14 +17,21 @@
 \vspace{0.2cm}
 %
 \begin{center}
-\begin{minipage}{0.6\textwidth}
+\tolerance=1
+\emergencystretch=\maxdimen
+\hyphenpenalty=10000
+\hbadness=10000
+\begin{minipage}{0.61\textwidth}
     \setlength{\parindent}{1em}
     Static type systems are the most widely deployed program verification technique. 
-    And yet, much of today's programming happens in \emph{dynamically typed languages} which abandon static typing, trading away safety for flexibility. 
-    This thesis argues for designing languages with \emph{structural subtyping} in mind, showing it mimics the flexibility of dynamically typed languages, while providing safety guarantees like traditional approaches. 
+    And yet, much of today's programming happens in \emph{dynamically typed languages}, trading away the safety of static typing for flexibility. 
+    This thesis argues for designing languages with \emph{structural subtyping}, showing that it mimics the flexibility of dynamically typed languages, while providing safety guarantees like traditional type systems. 
 
-    To inform language design, reliable type inference is identified as key to programmer productivity. Based on Dolan's seminal invention of \emph{algebraic subtyping}, this thesis develops a constraint-based type inference framework supporting structural subtyping. Its expressive power is displayed in the design and implementation of a functional language with extensible data types. Lastly, structural subtyping is shown to resolve a long-standing problem in language design with the invention of a statically typed array programming calculus admitting type inference.
+    In order to inform language design, reliable type inference is identified as key to programmer productivity. 
+    Based on Dolan's seminal invention of \emph{algebraic subtyping}, this thesis develops a constraint-based type inference framework supporting structural subtyping. 
+    Its expressive power is displayed in the design and implementation~of a functional language with extensible data types. 
+    Lastly, structural subtyping is shown to lead to a new middle ground between untyped and dependent type systems for array programming, with a novel design of a statically typed array calculus that admits type inference.
 
-    This research aims to steer programming language design towards structural subtyping, and to lead to improvements in optional static type systems for dynamically typed languages, particularly type inference.
+    This research aims to steer language design towards structural subtyping, and to lead to improvements in optional static type systems for dynamically typed languages.
 \end{minipage}
 \end{center}

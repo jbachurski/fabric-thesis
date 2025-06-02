@@ -250,14 +250,18 @@
 % Fabric
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
+\newnotation{fbpat}{$p$}{Pattern}{Y009}
+
 \newcommand{\fbrestricted}{\setminus}
 \newnotation{fbcast}{$e \fbrestricted \ell$}{Record restriction -- removing a field $\ell$ from $e$}{Y010}
 
 \newcommand{\fbcheck}[2]{{#1}_?{#2}}
 \newnotation{fbcheck}{$\fbcheck{\ell}{e}$}{Checked projection -- a tagged value $\mathrm{Some}\,e{.}\ell$ if $\ell$ is in $e$, $\mathrm{None}\,()$ otherwise}{Y011}
 
-\newcommand{\fbopt}[1]{?\boxed{#1}}
+\newcommand{\fbopt}[1]{\boxed{#1}?}
 \newnotation{fbopt}{$\fbopt{\tau}$}{Optional field -- absent, or present with $\tau$}{Y012}
+
+\newnotation{fbcase}{$\kappa$}{Case type}{Y019}
 
 \newcommand{\fbtag}[2]{#1\,#2}
 \newnotation{fbtag}{$\fbtag{T}{e}$}{Tagging}{Y020}

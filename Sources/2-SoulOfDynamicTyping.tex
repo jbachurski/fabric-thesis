@@ -75,24 +75,24 @@ Similarly to static and dynamic, nominal and structural typing also lie on a spe
     \centering
     \begin{subfigure}{.49\textwidth}
     \centering
-    \begin{ocaml}
+    \begin{cminted}{ocaml}
 (* record *)
 type point = { x : int; y : int }
 (* variant *)
 type opt = None | Some of int
-    \end{ocaml}
+    \end{cminted}
     \caption{Nominally typed records and variants.}
     \label{subfig:nominal-ocaml}
     \end{subfigure}
     \hfill
     \begin{subfigure}{.49\textwidth}
     \centering
-    \begin{ocaml}
+    \begin{cminted}{ocaml}
 (* object *)
 type point = < x : int; y : int >
 (* polymorphic variant *)
 type opt = [ `None | `Some of int ]
-    \end{ocaml}
+    \end{cminted}
     \caption{Structurally typed objects and polymorphic variants.}
     \label{subfig:structural-ocaml}
     \end{subfigure}
@@ -127,7 +127,7 @@ We briefly consider two possible alternatives. These represent the main areas of
 \begin{figure}
     \centering
     \begin{tabular}{c}
-    \begin{ocaml}
+    \begin{cminted}{ocaml}
 let f = function 
     | `None -> `Unit 
     | `Some x when x mod 2 = 0 -> `Pair (x / 2, x / 2) 
@@ -136,7 +136,7 @@ let f = function
 val f : [< `None | `Some of int ] 
      -> [> `Pair of int * int | `Single of int | `Unit ]
 *)
-    \end{ocaml}
+    \end{cminted}
     \end{tabular}
     \caption{Example of row polymorphism in OCaml using polymorphic variants, annotated with its (inferred) most general type. \texttt{<} and \texttt{>} stand for row type variables in closed and open variants, respectively. The argument type can be unified against any variant with at most the listed cases, while the result with at least those.}
     \label{fig:ocaml-row-polymorphism}

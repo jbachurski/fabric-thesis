@@ -1,0 +1,340 @@
+\chapter{Formal development of \fabric{}}
+\label{extra:fabric}
+
+This appendix sketches the formal development of Fabric, as described in Chapter \ref{fabric}.
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{Expressions}
+
+Syntax is given in terms of variable names $x$, field labels $\ell$, variant tags $T$, integers $n$, and arithmetic operations $\pi$. I define the grammars of expressions $e$ (Figure \ref{fig:fabric-expressions}), patterns $p$ (Figure \ref{fig:fabric-patterns}), and values $v$ (Figure \ref{fig:fabric-values}).
+
+\newcommand{\fbtuple}[1]{\left\langle#1\right\rangle}
+\newcommand{\fbmatch}[1]{\mathrm{match}\,#1\,\mathrm{with}\,}
+
+I note that in \fabric{}, as customary, we use the empty tuple $\fbtuple{}$ as a unit value (and later, unit type). Tuples and variants are eliminated using pattern matching.
+
+\paragraph{Operational semantics}
+FL is given a call-by-value, small-step operational semantics.
+We focus on interesting cases. 
+
+\begin{description}
+\item[Patterns] 
+Let us denote substitution of values in patterns by $[v/x]p$. 
+Then the substitution $\overline{v/x}$ for which $\left[ \overline{v/x} \right] p = v$ is unique if it exists (taking the wildcard tag \enquote{$\_$} as equal to any tag $T$). If it does, we denote it $\mathrm{unpack}_p(v)$. Then we have the following:
+\begin{align*}
+\fllet p v e &\step \left[ \mathrm{unpack}_p(v) \right]e \\
+(\fllam p e)\,v &\step \left[ \mathrm{unpack}_p(v) \right]e \\
+\fbmatch{v} \overline{p \Rightarrow e} &\step \left[ \mathrm{unpack}_p(v) \right]e & \text{for first matching $p$ among $\overline p$} 
+\end{align*}
+Where $\mathrm{unpack}_p(v)$ is undefined, the state on the left-hand side is stuck.
+\item[Records]
+Besides FL's usual record operations, \fabric{} also includes: \begin{itemize}
+    \item Checked projections, which test whether the record contains a given field and return it if it is present. The operation returns tagged values:
+    \begin{align*}
+        \fbcheck{\flrec{\overline{\ell = v}}}{\ell} &\step \mathrm{Some}\,v & \text{if $\ell$ occurs in $\overline \ell$} \\
+        \fbcheck{\flrec{\overline{\ell = v}}}{\ell} &\step \mathrm{None}\,\fbtuple{} & \text{if $\ell$ does not occur in $\overline \ell$}
+    \end{align*}
+    \item Record restriction, which removes a present field from a record:
+    $$ \flrec{\ell = v, \overline{\ell = v}} \fbrestricted \ell \step \flrec{\overline{\ell = v}} $$    
+\end{itemize}
+\item[Abbreviation-casts]
+Abbreviation-casts are run-time no-ops, as they are intended to coerce between values of \emph{effectively} the same type -- but with some parts of that type made opaque by a nominal type.
+$$ \fbcast{e}{\tau}{\tau'} \step e $$
+Because of this rule, Progress is stated only \emph{up to nominal abbreviations}.
+\end{description}
+
+\begin{figure}[p]
+    \centering
+\begin{align*}
+\graintro e 
+x \mid \fllet{p}{e} e
+& \text{(variable, let-binding)}
+\graitem
+\fllam p e \mid e\,e
+& \text{(function, application)}
+\graitem
+\fbmatch e \overline{p \Rightarrow e}
+& \text{(pattern matching)}
+\graitem
+n \mid \pi \left(\overline e \right)
+& \text{(integer literal, integer arithmetic)}
+\graitem
+\fbtuple{\overline e}
+& \text{(tuple)}
+\graitem
+\flrec{\overline{\ell = e}}
+& \text{(record construction)}
+\graitem
+e{.}\ell
+& \text{(record projection)}
+\graitem
+\fbcheck{e}{\ell}
+& \text{(record checked projection)}
+\graitem
+\flext{\ell = e}{e} 
+& \text{(record extension)}
+\graitem
+e \fbrestricted \ell
+& \text{(record restriction)}
+\graitem
+T\,e
+& \text{(variant tagging)}
+\graitem
+\fbcast{e}{\tau}{\tau}
+& \text{(abbreviation-cast)}
+\end{align*}
+    \caption{Expressions $e$.}
+    \label{fig:fabric-expressions}
+\end{figure}
+
+\begin{figure}[p]
+    \centering
+\begin{align*}
+\graintro p 
+x 
+& \text{(atom)}
+\graitem 
+n
+& \text{(integer)}
+\graitem
+\fbtuple{\overline p}
+& \text{(tuple)}
+\graitem
+\flrec{\overline{\ell : p}}
+& \text{(record)}
+\graitem
+T\,p
+& \text{(variant)}
+\graitem
+\_\,v
+& \text{(variant wildcard)}
+\end{align*}
+    \caption{Patterns $p$, used in expressions with binders.}
+    \label{fig:fabric-patterns}
+\end{figure}
+
+\begin{figure}[p]
+    \centering
+\begin{align*}
+\graintro v 
+n 
+& \text{(integer)}
+\graitem
+\fllam p e
+& \text{(function)}
+\graitem
+\fbtuple{\overline v}
+& \text{(tuple)}
+\graitem
+\flrec{\overline{\ell = v}} 
+& \text{(record)}
+\graitem
+T\,v
+& \text{(variant)}
+\end{align*}
+    \caption{Values $v$.}
+    \label{fig:fabric-values}
+\end{figure}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{Types}
+
+\newcommand{\fbvar}[2]{\left[ #1 \mid #2 \right]}
+
+I define the grammars of types $\tau$ (Figure \ref{fig:fabric-types}), including record field types $\phi$ (Figure \ref{fig:fabric-fields}) and variant case types $\kappa$ (Figure \ref{fig:fabric-cases}). For simplicity, I only present the simply-typed version of \fabric{}, but extension with polymorphism amounts adding type variables $\alpha$ to $\tau$, and annotated atoms $x : \tau$ to patterns $p$.
+
+The syntax refers to nominal types $t$. To simplify presentation, I assume the set of nominal types and definitions $\mathbf{type}\,t=\tau$ is fixed, so that $\tau_t$ is the definition of a nominal type $t$.
+
+\paragraph{Subtyping} 
+% We mainly consider the interesting cases.
+We focus on interesting cases. Firstly, subtyping for fields is given by the this Hasse diagram:
+\begin{center}
+\begin{tikzpicture}
+\node (top) at (-2, 2) {$\flftop$};
+\node (opt) at (-2, 1) {$\phantom{?} \fbopt \tau$};
+\node (absent) at (-3, 0) {$\flabsent$};
+\node (present) at (-1, 0) {$\flpresent \tau$};
+\node (bot) at (-2, -1) {$\flfbot$};
+\draw[->] (bot) -- (absent);
+\draw[->] (absent) -- (opt);
+\draw[->] (bot) -- (present);
+\draw[->] (present) -- (opt);
+\draw[->] (opt) -- (top);
+\end{tikzpicture}
+\end{center}
+For case types, it is given by $\flfbot \sub \flpresent \tau \sub \flftop$ (\ie{} compatible with the above diagram).
+
+% Subtyping for functions and tuples is exactly as expected:
+% $$ \dfrac{\tau_1 \super \tau_2 \quad \tau_1' \sub \tau_2'}{\tau_1 \to \tau_1' \sub \tau_2 \to \tau_2'}
+% \qquad 
+% \dfrac{\overline{\tau' \sub \tau''}}{\fbtuple{\overline {\tau'}} \sub \fbtuple{\overline {\tau''}}} $$
+For subtyping of records and variants, we exactly follow the formulation in FL:
+$$ 
+\dfrac{\forall \ell \ldotp \flproj{\tau_1}{\ell} \sub \flproj{\tau_2}{\ell}}{\tau_1 \sub \tau_2}
+\qquad 
+\dfrac{\forall T \ldotp \flproj{\tau_1}{T} \sub \flproj{\tau_2}{T}}{\tau_1 \sub \tau_2} 
+$$
+where we use the type-level field type projection operator, as defined for FL record types. It is worth noting that joins and meets of records and variants are, analogously to subtyping, defined pointwise.
+
+Note that an \enquote{open} record type (with unknown other fields) is given by $\flext{\overline{\ell : \phi}}{\flftop}$, while a \enquote{closed} one (with all other fields absent) is $\flext{\overline{\ell : \phi}}{\flabsent}$. 
+Likewise, an \enquote{open} variant type (with other cases possible) is given by $\fbvar{\overline{T : \kappa}}{\flftop}$, while a \enquote{closed} variant type (with other cases impossible) is $\fbvar{\overline{T : \kappa}}{\flfbot}$.
+
+\paragraph{Typing}
+
+I give complete typing rules for \fabric{} in Figure \ref{fig:fabric-typing}. I note the following:
+\begin{description}
+    \item[Abbreviations] We use the function $\mathrm{expand}(\tau)$, which produces a type $\tau'$ in which we substitute all nominal types for their definitions $\tau_t$. We type abbreviation-casts $\fbcast{e}{\tau}{\tau'}$ by checking $\mathrm{expand}(\tau) = \mathrm{expand}(\tau')$, ensuring the operation is safe. 
+    \item[Record operations] As shown in Section \ref{subsec:breaking-records}, we use homomorphisms $\mathrm{free}$ and $\mathrm{forget}$ for typing record operations. For brevity, I will use the abbreviation $\mathrm{update}_\ell(\tau, \phi)$.
+    \item[Patterns] 
+    The typing rules for patterns are problematic to describe in a non-ad-hoc manner, which is why I only provide a sketch of the design. They interact with polymorphism in a particular way, as each bound variable might introduce a type variable.
+    
+    Patterns are typed with an operator $\bigoplus {\overline p}$, returning a type $\tau$ such that all values of type $\tau$ match at least one of $\overline p$. For example, $\bigoplus$ takes the union of possible variant cases and required field tags. We~do not allow matching on mixed types, e.g.\@ variants and integers.
+    We also use an operator $@p$, returning an environment $\Gamma$ with variables bound in $p$, where types given to variables are compatible with~$\bigoplus \overline p$.
+
+    The trick to typing untagging lies in using a type with no tag-specific cases, but a default expressing all possible cases -- specifically, $\fbvar{\;\cdot}{\flpresent \tau\;}$ where all possible tags contain subtypes of $\tau$ -- as $\flfbot \sub \flpresent{\tau}$.
+\end{description}
+
+\begin{figure}[p]
+    \centering
+\begin{align*}
+\graintro \tau 
+\top 
+& \text{(top)}
+\graitem
+\sint
+& \text{(integer)}
+\graitem
+\tau \to \tau
+& \text{(function)}
+\graitem
+\fbtuple{\overline \tau}
+& \text{(tuple)}
+\graitem
+\flext{\overline{\ell : \phi}}{\phi} 
+& \text{(record)}
+\graitem
+\fbvar{\overline{T : \kappa}}{\kappa}
+& \text{(variant)}
+\graitem
+\bot
+& \text{(bottom)}
+\end{align*}
+    \caption{Types $\tau$.}
+    \label{fig:fabric-types}
+\end{figure}
+
+\begin{figure}[p]
+    \centering
+\begin{align*}
+\graintro \phi 
+\flftop 
+& \text{(top -- unknown)}
+\graitem 
+\fbopt \tau 
+& \text{(optional)}
+\graitem 
+\flpresent \tau 
+& \text{(present)}
+\graitem 
+\flabsent 
+& \text{(absent)}
+\graitem 
+\flfbot
+& \text{(bottom -- impossible)}
+\end{align*}
+    \caption{Field types $\phi$. These are similar to FL, but extended with optional fields $\fbopt \tau$.}
+    \label{fig:fabric-fields}
+\end{figure}
+
+\begin{figure}[p]
+    \centering
+\begin{align*}
+\graintro \kappa 
+\flftop 
+& \text{(top -- unknown)}
+\graitem
+\flpresent \tau
+& \text{(possible)}
+\graitem
+\flfbot 
+& \text{(bottom -- impossible)}
+\end{align*}
+    \caption{Case types $\kappa$ -- somewhat analogical to field types $\phi$, but simpler and used for specifying variant types.}
+    \label{fig:fabric-cases}
+\end{figure}
+
+\begin{figure}[t]
+    \centering
+\begin{gather*}
+\irule{Sub}
+    {\Gamma \vdash e : \tau \quad \tau \sub \tau'}
+    {\Gamma \vdash e : \tau'}
+\quad
+\irule{Var}
+    {x : \tau \in \Gamma}
+    {\Gamma \vdash e : \tau}
+\quad
+\irule{Lit}
+    {}
+    {\Gamma \vdash n : \sint}
+\quad
+\irule{Arith}
+    {\overline{\Gamma \vdash e : \sint}}
+    {\Gamma \vdash \pi(\overline e) : \sint}
+\\
+\irule{Fun}{\Gamma, @p \vdash e : \tau}{\Gamma \vdash \fllam p e : \bigoplus p \to \tau}
+\quad
+\irule{Apply}
+    {\Gamma \vdash e : \tau' \to \tau \quad \Gamma \vdash e' : \tau'}
+    {\Gamma \vdash e\,e' : \tau}
+\\
+\irule{Let}{\Gamma \vdash e : \bigoplus p \quad \Gamma, @p \vdash e' : \tau'}{\Gamma \vdash \fllet p e e' : \tau'}
+\quad
+\irule{Match}{\Gamma \vdash e : \bigoplus \overline{p_i} \quad  \overline{\Gamma, @(p_i) \vdash e_i : \tau}}{\Gamma \vdash \fbmatch{e} \overline{p_i \Rightarrow e_i} : \tau}
+\\
+\irule{Tuple}
+    {\overline{\Gamma \vdash e : \tau}}
+    {\Gamma \vdash \fbtuple{\overline e} : \fbtuple{\overline \tau}}
+\quad
+\irule{Cons}
+    {\overline{\Gamma \vdash e_\ell : \tau_\ell}}
+    {\Gamma \vdash \flrec{\overline{\ell = e_\ell}} : \flext{\overline{\ell = \tau_\ell}}{\flabsent}}
+\quad
+\irule{Tag}
+    {\Gamma \vdash e : \tau}
+    {\Gamma \vdash T\,e : \fbvar{T : \tau}{\flfbot}}
+\\
+\irule{Project}
+    {\Gamma \vdash e : \flext{\ell : \tau}{\flftop}}
+    {\Gamma \vdash \flproj e \ell : \tau}
+\quad
+\irule{CheckProject}
+    {\Gamma \vdash e : \flext{\ell : \tau}{\flftop}}
+    {\Gamma \vdash \fbcheck e \ell : \fbvar{\mathrm{Some}: \tau, \mathrm{None}: \fbtuple{}}{\flfbot}}
+\\
+\irule{Extend}
+    {\Gamma \vdash e : \tau \quad \tau \sub \flext{\ell : \flabsent}{\flftop} \quad \Gamma \vdash e_\ell : \pi}
+    {\Gamma \vdash \flext{\ell = e_\ell}{e} : \mathrm{update}_\ell(\tau, \flpresent{\pi})}
+\quad
+\irule{Restrict}
+    {\Gamma \vdash e : \tau \quad \tau \sub \flext{\ell : \flpresent {\pi}}{\flftop}}
+    {\Gamma \vdash e \fbrestricted \ell : \mathrm{update}_\ell(\tau, \flabsent)}
+\\
+\irule{AbbrevCast}
+    {\Gamma \vdash e : \tau \quad \mathrm{expand}(\tau) = \mathrm{expand}(\tau')}
+    {\Gamma \vdash (\fbcast{e}{\tau}{\tau'}) : \tau'}
+\end{gather*}
+    \caption{Typing rules for \fabric{}.}
+    \label{fig:fabric-typing}
+\end{figure}
+
+\paragraph{Type safety}
+
+I state and conjecture type safety -- Preservation and Progress theorems -- for \fabric{}. Their most interesting aspect is that Preservation is only \emph{up to nominal types}.
+
+\begin{conjecture}[Preservation]
+    If $\cdot \vdash e : \tau$ and $e \step e'$, then $\cdot \vdash e' : \tau'$ s.t.\@ $\mathrm{expand}(\tau) = \mathrm{expand}(\tau')$.
+\end{conjecture}
+\begin{conjecture}[Progress]
+    If $\cdot \vdash e : \tau$, then $e = v$ or $e \step e'$ for some $e'$.
+\end{conjecture}
