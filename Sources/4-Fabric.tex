@@ -3,9 +3,9 @@
 \label{fabric}
 
 In this short chapter, I present \textbf{\fabric{}} -- a functional programming language with structural subtyping. 
-\fabric{}'s role in my thesis is roughly similar to that of \mlsub{} \cite{dolan-thesis}: my design (Section \ref{sec:fabric-design}) is driven by: \begin{itemize}
-    \item Desire to statically type features present in dynamically typed languages, like Python or Lua.
+\fabric{}'s role in my thesis is similar in goal to that of \mlsub{} \cite{dolan-thesis}: exhibiting type inference. My design (Section~\ref{sec:fabric-design}) is driven by: \begin{itemize}
     \item Applying \inference{} (Chapter \ref{algebraic-subtyping}) -- making \fabric{} an example of its expressive power.
+    \item Desire to statically type features present in dynamically languages (Python, Lua).
 \end{itemize}
 Furthermore, in Section \ref{sec:fabric-impl} I explore the implementation of my \fabric{} compiler -- \compiler{} -- targeting \wasm{}, which includes a complete implementation of \inference{}. I thus report my practical experience working with \wasm{} and \inference{}.
 
