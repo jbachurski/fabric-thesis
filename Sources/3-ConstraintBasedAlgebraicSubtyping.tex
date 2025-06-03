@@ -641,11 +641,11 @@ In fact, \inference{} has a polarity-restricted subset, in which all constraints
 
 \begin{example}
     Adapting the update problem example from \textcite{operations-on-records} to $e = \fllam r \flext{p = \flproj{\flproj{r}{b}}{\mathrm{not}}}{r}$,%
-    \footnote{Note they use a record \emph{update} operator $\flrec{ e' \leftarrow \ell = e}$. It is expressible in \fabric{} as $\flext{\ell = e}{e' \fbrestricted \ell}$, but not in FL. Using an update of a present field $b$ instead of extension with $p$, we replicate the example, replacing $p$ by $b$ in $\sigma$.}
+    \footnote{Note they use a record \emph{update} operator $\flrec{ e' \leftarrow \ell = e}$. It is expressible in \fabric{} as $\flext{\ell = e}{e' \fbrestricted \ell}$, but not in FL. We replicate the example by updating $b$ in $r$ instead of extending with $p$, removing $p: \flabsent$ and replacing $p$ by $b$ in $\sigma$.}
     \inference{} infers $\cdot \vdash e : \sigma$:
 
     \vspace{-0.7em}
-    $$ \sigma \;=\; \alpha \meet \flext{b: \flext{\mathrm{not}: \beta}{\flftop}}{\flftop} \,\to\, \mathrm{free}_p(\alpha) \join \flext{p: \beta}{\flfbot} $$
+    $$ \sigma \;=\; \alpha \meet \flext{b: \flext{\mathrm{not}: \beta}{\flftop}, p : \flabsent}{\flftop} \,\to\, \mathrm{free}_p(\alpha) \join \flext{p: \beta}{\flfbot} $$
 \end{example}
 
 \needspace{6em}
