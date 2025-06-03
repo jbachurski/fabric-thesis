@@ -9,8 +9,6 @@
 
 \usepackage{tikz}
 
-\usepackage{todonotes}
-
 \usepackage{needspace}
 \usepackage{etoolbox}
 
@@ -25,6 +23,8 @@
 % Submission
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
+% \usepackage{todonotes}
+
 % 1. Render both the normal and anonymised versions.
 % 2. Update the word count and date in the Declaration, and month in Title.
 
@@ -35,31 +35,31 @@
 % Listings
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-\usepackage{listings}
+% \usepackage{listings}
 
-\definecolor{deepblue}{rgb}{0,0,0.6}
-\definecolor{deepred}{rgb}{0.6,0,0}
-\definecolor{deepgreen}{rgb}{0,0.6,0}
+% \definecolor{deepblue}{rgb}{0,0,0.6}
+% \definecolor{deepred}{rgb}{0.6,0,0}
+% \definecolor{deepgreen}{rgb}{0,0.6,0}
 
-\def\backtick{\`{}}
-\newcommand\basestyle{\lstset{
-    basicstyle=\small\ttfamily,
-    morekeywords={self},
-    keywordstyle=\color{deepblue},
-    stringstyle=\color{deepgreen},
-    showstringspaces=false,
-    literate={`}{\backtick}1,
-    escapechar=@
-}}
+% \def\backtick{\`{}}
+% \newcommand\basestyle{\lstset{
+%     basicstyle=\small\ttfamily,
+%     morekeywords={self},
+%     keywordstyle=\color{deepblue},
+%     stringstyle=\color{deepgreen},
+%     showstringspaces=false,
+%     literate={`}{\backtick}1,
+%     escapechar=@
+% }}
 
-\newcommand\ocamlstyle{\basestyle{} \lstset{language=caml}}
-\lstnewenvironment{ocaml}[1][]{\ocamlstyle \lstset{#1}}{}
+% \newcommand\ocamlstyle{\basestyle{} \lstset{language=caml}}
+% \lstnewenvironment{ocaml}[1][]{\ocamlstyle \lstset{#1}}{}
 
-\newcommand\pythonstyle{\basestyle{} \lstset{language=Python}}
-\lstnewenvironment{python}[1][]{\pythonstyle \lstset{#1}}{}
+% \newcommand\pythonstyle{\basestyle{} \lstset{language=Python}}
+% \lstnewenvironment{python}[1][]{\pythonstyle \lstset{#1}}{}
 
-\newcommand\javastyle{\basestyle{} \lstset{language=Java}}
-\lstnewenvironment{java}[1][]{\javastyle \lstset{#1}}{}
+% \newcommand\javastyle{\basestyle{} \lstset{language=Java}}
+% \lstnewenvironment{java}[1][]{\javastyle \lstset{#1}}{}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % Nomenclature
