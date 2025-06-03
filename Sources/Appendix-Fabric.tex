@@ -330,7 +330,7 @@ I give complete typing rules for \fabric{} in Figure \ref{fig:fabric-typing}. I 
 
 \paragraph{Type safety}
 
-I state and conjecture type safety -- Preservation and Progress theorems -- for \fabric{}. Their most interesting aspect is that Preservation is only \emph{up to nominal types}.
+I state and conjecture type safety -- Preservation and Progress theorems -- for \fabric{}. Their most interesting aspect is that Preservation is only \emph{up to nominal types}. This could be fixed by introducing tagging values with nominal types.
 
 \begin{conjecture}[Preservation]
     If $\cdot \vdash e : \tau$ and $e \step e'$, then $\cdot \vdash e' : \tau'$ s.t.\@ $\mathrm{expand}(\tau) = \mathrm{expand}(\tau')$.

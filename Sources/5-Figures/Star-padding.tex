@@ -1,0 +1,7 @@
+\begin{align*}
+\Phi\, x[s] \ldotp&\, \mathrm{match}\,x{.}\mathrm{row}, x{.}\mathrm{col}\,\mathrm{with} \\
+&\mid \mathrm{Centre}\,i, \mathrm{Centre}\,j \Rightarrow a[\srecordval{ \mathrm{row}= i, \mathrm{col}= j }] \\
+&\mid \mathrm{Top}\,\_, \_ \Rightarrow -1 \\
+&\mid \mathrm{Bot}\,\_, \_ \Rightarrow +1  \\
+&\mid \_, \_ \Rightarrow 0
+\end{align*}

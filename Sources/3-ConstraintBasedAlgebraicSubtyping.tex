@@ -620,24 +620,33 @@ $$
   {\tau = \flext{\ell' : \phi_{\ell'},  \overline{\ell : \phi_\ell}}{\phi}}
   {\mathrm{free}_\ell(\tau) = \flext{\ell' : \flfbot,  \overline{\ell : \phi_\ell}}{\phi}}
 $$
-We can now give a rule \textsc{FL-Typ-HExt}, equivalent to the \emph{rule scheme} \textsc{FL-Typ-Ext} -- which we cannot generate constraints for, while avoiding the update problem \cite{operations-on-records}. The two are given below:
+We can now give a rule \textsc{HExt}, equivalent to the \emph{rule scheme} \textsc{Ext} -- which we cannot generate constraints for, while avoiding the update problem \cite{operations-on-records}. The two are given below:
 $$
-\irule{FL-Typ-Ext}
+\irule{Ext}
     {\Gamma \vdash e : \flext{\ell' : \flabsent, \overline{\ell : \phi_\ell}}{\phi} \quad \Gamma \vdash e' : \tau'}
     {\Gamma \vdash \flext{\ell' = e'}{e} : \flext{\ell' : \tau', \overline{\ell : \phi_\ell}}{\phi}}
 \quad 
-\irule{FL-Typ-HExt}{\Gamma \vdash e : \tau \meet \flext{\ell' : \flabsent}{\flftop} \quad \Gamma \vdash e' : \tau'}{\Gamma \vdash \flext{\ell' = e'}{e} : \mathrm{forget}_{\ell'}(\tau) \meet \flext{\ell' : \tau'}{\flftop}}
+\irule{HExt}{\Gamma \vdash e : \tau \meet \flext{\ell' : \flabsent}{\flftop} \quad \Gamma \vdash e' : \tau'}{\Gamma \vdash \flext{\ell' = e'}{e} : \mathrm{forget}_{\ell'}(\tau) \meet \flext{\ell' : \tau'}{\flftop}}
 $$
 We can straightforwardly generate constraints for 
-\textsc{FL-Typ-HExt}.
-% (sketch of the proofs of homomorphisms laws and equivalence of \textsc{FL-Typ-Ext} and \textsc{FL-Typ-HExt})
+\textsc{HExt}.
+% (sketch of the proofs of homomorphisms laws and equivalence of \textsc{Ext} and \textsc{HExt})
 Thus, the development solves the record update problem under algebraic subtyping without row polymorphism. For details, see Appendix \ref{extra:fl-constraints}.
 
 \paragraph{Polarity restriction} Lastly, I note that:
-$$ \mathrm{update}_\ell(\tau, \phi) = \mathrm{free}_\ell(\tau) \join \flext{ \ell : \phi }{\flfbot} = \mathrm{forget}_\ell(\tau) \meet \flext{ \ell : \phi }{\flftop}  $$ 
+$$ \mathrm{update}_\ell(\tau, \phi) \equiv \mathrm{free}_\ell(\tau) \join \flext{ \ell : \phi }{\flfbot} \equiv \mathrm{forget}_\ell(\tau) \meet \flext{ \ell : \phi }{\flftop}  $$ 
 Hence, the approach is compatible with the polarity restriction: we can use the meet or join version of $\mathrm{update}$ depending on the target polarity. Likewise, adjoints agree with polarities.
 
 In fact, \inference{} has a polarity-restricted subset, in which all constraints are of form $\tau^+ \sub \tau^-$, and thus intermediate $\typcnf$ have single-literal clauses. There, we require homomorphisms preserve polarity.
+
+\begin{example}
+    Adapting the update problem example from \textcite{operations-on-records} to $e = \fllam r \flext{p = \flproj{\flproj{r}{b}}{\mathrm{not}}}{r}$,%
+    \footnote{Note they use a record \emph{update} operator $\flrec{ e' \leftarrow \ell = e}$. It is expressible in \fabric{} as $\flext{\ell = e}{e' \fbrestricted \ell}$, but not in FL. Using an update of a present field $b$ instead of extension with $p$, we replicate the example, replacing $p$ by $b$ in $\sigma$.}
+    \inference{} infers $\cdot \vdash e : \sigma$:
+
+    \vspace{-0.7em}
+    $$ \sigma \;=\; \alpha \meet \flext{b: \flext{\mathrm{not}: \beta}{\flftop}}{\flftop} \,\to\, \mathrm{free}_p(\alpha) \join \flext{p: \beta}{\flfbot} $$
+\end{example}
 
 \needspace{6em}
 \section{Correctness}
@@ -651,7 +660,7 @@ I state correctness theorems for \inference{}, particularly for \emph{solved con
     Follows directly by semantic preservation of $c$, since $c \leadsto^* \mathcal S(c)$ by construction.
 \end{proof}
 
-However, I do not provide proofs for the following theorems -- and only provide evidence based on my implementation (Chapter \ref{fabric}). I note that \inference{} generalises prior work where these properties hold \cite{simple-sub, mlstruct}. 
+However, I only conjecture the following theorems -- and only provide evidence based on my implementation (Chapter \ref{fabric}). I note that \inference{} generalises prior work where these properties hold \cite{simple-sub, mlstruct}. 
 
 \begin{conjecture}[Termination]
     Constraint solving $\mathcal S(c)$ described in Section \ref{sec:constraints} always terminates.
@@ -666,9 +675,9 @@ However, I do not provide proofs for the following theorems -- and only provide 
 \end{conjecture}
 
 Note that: \begin{itemize}
-    \item Termination requires appropriate choices of $\cdecomp$, $\ladjrest \morph$/$\radjrest \morph$, and ensuring the fixed-point is found after a finite number of iterations.
-    \item Completeness relies on the transitive closure finding all possible contradictions in the system -- which is a standard result in constraint-based type inference, particularly the work of \textcite{pottier-framework} (Pottier attributes the \emph{closure} computation to \textcite{closure-in-type-inference}).
-    \item Principality for $\preceq$ seems straightforward (by construction of the closure), and leads to principality for $\subsume$, as $\preceq$ is a stronger condition.
+    \item Termination requires appropriate choices of $\cdecomp$, $\ladjrest \morph$/$\radjrest \morph$, and proving the closure fixed-point is found.
+    \item Completeness relies on the transitive closure finding all contradictions -- which is a standard result in constraint solving, particularly \textcite{pottier-framework} (who attributes \emph{closure} to \textcite{closure-in-type-inference}).
+    \item Principality for $\preceq$ seems straightforward by construction, leading to $\subsume$, as $\preceq$ is a stronger condition.
 \end{itemize}
 We do not consider decidability of subsumption of type schemes (to the well-founded dismay of \textcite{dolan-thesis}). I instead rely on the claim of \textcite{mlstruct} that it is resolvable by solving an appropriate constraint, and thus subsumption is decidable given the constraint solving process terminates.
 

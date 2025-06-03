@@ -89,14 +89,14 @@ Thus, for shapes $\sigma, \dots$ and tags~$T, \dots$ we should have a shape $\sc
 
 \begin{figure}
     \centering
-    \input{Sources/4-Figures/Star-expressions}
+    \input{Sources/5-Figures/Star-expressions}
     \caption{Expressions $e$ in \starr{}, including shape expressions $\eess$.}
     \label{fig:star-expressions}
 \end{figure}
 
 \begin{figure}
     \centering
-    \input{Sources/4-Figures/Star-values}
+    \input{Sources/5-Figures/Star-values}
     \caption{Values $v$ in \starr{}, including shape values $\vess$.}
     \label{fig:star-values}
 \end{figure}
@@ -124,7 +124,8 @@ We start with some informal explanations:
 The design of array shapes in \starr{} -- both shape values here and shape types in Section~\ref{sec:typing} -- is a novel contribution.
 In \starr{}, array comprehensions require providing a shape.
 We informally summarise them now and elaborate later. 
-We have three constructors for shape values:
+
+Firstly, we have three constructors for shape values:
 \begin{itemize}
     \item A sized shape $\ssize{e}$ is used for a usual flat array. For example, $\ssize{10}$ is the shape of an array indexed by integers in the range $[ 0, 10)$.
     \item Product shapes are used for defining arrays with multiple \textit{named} dimensions. For instance: 
@@ -145,7 +146,7 @@ Projections on shapes extract dimensions/components of products/concatenations. 
 
 \begin{figure}
     \centering
-    \input{Sources/4-Figures/Star-broadcasting}
+    \input{Sources/5-Figures/Star-broadcasting}
     \caption{
         Semantics $\broadcastsem$ of shape broadcasting $\broadcast$. 
         We take the union of sets of dimensions $\ell$ (defaulting $s_\ell' = s_\ell''$ if either is absent), but equate sets of components $T$. 
@@ -181,14 +182,14 @@ In the operational semantics, $\inbsp$ determines the indices $v$ for which we s
 
 \begin{figure}
     \centering
-    \input{Sources/4-Figures/Star-in-bounds}
+    \input{Sources/5-Figures/Star-in-bounds}
     \caption{Definition of the in-bounds relation $v \inbs s$, stating that an index $v$ can be used to index into a shape $s$.}
     \label{fig:in-bounds}
 \end{figure}
 
 \begin{figure}
     \centering
-    \input{Sources/4-Figures/Star-cast}
+    \input{Sources/5-Figures/Star-cast}
     \caption{Definition of the index-shape cast $\scast{v}{s}$, which removes dimensions from $v$ which do not appear in $s$.}
     \label{fig:cast}
 \end{figure}
@@ -217,14 +218,14 @@ Successful executions eventually reduce to a value $v$ (Figure~\ref{fig:star-val
 
 \begin{figure}
     \centering
-    \input{Sources/4-Figures/Star-opsem-err}
+    \input{Sources/5-Figures/Star-opsem-err}
     \caption{Raises-error step relation $e \sterr$, used for specifying errors which \emph{can} occur in well-typed \starr{} programs.}
     \label{fig:opsem-err}
 \end{figure}
 
 \begin{figure}
     \centering
-    \input{Sources/4-Figures/Star-opsem}
+    \input{Sources/5-Figures/Star-opsem}
     \caption{
         Small-step operational semantics for \starr{}. We write $e \step e'$ when $e$ reduces to $e'$.
         Evaluation contexts $\evalctx$ are defined in Figure \ref{fig:evalctx} -- we never evaluate under $\lambda$ or $\Phi$; but we evaluate expressions in $\sarrayval{s}{J}$.
@@ -235,7 +236,7 @@ Successful executions eventually reduce to a value $v$ (Figure~\ref{fig:star-val
 
 \begin{figure}
     \centering
-    \input{Sources/4-Figures/Star-contexts}
+    \input{Sources/5-Figures/Star-contexts}
     \caption{Evaluation contexts $C$ for \starr{}, necessary for specifying the congruence rules for $\leadsto$.}
     \label{fig:evalctx}
 \end{figure}
@@ -245,7 +246,7 @@ Successful executions eventually reduce to a value $v$ (Figure~\ref{fig:star-val
 
 \begin{figure}[t]
     \centering
-    \input{Sources/4-Figures/Star-types}
+    \input{Sources/5-Figures/Star-types}
     \caption{Types $\tau$ in \starr{}, showing their subtypes: shape types $\sigma$
     and index types $\eta$.
     % Note that $\sigma$ and $\eta$ are in bijection (see Figure~\ref{fig:indices}).
@@ -256,7 +257,7 @@ Successful executions eventually reduce to a value $v$ (Figure~\ref{fig:star-val
 
 \begin{table}[t]
     \centering
-    \input{Sources/4-Figures/Star-shape-index-examples}
+    \input{Sources/5-Figures/Star-shape-index-examples}
     \caption{Example shapes with matching indices. For a shape of type $\sigma$ on the left, an index of type $\iota(\sigma)$ is on the~right.}
     \label{tab:shape-index-examples}
 \end{table}
@@ -271,7 +272,7 @@ Afterwards, I state type safety for \starr{} in Section~\ref{subsec:type-safety}
 
 \begin{figure}[p]
     \centering
-    \input{Sources/4-Figures/Star-subtyping}
+    \input{Sources/5-Figures/Star-subtyping}
     \caption{
         Subtyping relation $\tau \sub \tau$. \textsc{SubArray} is particularly noteworthy, as it mixes contravariance of indices and covariance of shape-access. 
         % We include rules for specifying $\sigma$ to be a supertype of shape types and $\eta$ a supertype of index types. 
@@ -282,7 +283,7 @@ Afterwards, I state type safety for \starr{} in Section~\ref{subsec:type-safety}
 ~
 \begin{figure}[p]
     \centering
-    \input{Sources/4-Figures/Star-typing}
+    \input{Sources/5-Figures/Star-typing}
     \caption{Rules for the typing judgement $\Gamma \vdash e : \tau$ for \starr{} expressions $e$. We use $\sigma$ for metavariables standing for shape types.
     % \AMcomment{$\tau?$}
     % \AMcomment{CONCAT rule has been `corrected'}
@@ -302,7 +303,7 @@ Constructing $\iota$ is unsurprising -- similar concepts often arise when genera
 
 \begin{figure}
     \centering
-    \input{Sources/4-Figures/Star-iota}
+    \input{Sources/5-Figures/Star-iota}
     \caption{Definition of the metafunction $\iota$. For a shape type $\sigma$, $\eta = \iota(\sigma)$ is the least upper bound on its index~type.}
     \label{fig:iota}
 \end{figure}
@@ -356,7 +357,7 @@ Usability is mainly limited by type scheme simplification -- a shortcoming discu
     \centering
     \addtolength{\jot}{0.2em}
     $$ \boxed{\cstr{\Gamma}{e}{\tau} = c} $$
-    \input{Sources/4-Figures/Star-constraints}
+    \input{Sources/5-Figures/Star-constraints}
     \caption{Definition of \inference{} constraint generation for \starr{}, defined inductively on $e$. Each case here corresponds to a typing rule of the same name. Note that \textsc{Broadcast} breaks the polarity restriction, and that \textsc{Array} and \textsc{Index} use the $\iota$ homomorphism.}
     \label{fig:star-type-constraints}
 \end{figure}
@@ -410,13 +411,7 @@ s =\; \{\!\mid &\,\mathrm{row}= \sconcatval{\mathrm{Top}= \ssize t, \mathrm{Cent
 &\,\mathrm{col}= \sconcatval{ \mathrm{Left}= \ssize l, \mathrm{Centre}= \sproductproj{\sshape{a}}{\mathrm{col}}, \mathrm{Right}= \ssize r} \mid\!\}
 \end{align*}
 and easily construct the padding of an array $a : [\sproducttype{\mathrm{row} : \ssized,\mathrm{col} : \ssized }] \mathrm{int} $:
-\begin{align*}
-\Phi\, x[s] \ldotp&\, \mathrm{match}\,x\,\mathrm{with} \\
-&\mid \mathrm{Centre}\,i, \mathrm{Centre}\,j \Rightarrow a[\srecordval{ \mathrm{row}= i, \mathrm{col}= j }] \\
-&\mid \mathrm{Top}\,\_, \_ \Rightarrow -1 \\
-&\mid \mathrm{Bot}\,\_, \_ \Rightarrow +1  \\
-&\mid \_, \_ \Rightarrow 0
-\end{align*}
+\input{Sources/5-Figures/Star-padding}
 Satisfyingly, index arithmetic (which most existing array languages would have us rely on) has become pattern matching -- and the program's safety is guaranteed.
 
 \section{Conclusions}

@@ -105,13 +105,13 @@ This shows that the described homomorphisms are indeed well-behaved in constrain
 \subsection{Record extension}
     % \item Sketch that rule using homomorphisms is equivalent to the usual rule.
 
-Lastly, I sketch the equivalence of the rules $\textsc{FL-Typ-Ext}$ (quantifying over record types) and $\textsc{FL-Typ-HExt}$ (applying $\mathrm{forget}_\ell$). For completeness, they are given below:
+Lastly, I sketch the equivalence of the rules $\textsc{Ext}$ (quantifying over record types) and $\textsc{HExt}$ (applying $\mathrm{forget}_\ell$). For completeness, they are given below:
 $$
-\irule{FL-Typ-Ext}
+\irule{Ext}
     {\Gamma \vdash e : \flext{\ell' : \flabsent, \overline{\ell : \phi_\ell}}{\phi} \quad \Gamma \vdash e' : \tau'}
     {\Gamma \vdash \flext{\ell' = e'}{e} : \flext{\ell' : \tau', \overline{\ell : \phi_\ell}}{\phi}}
 \quad 
-\irule{FL-Typ-HExt}{\Gamma \vdash e : \tau \meet \flext{\ell' : \flabsent}{\flftop} \quad \Gamma \vdash e' : \tau'}{\Gamma \vdash \flext{\ell' = e'}{e} : \mathrm{forget}_{\ell'}(\tau) \meet \flext{\ell' : \tau'}{\flftop}}
+\irule{HExt}{\Gamma \vdash e : \tau \meet \flext{\ell' : \flabsent}{\flftop} \quad \Gamma \vdash e' : \tau'}{\Gamma \vdash \flext{\ell' = e'}{e} : \mathrm{forget}_{\ell'}(\tau) \meet \flext{\ell' : \tau'}{\flftop}}
 $$
 \begin{proof}
     Firstly, note that the assumptions of the two rules are equivalent. The only difference is in the constraint on $e$ -- to see that the two are equivalent, notice that $\flext{\ell' : \flabsent, \overline{\ell : \phi_\ell}}{\phi}$ are exactly the types of form $\tau \meet \flext{\ell : \flabsent}{\flftop}$ for some $\tau = \flext{\overline{\ell : \phi_\ell}}{\phi}$ (unless $\ell : \flfbot$, in which case the assumption also follows).
