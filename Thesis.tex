@@ -31,6 +31,9 @@
 \newif\ifanonymised
 % \anonymisedtrue % comment out to de-anonymise
 
+\newif\ifprint
+\printtrue
+
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % Listings
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -92,13 +95,20 @@
 % Hyperlinks & bookmarks
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
+\ifprint
 \usepackage[%
-  colorlinks = true,
+  hidelinks,
+  colorlinks = false,
+  unicode,
+  ]{hyperref}
+\else
+\usepackage[%
   citecolor  = RoyalBlue,
   linkcolor  = RoyalBlue,
   urlcolor   = RoyalBlue,
   unicode,
   ]{hyperref}
+\fi
 
 \usepackage{bookmark}
 
@@ -261,14 +271,14 @@
 \begin{document}
 %TC:ignore 
   \input{Sources/Notation}
-
 \frontmatter
 \ifanonymised
   \include{Sources/CoverSheet}
 \else
   \include{Sources/Title}
+  \cleardoublepage
 \fi
-  \include{Sources/Declaration}
+  % \include{Sources/Declaration}
   \include{Sources/Abstract}
 \ifanonymised\else
   \include{Sources/Acknowledgements}

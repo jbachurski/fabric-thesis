@@ -4,13 +4,16 @@
 \PassOptionsToPackage{DIV = 15}{typearea}
 
 \LoadClass[a4paper,
-           oneside,
+           % twoside,  % print // oneside
+           oneside,    % non-print
+           open=right,
            12pt,
            cleardoublepage=empty,
            numbers=noenddot,
            titlepage,
            toc=bibliography,
            toc=index,]{scrbook}
+% \areaset[10mm]{\textwidth}{\textheight}  % print //
 
 \RequirePackage{iftex}
 \newif\ifxetexorluatex\xetexorluatexfalse
